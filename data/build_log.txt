@@ -1,7 +1,0 @@
-Loaded 340,587 plays from 7 seasons
-Dropped 97,695 rows that are not a pass or run (kickoffs, punts, field goals, extra points, kneels/spikes, penalties with no play, timeouts)
-Dropped 0 pass/run rows with no offense or defense team
-Dropped 954 pass/run rows with no EPA or no down (e.g. two-point tries)
-Wrote data/plays.csv: 241,938 rows, 27 columns, 31.0 MB
-Seasons: 7 (2018-2024), teams: 32
-Categorical filter columns: 11; numeric measure columns: 5

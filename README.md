@@ -29,9 +29,6 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `data/DATA_QUALITY.md` | Row counts, coverage by season, missing values, known gaps. |
 | `CHECKLIST.md` | The assignment requirements and where each one is met. |
 
-Files from an earlier play-by-play attempt (`scripts/build_data.py`, `data/plays.csv`, `data/build_log.txt`) are still in
-the repository and will be removed or replaced.
-
 ## Rebuilding the data
 
 ```
