@@ -118,7 +118,7 @@ add("Passing peaked, then slid",
 add("Passing peaked, then slid",
     f"Fewer quarterbacks reach 4,000 yards: {int(c4000[2016])} did in 2016, only {int(c4000[LAST])} in {LAST}",
     [f"A 4,000-yard passing season used to be common. In 2016, {int(c4000[2016])} quarterbacks got there, the most of any season. "
-     (f"It was {int(c4000[LAST])} in both {LAST - 1} and {LAST}." if c4000[LAST - 1] == c4000[LAST]
+     + (f"It was {int(c4000[LAST])} in both {LAST - 1} and {LAST}." if c4000[LAST - 1] == c4000[LAST]
       else f"It was {int(c4000[LAST - 1])} in {LAST - 1} and {int(c4000[LAST])} in {LAST}."),
      "This counts each player's regular-season total for one season. Seasons were 16 games through 2020 and 17 from 2021, so "
      "counts from 2021 on have a little extra room to reach the threshold."],
