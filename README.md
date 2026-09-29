@@ -25,6 +25,8 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `assets/css/style.css` | Shared styles, colors and layout for both pages (dark and light themes). |
 | `assets/fonts/` | Geist, Geist Mono and Instrument Serif, used by both pages. |
 | `assets/js/stats.js` | The calculation module: parses the CSVs, filters, aggregates, defines every measure. Used by the dashboard and by the number checker. |
+| `assets/js/teams.js` | Loads `data/teams.csv` and provides team colors, names and logo badges to both pages. |
+| `assets/js/field.js` | The team play board: a football field where the 32 teams run routes and the ball is thrown to a random team. Used on the report and as the dashboard's team picker. |
 | `assets/js/charts.js` | Chart.js helpers and the theme toggle, shared by both pages. |
 | `assets/js/report.js` | Draws the report's charts. |
 | `assets/js/dashboard.js` | The dashboard's behavior: loading, filters, player search, charts, table. |
@@ -32,7 +34,8 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `scripts/build_report.py` | Computes every report number from the CSVs with pandas, writes `index.html` and `data/report.json`. |
 | `scripts/check_numbers.js` | Recomputes the report and advanced-stat numbers with `assets/js/stats.js` and compares them with `data/report.json`. Run with `node scripts/check_numbers.js`. |
 | `data/seasons/player_games_YYYY.csv` | The cleaned data, one file per season. Blank stat cell = 0; `NA` = the source has no value (no such play or role, or not recorded that season). |
-| `data/teams.csv` | Team code, city, name, conference and division. |
+| `data/teams.csv` | Team code, city, name, conference, division, full name, two team colors and a logo link (colors, logo links, conference and division come from the nflverse teams file). |
+| `data/team_summary.json` | Per-team-game averages for each team (regular season, 2009 to 2025), used for the play board's hover stats. Checked by `scripts/check_numbers.js`. |
 | `data/manifest.json` | Seasons, column list and row counts for the files above. |
 | `data/report.json` | Every number printed in the report, plus reference values for the advanced measures. |
 | `data/player_build_log.txt` | Every row dropped or changed during cleaning, and why. |
@@ -63,3 +66,11 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
   dashboard to include them.
 - Nothing on the site is a career total. Findings and rankings use one season or one game at a time.
 - Team-level numbers (per team-game) are built by adding up players' rows, since the data has no team-level file.
+
+## Design and credits
+
+- The look is a football theme: NFL-style navy, red and white, a turf-green field, and team colors in the charts.
+- **NFL team names and logos belong to the NFL and its teams.** They appear only to identify teams. Logos are loaded by the
+  visitor's browser from the links in the nflverse teams file (`team_logo_espn`) and are not stored in this repository; if a
+  logo cannot load, a color badge is shown instead.
+- Fonts: Geist and Instrument Serif (copied from the author's other project).

@@ -35,7 +35,7 @@ Status: done / partly / not done.
 ## Site and repository
 | # | Requirement | Where | Status |
 |---|---|---|---|
-| 16 | Shared nav bar, fonts and colors | `assets/css/style.css`, same nav on both pages | done |
+| 16 | Shared nav bar, fonts and colors | `assets/css/style.css`, same nav on both pages; football theme with team colors and logos, and an interactive team play board (`assets/js/field.js`) | done |
 | 17 | Own folder under home folder, not inside `~/fda-python` | `~/fda_website_project` | done |
 | 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ | partly (live site not yet verified) |
 | 19 | README listing every file and the data source | `README.md` | done |
