@@ -6,7 +6,8 @@ Rows with a position group outside the known nine: 0
 Column def_tackles_for_loss has no non-zero value in 2009: written as NA (not recorded), not 0
 Column def_tackles_for_loss has no non-zero value in 2010: written as NA (not recorded), not 0
 Column def_tackles_for_loss has no non-zero value in 2011: written as NA (not recorded), not 0
-Kept 4,559 rows whose kept stat columns are all zero (player appears in the source game record without a tracked stat here). They count as appearances.
+sack_yards_lost: 0 rows with a positive value (expected 0; the column is stored as a negative number)
+Kept 4,536 rows whose kept stat columns are all zero (player appears in the source game record without a tracked stat here). They count as appearances.
 Team codes not in teams.csv: none. The source already uses one code per franchise across relocations (Raiders LV, Chargers LAC, Rams LA), so no renaming was needed.
-Wrote 304,515 rows, 46 columns, 17 files, 34.7 MB total (2.2 MB largest season)
+Wrote 304,515 rows, 69 columns, 17 files, 46.1 MB total (2.9 MB largest season)
 Distinct players: 8,093; teams: 32; games: 4,630

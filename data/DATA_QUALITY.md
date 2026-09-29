@@ -4,7 +4,7 @@ Source: nflverse `stats_player` weekly player stats (CC-BY-4.0). Scope: seasons 
 
 ## Size
 
-- 304,877 rows in the source files, 304,515 rows kept, 46 columns.
+- 304,877 rows in the source files, 304,515 rows kept, 69 columns.
 - 8,093 distinct players, 32 teams, 4,630 games.
 - Duplicate player-game rows after cleaning: 0.
 - Player names shared by more than one player ID: 92. Use `player_id` as the key.

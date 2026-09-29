@@ -59,6 +59,26 @@ STATS = [
     ("pt_att", "Punts."), ("pt_yards", "Punt yards (gross)."),
     ("penalties", "Penalties committed."), ("fumbles_lost", "Fumbles lost (any type)."),
     ("fantasy_points_ppr", "Fantasy points, full-PPR scoring, as computed by nflverse. Rounded to 2 decimals."),
+    # advanced columns (definitions from the nflverse player stats data dictionary)
+    ("sack_yards_lost", "Yards lost on sacks suffered. Stored as a negative number."),
+    ("passing_air_yards", "Passing air yards, including incomplete passes."),
+    ("passing_yards_after_catch", "Yards after the catch on this player's completions (unofficial stat)."),
+    ("passing_first_downs", "First downs on pass attempts."),
+    ("passing_epa", "Total expected points added on pass attempts and sacks (qb_epa). Rounded to 3 decimals."),
+    ("passing_cpoe", "Completion percentage over expected, in percentage points, for that game. Only meaningful for players who threw passes. Rounded to 3 decimals."),
+    ("rushing_first_downs", "First downs on rush attempts."),
+    ("rushing_epa", "Expected points added on rush attempts, including scrambles and kneel-downs. Rounded to 3 decimals."),
+    ("receiving_air_yards", "Receiving air yards on targets, including incompletions."),
+    ("receiving_yards_after_catch", "Yards after the catch on this player's receptions (unofficial stat)."),
+    ("receiving_first_downs", "First downs on receptions."),
+    ("receiving_epa", "Total EPA on plays where this player was targeted. Rounded to 3 decimals."),
+    ("target_share", "Player's share of team targets in this game, from 0 to 1. Only meaningful when targets > 0."),
+    ("air_yards_share", "Player's share of team air yards in this game, from 0 to 1. Only meaningful when targets > 0."),
+    ("wopr", "Weighted opportunity rating: 1.5 x target_share + 0.7 x air_yards_share. Only meaningful when targets > 0."),
+    ("fg_made_30_39", "Field goals made from 30 to 39 yards."), ("fg_made_40_49", "Field goals made from 40 to 49 yards."),
+    ("fg_made_50_59", "Field goals made from 50 to 59 yards."), ("fg_made_60_", "Field goals made from 60 yards or more (a season with none is a real zero)."),
+    ("fg_missed_30_39", "Field goals missed from 30 to 39 yards."), ("fg_missed_40_49", "Field goals missed from 40 to 49 yards."),
+    ("fg_missed_50_59", "Field goals missed from 50 to 59 yards."), ("fg_missed_60_", "Field goals missed from 60 yards or more."),
 ]
 SRC = {"fumbles_lost": "fumbles_lost_total"}
 STAT_COLS = [s for s, _ in STATS]
@@ -107,7 +127,7 @@ def fmt(series):
             return "NA"
         if v == 0:
             return ""
-        return str(int(v)) if float(v).is_integer() else f"{v:.2f}".rstrip("0").rstrip(".")
+        return str(int(v)) if float(v).is_integer() else f"{v:.3f}".rstrip("0").rstrip(".")
     return series.map(one)
 
 
@@ -138,14 +158,20 @@ def main():
     unmapped = df["unit"].isna().sum()
     note(f"Rows with a position group outside the known nine: {unmapped}")
     df["fantasy_points_ppr"] = df["fantasy_points_ppr"].round(2)
+    for c in ["passing_epa", "passing_cpoe", "rushing_epa", "receiving_epa", "target_share", "air_yards_share", "wopr"]:
+        df[c] = df[c].round(3)
 
     # A stat with no non-zero value anywhere in a season was not tracked that season: mark NA, not 0.
-    for c in STAT_COLS:
+    # Exception: 60+ yard field goals are rare enough that a season with none is a real zero.
+    rare = {"fg_made_60_", "fg_missed_60_"}
+    for c in [c for c in STAT_COLS if c not in rare]:
         for y, idx in df.groupby("season").groups.items():
             if (df.loc[idx, c].fillna(0) == 0).all():
                 df.loc[idx, c] = float("nan")
                 note(f"Column {c} has no non-zero value in {y}: written as NA (not recorded), not 0")
 
+    note(f"sack_yards_lost: {int((df['sack_yards_lost'] > 0).sum())} rows with a positive value "
+         f"(expected 0; the column is stored as a negative number)")
     z = (df[STAT_COLS].fillna(0) == 0).all(axis=1)
     note(f"Kept {int(z.sum()):,} rows whose kept stat columns are all zero (player appears in the source game "
          f"record without a tracked stat here). They count as appearances.")

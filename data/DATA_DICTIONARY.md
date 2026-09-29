@@ -50,5 +50,28 @@ Files: `data/seasons/player_games_YYYY.csv`, one per season, one row per player 
 | `penalties` | number | `penalties` | Penalties committed. | blank = 0, NA = not recorded that season |
 | `fumbles_lost` | number | `fumbles_lost_total` | Fumbles lost (any type). | blank = 0, NA = not recorded that season |
 | `fantasy_points_ppr` | number | `fantasy_points_ppr` | Fantasy points, full-PPR scoring, as computed by nflverse. Rounded to 2 decimals. | blank = 0, NA = not recorded that season |
+| `sack_yards_lost` | number | `sack_yards_lost` | Yards lost on sacks suffered. Stored as a negative number. | blank = 0, NA = not recorded that season |
+| `passing_air_yards` | number | `passing_air_yards` | Passing air yards, including incomplete passes. | blank = 0, NA = not recorded that season |
+| `passing_yards_after_catch` | number | `passing_yards_after_catch` | Yards after the catch on this player's completions (unofficial stat). | blank = 0, NA = not recorded that season |
+| `passing_first_downs` | number | `passing_first_downs` | First downs on pass attempts. | blank = 0, NA = not recorded that season |
+| `passing_epa` | number | `passing_epa` | Total expected points added on pass attempts and sacks (qb_epa). Rounded to 3 decimals. | blank = 0, NA = not recorded that season |
+| `passing_cpoe` | number | `passing_cpoe` | Completion percentage over expected, in percentage points, for that game. Only meaningful for players who threw passes. Rounded to 3 decimals. | blank = 0, NA = not recorded that season |
+| `rushing_first_downs` | number | `rushing_first_downs` | First downs on rush attempts. | blank = 0, NA = not recorded that season |
+| `rushing_epa` | number | `rushing_epa` | Expected points added on rush attempts, including scrambles and kneel-downs. Rounded to 3 decimals. | blank = 0, NA = not recorded that season |
+| `receiving_air_yards` | number | `receiving_air_yards` | Receiving air yards on targets, including incompletions. | blank = 0, NA = not recorded that season |
+| `receiving_yards_after_catch` | number | `receiving_yards_after_catch` | Yards after the catch on this player's receptions (unofficial stat). | blank = 0, NA = not recorded that season |
+| `receiving_first_downs` | number | `receiving_first_downs` | First downs on receptions. | blank = 0, NA = not recorded that season |
+| `receiving_epa` | number | `receiving_epa` | Total EPA on plays where this player was targeted. Rounded to 3 decimals. | blank = 0, NA = not recorded that season |
+| `target_share` | number | `target_share` | Player's share of team targets in this game, from 0 to 1. Only meaningful when targets > 0. | blank = 0, NA = not recorded that season |
+| `air_yards_share` | number | `air_yards_share` | Player's share of team air yards in this game, from 0 to 1. Only meaningful when targets > 0. | blank = 0, NA = not recorded that season |
+| `wopr` | number | `wopr` | Weighted opportunity rating: 1.5 x target_share + 0.7 x air_yards_share. Only meaningful when targets > 0. | blank = 0, NA = not recorded that season |
+| `fg_made_30_39` | number | `fg_made_30_39` | Field goals made from 30 to 39 yards. | blank = 0, NA = not recorded that season |
+| `fg_made_40_49` | number | `fg_made_40_49` | Field goals made from 40 to 49 yards. | blank = 0, NA = not recorded that season |
+| `fg_made_50_59` | number | `fg_made_50_59` | Field goals made from 50 to 59 yards. | blank = 0, NA = not recorded that season |
+| `fg_made_60_` | number | `fg_made_60_` | Field goals made from 60 yards or more (a season with none is a real zero). | blank = 0, NA = not recorded that season |
+| `fg_missed_30_39` | number | `fg_missed_30_39` | Field goals missed from 30 to 39 yards. | blank = 0, NA = not recorded that season |
+| `fg_missed_40_49` | number | `fg_missed_40_49` | Field goals missed from 40 to 49 yards. | blank = 0, NA = not recorded that season |
+| `fg_missed_50_59` | number | `fg_missed_50_59` | Field goals missed from 50 to 59 yards. | blank = 0, NA = not recorded that season |
+| `fg_missed_60_` | number | `fg_missed_60_` | Field goals missed from 60 yards or more. | blank = 0, NA = not recorded that season |
 
 `data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`.

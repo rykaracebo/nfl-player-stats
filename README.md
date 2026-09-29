@@ -9,7 +9,7 @@ interactive dashboard, both built from NFL player game logs. Work in progress; t
   (`stats_player_week_YYYY.csv.gz`).
 - **License:** CC-BY-4.0. Credit: the nflverse project and its contributors.
 - **Scope:** seasons 2009 to 2025, all position groups (offense, defense, special teams), regular season and playoffs.
-- **One row:** one player in one game. 304,515 rows, 46 columns, 8,093 players, 32 teams, 4,630 games.
+- **One row:** one player in one game. 304,515 rows, 69 columns, 8,093 players, 32 teams, 4,630 games.
 - **Why 2009:** nflverse has the same files back to 1999, but 2009 is where the course scope starts, and it keeps the
   browser download smaller.
 
