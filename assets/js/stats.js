@@ -128,6 +128,9 @@
     { id: "sacks_tg", group: "Per team-game", label: "Sacks per team-game", type: "perTeamGame", num: ["def_sacks"], fmt: "dec3" },
     { id: "qb_hits_tg", group: "Per team-game", label: "QB hits per team-game", type: "perTeamGame", num: ["def_qb_hits"], fmt: "dec2" },
     { id: "pass_def_tg", group: "Per team-game", label: "Passes defended per team-game", type: "perTeamGame", num: ["def_pass_defended"], fmt: "dec2" },
+    { id: "pen_tg", group: "Per team-game", label: "Penalties per team-game", type: "perTeamGame", num: ["penalties"], fmt: "dec2" },
+    { id: "team_games", group: "Per team-game", label: "Team-games (count)", type: "teamGames", num: null, fmt: "int",
+      desc: "Number of distinct team-games among the rows in view." },
     // Basic rates
     { id: "comp_pct", group: "Rates", label: "Completion percentage", type: "ratio", num: ["completions"], den: ["attempts"], fmt: "pct1", min: 200, desc: "Completions divided by attempts." },
     { id: "ypa", group: "Rates", label: "Yards per pass attempt", type: "ratio", num: ["passing_yards"], den: ["attempts"], fmt: "dec2", min: 200 },
@@ -151,6 +154,12 @@
       desc: "How far downfield a passer throws, on average, counting incomplete passes." },
     { id: "pass_fd_rate", group: "Advanced: passing", label: "Pass first-down rate", type: "ratio", num: ["passing_first_downs"], den: ["attempts"], fmt: "pct1", min: 200 },
     { id: "qb_sack_rate", group: "Advanced: passing", label: "Sack rate (sacks taken per dropback)", type: "ratio", num: ["sacks_suffered"], den: DB, fmt: "pct1", min: 200 },
+    { id: "epa_opp_qb", group: "Advanced: value", label: "EPA per opportunity, quarterbacks", type: "ratio",
+      num: ["passing_epa", "rushing_epa"], den: ["attempts", "sacks_suffered", "carries"], fmt: "dec3", min: 200,
+      desc: "(Passing EPA + rushing EPA) divided by (attempts + sacks + carries). Meant for quarterbacks." },
+    { id: "epa_opp_skill", group: "Advanced: value", label: "EPA per opportunity, RB / WR / TE", type: "ratio",
+      num: ["rushing_epa", "receiving_epa"], den: ["carries", "targets"], fmt: "dec3", min: 100,
+      desc: "(Rushing EPA + receiving EPA) divided by (carries + targets). Meant for running backs, receivers and tight ends." },
     // Advanced: receiving
     { id: "epa_tgt", group: "Advanced: receiving", label: "Receiving EPA per target", type: "ratio", num: ["receiving_epa"], den: ["targets"], fmt: "dec3", min: 50,
       desc: "EPA on targeted plays divided by targets." },
@@ -262,7 +271,7 @@
   function aggregate(store, filters, groupBy, measures) {
     const f = filters || {};
     const tables = allowedTables(store, f.cats);
-    const needTG = measures.some((m) => m.type === "perTeamGame");
+    const needTG = measures.some((m) => m.type === "perTeamGame" || m.type === "teamGames");
     const groups = new Map();
     const nm = measures.length;
     for (const chunk of store.chunks) {
@@ -304,6 +313,7 @@
       case "avg": return g.rows ? g.num[k] / g.rows : NaN;
       case "ratio": return g.den[k] > 0 ? g.num[k] / g.den[k] : NaN;
       case "perTeamGame": return g.tg && g.tg.size ? g.num[k] / g.tg.size : NaN;
+      case "teamGames": return g.tg ? g.tg.size : NaN;
       default: return NaN;
     }
   }
@@ -346,6 +356,58 @@
       }
     }
     return count;
+  }
+
+  // Count distinct values of a categorical column among the rows in view (players, teams, ...).
+  function countDistinct(store, filters, col) {
+    const f = filters || {};
+    const tables = allowedTables(store, f.cats);
+    const seen = new Uint8Array(store.dicts[col].list.length);
+    let count = 0;
+    for (const chunk of store.chunks) {
+      if (!chunkInRange(chunk, f)) continue;
+      for (let i = 0; i < chunk.n; i++) {
+        if (!rowPasses(chunk, i, f, tables)) continue;
+        const c = chunk.cat[col][i];
+        if (!seen[c]) { seen[c] = 1; count++; }
+      }
+    }
+    return count;
+  }
+
+  // EPA over replacement (this site's version), regular season, one position group at a time.
+  // Opportunities: QB = attempts + sacks + carries; RB/WR/TE = carries + targets.
+  // Per season, players are ranked by opportunities (ties: player_id), the first K are "starters", and the rest form the
+  // replacement pool. r = pool EPA / pool opportunities. EPAOR = EPA - r x opportunities.
+  const REPLACEMENT_K = { QB: 32, RB: 32, WR: 64, TE: 32 };
+  const EPAOR_DEF = {
+    QB: { epa: ["passing_epa", "rushing_epa"], opp: ["attempts", "sacks_suffered", "carries"] },
+    RB: { epa: ["rushing_epa", "receiving_epa"], opp: ["carries", "targets"] },
+    WR: { epa: ["rushing_epa", "receiving_epa"], opp: ["carries", "targets"] },
+    TE: { epa: ["rushing_epa", "receiving_epa"], opp: ["carries", "targets"] },
+  };
+  function epaOverReplacement(store, position, seasonMin, seasonMax) {
+    const def = EPAOR_DEF[position], K = REPLACEMENT_K[position];
+    const ms = [{ type: "sum", num: def.epa }, { type: "sum", num: def.opp }];
+    const groups = aggregate(store, { seasonMin, seasonMax, cats: { season_type: ["REG"], position_group: [position] } }, "player_season", ms);
+    const bySeason = new Map();
+    for (const [key, g] of groups) {
+      if (!(g.num[1] > 0)) continue;
+      const season = (key % 64) + PS_SEASON_BASE, pc = Math.floor(key / 64);
+      if (!bySeason.has(season)) bySeason.set(season, []);
+      bySeason.get(season).push({ id: store.dicts.player_id.list[pc], name: store.playerNames[pc], season,
+        team: store.dicts.team.list[g.team], games: g.rows, epa: g.num[0], opp: g.num[1] });
+    }
+    const out = new Map();
+    for (const [season, list] of bySeason) {
+      list.sort((a, b) => b.opp - a.opp || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+      let pe = 0, po = 0, se = 0, so = 0;
+      list.forEach((x, i) => { if (i >= K) { pe += x.epa; po += x.opp; } else { se += x.epa; so += x.opp; } });
+      const r = po > 0 ? pe / po : 0;
+      list.forEach((x) => { x.epaor = x.epa - r * x.opp; });
+      out.set(season, { r, starterRate: so > 0 ? se / so : NaN, poolSize: Math.max(0, list.length - K), rows: list });
+    }
+    return out;
   }
 
   // Player-season milestone counts (thresholds apply to each player's filtered totals in a season).
@@ -443,5 +505,5 @@
   }
 
   return { newStore, addSeason, MEASURES, MEASURE_BY_ID, BREAKDOWNS, MILESTONES, format, aggregate, value, valueMin,
-           groupTable, countPlayers, milestones, topPlayerSeasons, gameLog, playerIndex, decode };
+           groupTable, countPlayers, countDistinct, epaOverReplacement, REPLACEMENT_K, milestones, topPlayerSeasons, gameLog, playerIndex, decode };
 });
