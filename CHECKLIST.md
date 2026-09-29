@@ -37,7 +37,7 @@ Status: done / partly / not done.
 |---|---|---|---|
 | 16 | Shared nav bar, fonts and colors | `assets/css/style.css` | not done |
 | 17 | Own folder under home folder, not inside `~/fda-python` | `~/fda_website_project` | done |
-| 18 | Public repo, GitHub Pages from `main` | github.com/rykaracebo/nfl-player-stats | partly |
+| 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ (Pages enabled; shows 404 until `index.html` is published) | partly |
 | 19 | README listing every file and the data source | `README.md` | partly |
 | 20 | Data files, scripts and site files in the repo | `data/`, `scripts/` | partly |
 | 21 | Commit history showing the work as it was done | small commits per step | in progress |
