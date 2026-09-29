@@ -28,7 +28,7 @@
   the nflverse weekly player stats. It looks at seasons and games rather than careers, so the start of the data never cuts a
   player off. Passing yards per team-game peaked in 2015 at 259.2 and fell to 225.0 by
   2025, while rushing stayed flat. Defenses tell the matching story: interceptions per team-game fell 32% while sacks per pass
-  attempt rose. The dashboard lets you filter the same data, chase advanced stats like EPA per dropback and CPOE, and look up any player.</p>
+  attempt rose. A last pair of findings uses a value-over-replacement stat built for this site. The dashboard lets you filter the same data, switch between player and team views, and chase advanced stats like EPA per dropback and CPOE.</p>
   <a class="btn" href="dashboard.html">Open the dashboard &rarr;</a>
 </header>
 
@@ -145,6 +145,28 @@
       <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Leader</th><th>Sacks</th></tr></thead><tbody><tr><td>2009</td><td>Elvis Dumervil</td><td>16.5</td></tr><tr><td>2010</td><td>DeMarcus Ware</td><td>15.5</td></tr><tr><td>2011</td><td>Jared Allen</td><td>22.0</td></tr><tr><td>2012</td><td>J.J. Watt</td><td>20.5</td></tr><tr><td>2013</td><td>Robert Mathis</td><td>19.5</td></tr><tr><td>2014</td><td>Justin Houston</td><td>22.0</td></tr><tr><td>2015</td><td>J.J. Watt</td><td>17.5</td></tr><tr><td>2016</td><td>Vic Beasley</td><td>15.5</td></tr><tr><td>2017</td><td>Chandler Jones</td><td>17.0</td></tr><tr><td>2018</td><td>Aaron Donald</td><td>20.5</td></tr><tr><td>2019</td><td>Shaquil Barrett</td><td>19.5</td></tr><tr><td>2020</td><td>T.J. Watt</td><td>15.0</td></tr><tr><td>2021</td><td>T.J. Watt</td><td>22.5</td></tr><tr><td>2022</td><td>Nick Bosa</td><td>18.5</td></tr><tr><td>2023</td><td>T.J. Watt</td><td>19.0</td></tr><tr><td>2024</td><td>Trey Hendrickson</td><td>17.5</td></tr><tr><td>2025</td><td>Myles Garrett</td><td>23.0</td></tr></tbody></table></div></details>
     </figure>
   </section>
+  <section class="finding" id="f11">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 11 &middot; Value over replacement</span>
+      <h2>By expected points over replacement, Patrick Mahomes in 2022 was the best quarterback season, and only 4 of the top 10 also top the passing-yards list</h2>
+      <p>EPA over replacement (EPAOR) is the expected points a quarterback added beyond what a replacement-level passer would have added on the same number of plays. The top season in 2009 to 2025 is Patrick Mahomes in 2022 with 308.1 points, ranked 4 in passing yards.</p><p>Ranking all quarterback seasons by EPAOR and by passing yards, 4 of the top 10 seasons appear on both lists. Passing yards reward volume; EPAOR also rewards efficiency and counts sacks, interceptions and scrambles. This is this site&#x27;s own version of a value-over-replacement stat, not a full WAR. The replacement rule is in the data section below.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:420px"><canvas data-chart='{&quot;kind&quot;:&quot;hbar&quot;,&quot;labels&quot;:[&quot;Patrick Mahomes 2022&quot;,&quot;Tom Brady 2012&quot;,&quot;Patrick Mahomes 2018&quot;,&quot;Peyton Manning 2013&quot;,&quot;Lamar Jackson 2019&quot;,&quot;Aaron Rodgers 2011&quot;,&quot;Drew Brees 2011&quot;,&quot;Peyton Manning 2009&quot;,&quot;Drew Brees 2009&quot;,&quot;Tom Brady 2011&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;EPA over replacement&quot;,&quot;data&quot;:[308.0749,298.6607,298.1038,295.9755,295.914,281.1945,280.7014,273.9929,267.6039,267.4844]}],&quot;fmt&quot;:&quot;dec1&quot;,&quot;yTitle&quot;:&quot;Expected points over replacement&quot;,&quot;height&quot;:420}' role="img" aria-label="By expected points over replacement, Patrick Mahomes in 2022 was the best quarterback season, and only 4 of the top 10 also top the passing-yards list"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Rank</th><th>Player-season</th><th>EPAOR</th><th>Total EPA</th><th>Opportunities</th><th>Passing-yards rank</th></tr></thead><tbody><tr><td>1</td><td>Patrick Mahomes 2022</td><td>308.1</td><td>217.4</td><td>735</td><td>4</td></tr><tr><td>2</td><td>Tom Brady 2012</td><td>298.7</td><td>197.8</td><td>687</td><td>27</td></tr><tr><td>3</td><td>Patrick Mahomes 2018</td><td>298.1</td><td>237.0</td><td>666</td><td>12</td></tr><tr><td>4</td><td>Peyton Manning 2013</td><td>296.0</td><td>233.4</td><td>709</td><td>2</td></tr><tr><td>5</td><td>Lamar Jackson 2019</td><td>295.9</td><td>198.9</td><td>600</td><td>333</td></tr><tr><td>6</td><td>Aaron Rodgers 2011</td><td>281.2</td><td>227.3</td><td>597</td><td>48</td></tr><tr><td>7</td><td>Drew Brees 2011</td><td>280.7</td><td>217.1</td><td>705</td><td>1</td></tr><tr><td>8</td><td>Peyton Manning 2009</td><td>274.0</td><td>161.7</td><td>600</td><td>68</td></tr><tr><td>9</td><td>Drew Brees 2009</td><td>267.6</td><td>163.5</td><td>556</td><td>86</td></tr><tr><td>10</td><td>Tom Brady 2011</td><td>267.5</td><td>205.6</td><td>686</td><td>5</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f12">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 12 &middot; Value over replacement</span>
+      <h2>The replacement level for quarterbacks is below zero: -0.113 EPA per play on average, against 0.064 for starters</h2>
+      <p>Each season, the quarterbacks ranked below the top 32 by plays form the replacement pool. Their EPA per play averaged -0.113, from -0.187 (2009) to -0.067 (2020). The top 32 averaged 0.064, above the replacement level in 17 of 17 seasons.</p><p>The rate is noisy because the pool is made of players with few plays. For wide receivers, replacement level averaged 0.125 EPA per opportunity, well above zero, so the bar differs by position and EPAOR scores should only be compared within a position.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:340px"><canvas data-chart='{&quot;kind&quot;:&quot;line&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Top 32 quarterbacks&quot;,&quot;data&quot;:[0.0536,0.062,0.0522,0.0631,0.0625,0.0623,0.072,0.0691,0.0355,0.0799,0.0731,0.1035,0.0598,0.0546,0.0319,0.0799,0.077]},{&quot;label&quot;:&quot;Replacement pool&quot;,&quot;data&quot;:[-0.1872,-0.1296,-0.0902,-0.1469,-0.0882,-0.118,-0.0981,-0.077,-0.1418,-0.0917,-0.1617,-0.0668,-0.0762,-0.1233,-0.1389,-0.0817,-0.1039]}],&quot;fmt&quot;:&quot;dec3&quot;,&quot;yTitle&quot;:&quot;EPA per play (attempts, sacks, carries)&quot;,&quot;height&quot;:340}' role="img" aria-label="The replacement level for quarterbacks is below zero: -0.113 EPA per play on average, against 0.064 for starters"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Pool size</th><th>Replacement EPA per play</th><th>Top 32 EPA per play</th></tr></thead><tbody><tr><td>2009</td><td>45</td><td>-0.187</td><td>0.054</td></tr><tr><td>2010</td><td>48</td><td>-0.130</td><td>0.062</td></tr><tr><td>2011</td><td>43</td><td>-0.090</td><td>0.052</td></tr><tr><td>2012</td><td>38</td><td>-0.147</td><td>0.063</td></tr><tr><td>2013</td><td>34</td><td>-0.088</td><td>0.062</td></tr><tr><td>2014</td><td>41</td><td>-0.118</td><td>0.062</td></tr><tr><td>2015</td><td>42</td><td>-0.098</td><td>0.072</td></tr><tr><td>2016</td><td>38</td><td>-0.077</td><td>0.069</td></tr><tr><td>2017</td><td>41</td><td>-0.142</td><td>0.035</td></tr><tr><td>2018</td><td>39</td><td>-0.092</td><td>0.080</td></tr><tr><td>2019</td><td>39</td><td>-0.162</td><td>0.073</td></tr><tr><td>2020</td><td>49</td><td>-0.067</td><td>0.103</td></tr><tr><td>2021</td><td>49</td><td>-0.076</td><td>0.060</td></tr><tr><td>2022</td><td>51</td><td>-0.123</td><td>0.055</td></tr><tr><td>2023</td><td>49</td><td>-0.139</td><td>0.032</td></tr><tr><td>2024</td><td>46</td><td>-0.082</td><td>0.080</td></tr><tr><td>2025</td><td>49</td><td>-0.104</td><td>0.077</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
 
   <section class="finding data-section" id="data">
     <div class="finding-text wide">
@@ -181,6 +203,13 @@
         stored as negatives. CPOE is each game's CPOE weighted by that game's attempts. RACR is receiving yards divided by receiving
         air yards. Target share, air-yards share and WOPR are averages over games in which the player was targeted. Each dashboard
         measure states its definition under the chart.</li>
+        <li><strong>EPA over replacement (EPAOR, this site's version):</strong> regular season only, one position group at a time
+        (quarterbacks, running backs, wide receivers, tight ends). Opportunities are attempts + sacks + carries for quarterbacks and
+        carries + targets for the others. Each season players are ranked by opportunities (ties by player ID); the top 32 quarterbacks,
+        32 running backs, 64 wide receivers and 32 tight ends are the starters and everyone below them is the replacement pool.
+        The replacement rate r is the pool's total EPA divided by the pool's opportunities, and EPAOR = a player's EPA - r x opportunities.
+        The cutoffs are a judgment call, not nflWAR's. Scores are in expected points, not wins, and are only comparable within a position.
+        A pass's EPA appears under both the passer and the receiver, so EPA must not be added across players.</li>
       </ul>
       <p><strong>Limits.</strong> Stats are only as good as the source; tackles depend on stat-crew scoring and are not used here.
       Metrics that need play-by-play, Next Gen Stats or Pro Football Reference data (EPA allowed, pressure rate, time to throw,

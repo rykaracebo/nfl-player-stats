@@ -227,6 +227,76 @@ qb["v"] = qb["pe"] / (qb["a"] + qb["s"])
 adv["top_epa_db"] = [[r.player_name, int(r.season), float(r.v)] for r in qb.sort_values(["v", "player_name"], ascending=[False, True]).head(10).itertuples()]
 R["advanced"] = adv
 
+# ------------------------------------------------------------------ EPA over replacement (this site's version)
+# Rule (same as assets/js/stats.js): regular season, one position group at a time, rows filtered by position_group.
+# Opportunities: QB = attempts + sacks + carries; RB/WR/TE = carries + targets. Per season, rank players by opportunities
+# (ties: player_id), the first K are starters, the rest are the replacement pool. r = pool EPA / pool opportunities.
+# EPAOR = EPA - r x opportunities.
+K_START = {"QB": 32, "RB": 32, "WR": 64, "TE": 32}
+EPA_COLS = {"QB": ["passing_epa", "rushing_epa"], "RB": ["rushing_epa", "receiving_epa"],
+            "WR": ["rushing_epa", "receiving_epa"], "TE": ["rushing_epa", "receiving_epa"]}
+OPP_COLS = {"QB": ["attempts", "sacks_suffered", "carries"], "RB": ["carries", "targets"],
+            "WR": ["carries", "targets"], "TE": ["carries", "targets"]}
+
+
+def epaor(pos):
+    sub = reg[reg["position_group"] == pos].copy()
+    sub["epa"] = sub[EPA_COLS[pos]].sum(axis=1)
+    sub["opp"] = sub[OPP_COLS[pos]].sum(axis=1)
+    pl = sub.groupby(["season", "player_id"], as_index=False).agg(
+        name=("player_name", "first"), epa=("epa", "sum"), opp=("opp", "sum"), yards=("passing_yards", "sum"))
+    pl = pl[pl["opp"] > 0]
+    out = {}
+    for season, g in pl.groupby("season"):
+        g = g.sort_values(["opp", "player_id"], ascending=[False, True]).reset_index(drop=True)
+        pool, starters = g.iloc[K_START[pos]:], g.iloc[:K_START[pos]]
+        r = pool["epa"].sum() / pool["opp"].sum() if pool["opp"].sum() > 0 else 0.0
+        g["epaor"] = g["epa"] - r * g["opp"]
+        out[int(season)] = {"r": float(r), "starter": float(starters["epa"].sum() / starters["opp"].sum()), "pool": int(len(pool)), "df": g}
+    return out
+
+
+EPAOR = {pos: epaor(pos) for pos in K_START}
+R["epaor"] = {pos: {str(s): {"r": v["r"], "starter": v["starter"], "pool": v["pool"],
+                              "top5": [[r.name, float(r.epaor)] for r in v["df"].sort_values(["epaor", "name"], ascending=[False, True]).head(5).itertuples()]}
+                    for s, v in EPAOR[pos].items()} for pos in K_START}
+
+qb_all = pd.concat([v["df"] for v in EPAOR["QB"].values()], ignore_index=True)
+qb_all["yards_rank"] = qb_all["yards"].rank(ascending=False, method="min")
+top_epaor = qb_all.sort_values(["epaor", "name"], ascending=[False, True]).head(10)
+top_yards = qb_all.sort_values(["yards", "name"], ascending=[False, True]).head(10)
+key = lambda df: set(zip(df["season"], df["player_id"]))
+overlap = len(key(top_epaor) & key(top_yards))
+best = top_epaor.iloc[0]
+R["epaor_overlap"] = overlap
+add("Value over replacement",
+    f"By expected points over replacement, {best['name']} in {int(best['season'])} was the best quarterback season, and only {overlap} of the top 10 also top the passing-yards list",
+    [f"EPA over replacement (EPAOR) is the expected points a quarterback added beyond what a replacement-level passer would have added "
+     f"on the same number of plays. The top season in {FIRST} to {LAST} is {best['name']} in {int(best['season'])} with {dec(best['epaor'])} points, "
+     f"ranked {int(best['yards_rank'])} in passing yards.",
+     f"Ranking all quarterback seasons by EPAOR and by passing yards, {overlap} of the top 10 seasons appear on both lists. Passing yards "
+     f"reward volume; EPAOR also rewards efficiency and counts sacks, interceptions and scrambles. This is this site's own version of a "
+     f"value-over-replacement stat, not a full WAR. The replacement rule is in the data section below."],
+    chart("hbar", [f"{r.name} {int(r.season)}" for r in top_epaor.itertuples()], [("EPA over replacement", top_epaor["epaor"])], "dec1", "Expected points over replacement", 420),
+    ["Rank", "Player-season", "EPAOR", "Total EPA", "Opportunities", "Passing-yards rank"],
+    [[i + 1, f"{r.name} {int(r.season)}", dec(r.epaor), dec(r.epa), num(r.opp), int(r.yards_rank)] for i, r in enumerate(top_epaor.itertuples())])
+
+qb_r = pd.Series({s: v["r"] for s, v in EPAOR["QB"].items()})
+qb_st = pd.Series({s: v["starter"] for s, v in EPAOR["QB"].items()})
+wr_r = pd.Series({s: v["r"] for s, v in EPAOR["WR"].items()})
+above = int((qb_st > qb_r).sum())
+add("Value over replacement",
+    f"The replacement level for quarterbacks is below zero: {dec(qb_r.mean(), 3)} EPA per play on average, against {dec(qb_st.mean(), 3)} for starters",
+    [f"Each season, the quarterbacks ranked below the top 32 by plays form the replacement pool. Their EPA per play averaged "
+     f"{dec(qb_r.mean(), 3)}, from {dec(qb_r.min(), 3)} ({int(qb_r.idxmin())}) to {dec(qb_r.max(), 3)} ({int(qb_r.idxmax())}). The top 32 averaged "
+     f"{dec(qb_st.mean(), 3)}, above the replacement level in {above} of {len(qb_r)} seasons.",
+     f"The rate is noisy because the pool is made of players with few plays. For wide receivers, replacement level averaged "
+     f"{dec(wr_r.mean(), 3)} EPA per opportunity, well above zero, so the bar differs by position "
+     f"and EPAOR scores should only be compared within a position."],
+    chart("line", SEASONS, [("Top 32 quarterbacks", qb_st), ("Replacement pool", qb_r)], "dec3", "EPA per play (attempts, sacks, carries)", 340),
+    ["Season", "Pool size", "Replacement EPA per play", "Top 32 EPA per play"],
+    [[int(s), EPAOR["QB"][s]["pool"], dec(qb_r[s], 3), dec(qb_st[s], 3)] for s in SEASONS])
+
 R["watt_hits_top10"] = int(len(watt))
 R["watt_led_sacks"] = watt_led
 
@@ -306,7 +376,7 @@ page = f"""<!doctype html>
   the nflverse weekly player stats. It looks at seasons and games rather than careers, so the start of the data never cuts a
   player off. Passing yards per team-game peaked in {peak_pass} at {dec(pass_tg[peak_pass])} and fell to {dec(pass_tg[LAST])} by
   {LAST}, while rushing stayed flat. Defenses tell the matching story: interceptions per team-game fell {pct(1 - int_tg[LAST] / int_tg[FIRST], 0)} while sacks per pass
-  attempt rose. The dashboard lets you filter the same data, chase advanced stats like EPA per dropback and CPOE, and look up any player.</p>
+  attempt rose. A last pair of findings uses a value-over-replacement stat built for this site. The dashboard lets you filter the same data, switch between player and team views, and chase advanced stats like EPA per dropback and CPOE.</p>
   <a class="btn" href="dashboard.html">Open the dashboard &rarr;</a>
 </header>
 
@@ -349,6 +419,13 @@ page = f"""<!doctype html>
         stored as negatives. CPOE is each game's CPOE weighted by that game's attempts. RACR is receiving yards divided by receiving
         air yards. Target share, air-yards share and WOPR are averages over games in which the player was targeted. Each dashboard
         measure states its definition under the chart.</li>
+        <li><strong>EPA over replacement (EPAOR, this site's version):</strong> regular season only, one position group at a time
+        (quarterbacks, running backs, wide receivers, tight ends). Opportunities are attempts + sacks + carries for quarterbacks and
+        carries + targets for the others. Each season players are ranked by opportunities (ties by player ID); the top 32 quarterbacks,
+        32 running backs, 64 wide receivers and 32 tight ends are the starters and everyone below them is the replacement pool.
+        The replacement rate r is the pool's total EPA divided by the pool's opportunities, and EPAOR = a player's EPA - r x opportunities.
+        The cutoffs are a judgment call, not nflWAR's. Scores are in expected points, not wins, and are only comparable within a position.
+        A pass's EPA appears under both the passer and the receiver, so EPA must not be added across players.</li>
       </ul>
       <p><strong>Limits.</strong> Stats are only as good as the source; tackles depend on stat-crew scoring and are not used here.
       Metrics that need play-by-play, Next Gen Stats or Pro Football Reference data (EPA allowed, pressure rate, time to throw,

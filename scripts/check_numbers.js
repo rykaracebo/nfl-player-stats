@@ -84,5 +84,27 @@ report.advanced.top_epa_db.forEach(([name, season, v], i) => {
   check("top EPA per dropback rank " + (i + 1) + " value", topEpa[i].value, v);
 });
 
+// EPA over replacement: dashboard code vs pandas, every position and season (replacement rate, starter rate, pool size, top 5)
+for (const pos of Object.keys(report.epaor)) {
+  const js = S.epaOverReplacement(store, pos, null, null);
+  for (const [season, ref] of Object.entries(report.epaor[pos])) {
+    const got = js.get(+season);
+    check("EPAOR " + pos + " " + season + " replacement rate", got.r, ref.r);
+    check("EPAOR " + pos + " " + season + " starter rate", got.starterRate, ref.starter);
+    check("EPAOR " + pos + " " + season + " pool size", got.poolSize, ref.pool);
+    const top = got.rows.slice().sort((a, b) => b.epaor - a.epaor || a.name.localeCompare(b.name)).slice(0, 5);
+    ref.top5.forEach(([name, v], i) => {
+      check("EPAOR " + pos + " " + season + " top " + (i + 1) + " player", top[i].name, name);
+      check("EPAOR " + pos + " " + season + " top " + (i + 1) + " value", top[i].epaor, v);
+    });
+  }
+}
+
+// team-level views use the same code: team-games and per-team-game rates summed over teams must equal the league totals
+const perTeam = S.aggregate(store, REG, "team", [M.pass_yds_tg, M.team_games]);
+let tgSum = 0;
+for (const [, g] of perTeam) tgSum += g.tg.size;
+check("team-games summed over teams equals league team-games", tgSum, Object.values(report.team_games).reduce((a, b) => a + b, 0));
+
 console.log(checks + " checks, " + failures + " mismatches");
 process.exit(failures ? 1 : 0);
