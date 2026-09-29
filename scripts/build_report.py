@@ -118,9 +118,10 @@ add("Passing peaked, then slid",
 add("Passing peaked, then slid",
     f"Fewer quarterbacks reach 4,000 yards: {int(c4000[2016])} did in 2016, only {int(c4000[LAST])} in {LAST}",
     [f"A 4,000-yard passing season used to be common. In 2016, {int(c4000[2016])} quarterbacks got there, the most of any season. "
-     f"In {LAST - 1} it was {int(c4000[LAST - 1])} and in {LAST} it was {int(c4000[LAST])}.",
-     "This counts each player's regular-season total for one season. A season of 17 games (18 weeks from 2021) is enough to make the "
-     "thresholds comparable, though the extra game from 2021 adds a little room."],
+     (f"It was {int(c4000[LAST])} in both {LAST - 1} and {LAST}." if c4000[LAST - 1] == c4000[LAST]
+      else f"It was {int(c4000[LAST - 1])} in {LAST - 1} and {int(c4000[LAST])} in {LAST}."),
+     "This counts each player's regular-season total for one season. Seasons were 16 games through 2020 and 17 from 2021, so "
+     "counts from 2021 on have a little extra room to reach the threshold."],
     chart("bar", SEASONS, [("Players with 4,000+ passing yards", c4000)], "int", "Players"),
     ["Season", "Players with 4,000+ passing yards"], [[int(s), int(c4000[s])] for s in SEASONS])
 
@@ -136,15 +137,15 @@ add("The running back roller coaster",
 
 add("The running back roller coaster",
     f"The workhorse back nearly disappeared, then returned: {int(c300[FIRST])} backs had 300+ carries in {FIRST}, {int(c300[2023])} in 2023, {int(c300[2024])} in 2024",
-    [f"A 300-carry season was routine early on: {int(c300[FIRST])} players in {FIRST} and {int(c300[2010])} in 2010. From 2013 to 2022 "
-     f"the count never passed {int(c300.loc[2013:2022].max())}, and in 2023 it hit {int(c300[2023])}.",
-     f"It came back in 2024 with {int(c300[2024])} players and {int(c300[LAST])} in {LAST}. The counts are small, so one or two "
+    [f"A 300-carry season was more common early on: {int(c300[FIRST])} players in {FIRST} and {int(c300[2010])} in 2010. From 2013 to 2022 "
+     f"the count never passed {int(c300.loc[2013:2022].max())}, and in 2023 it fell to {int(c300[2023])}.",
+     f"It came back in 2024 with {int(c300[2024])} players, then {int(c300[LAST])} in {LAST}. The counts are small, so one or two "
      f"bell-cow backs make a visible difference."],
     chart("bar", SEASONS, [("Players with 300+ carries", c300)], "int", "Players"),
     ["Season", "Players with 300+ carries"], [[int(s), int(c300[s])] for s in SEASONS])
 
 add("Receivers pile up catches",
-    f"100-catch seasons rose even as passing yards fell: {int(c100rec[2010])} in 2010, {int(c100rec.max())} at the peak",
+    f"100-catch seasons climbed from {int(c100rec[2010])} in 2010 to {int(c100rec.max())} at the peak, even though team passing yards were below their {peak_pass} high",
     [f"Only {int(c100rec[2010])} players caught 100 passes in 2010. The count reached {int(c100rec.max())} in "
      f"{', '.join(str(int(s)) for s in c100rec[c100rec == c100rec.max()].index)} and was {int(c100rec[LAST])} in {LAST}.",
      "These are counts of individual players, so a few high-volume receivers can move the number from one season to the next."],
@@ -186,8 +187,8 @@ add("Defenses: fewer takeaways, more pressure",
     [f"The top 10 single seasons for quarterback hits include {len(watt)} by J.J. Watt, in " +
      ", ".join(f"{int(r.season)} ({int(r.def_qb_hits)})" for r in watt.sort_values("season").itertuples()) +
      f". The record in the data is {int(hits.iloc[0]['def_qb_hits'])}.",
-     "QB hits are recorded on only about a third of defensive player-games and not in a way that lines up with sacks, so treat this as a "
-     "ranking of recorded hits, not a full count of pressure."],
+     "The source does not say how consistently QB hits were recorded over time, so treat this as a ranking of recorded hits, "
+     "not a full count of pressure."],
     chart("hbar", [f"{r.player_name} {int(r.season)}" for r in hits.itertuples()], [("QB hits", hits["def_qb_hits"])], "int", "QB hits in the season", 400),
     ["Player", "Season", "QB hits"], [[r.player_name, int(r.season), int(r.def_qb_hits)] for r in hits.itertuples()])
 
