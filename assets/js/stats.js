@@ -11,7 +11,8 @@
 
   const CAT_COLS = ["player_id", "position", "position_group", "unit", "season_type", "game_id", "team", "opponent_team"];
   const KEY_COLS = new Set(["player_name", "season", "week"].concat(CAT_COLS));
-  const FLOAT64 = new Set(["fantasy_points_ppr"]); // decimals; the rest are whole numbers or halves
+  const FLOAT64 = new Set(["fantasy_points_ppr", "passing_epa", "passing_cpoe", "rushing_epa", "receiving_epa",
+                           "target_share", "air_yards_share", "wopr"]); // decimals; the rest are whole numbers or halves
   const PS_SEASON_BASE = 2000; // player-season key = playerCode * 64 + (season - 2000)
 
   // ------------------------------------------------------------------ store and parsing
@@ -91,33 +92,92 @@
   // ------------------------------------------------------------------ measures
   // value = sum(num) / sum(den) for ratios; sum(num) for sums; sum(num) / rows for per-player-game averages;
   // sum(num) / distinct team-games for per-team-game rates. num/den null means "1 per row".
+  const DB = ["attempts", "sacks_suffered"]; // dropbacks
   const MEASURES = [
-    { id: "games", label: "Player-games", type: "sum", num: null, fmt: "int" },
-    { id: "pass_yds", label: "Passing yards", type: "sum", num: ["passing_yards"], fmt: "int" },
-    { id: "rush_yds", label: "Rushing yards", type: "sum", num: ["rushing_yards"], fmt: "int" },
-    { id: "rec_yds", label: "Receiving yards", type: "sum", num: ["receiving_yards"], fmt: "int" },
-    { id: "receptions", label: "Receptions", type: "sum", num: ["receptions"], fmt: "int" },
-    { id: "tds", label: "Touchdowns (pass, rush, receive)", type: "sum", num: ["passing_tds", "rushing_tds", "receiving_tds"], fmt: "int" },
-    { id: "sacks", label: "Sacks (defense)", type: "sum", num: ["def_sacks"], fmt: "dec1" },
-    { id: "ints_def", label: "Interceptions (defense)", type: "sum", num: ["def_interceptions"], fmt: "int" },
-    { id: "qb_hits", label: "QB hits (defense)", type: "sum", num: ["def_qb_hits"], fmt: "int" },
-    { id: "pass_def", label: "Passes defended", type: "sum", num: ["def_pass_defended"], fmt: "int" },
-    { id: "fantasy", label: "Fantasy points (PPR)", type: "sum", num: ["fantasy_points_ppr"], fmt: "int" },
-    { id: "fantasy_pg", label: "Fantasy points per player-game", type: "avg", num: ["fantasy_points_ppr"], fmt: "dec2" },
-    { id: "pass_yds_pg", label: "Passing yards per player-game", type: "avg", num: ["passing_yards"], fmt: "dec1" },
-    { id: "rush_yds_pg", label: "Rushing yards per player-game", type: "avg", num: ["rushing_yards"], fmt: "dec1" },
-    { id: "rec_yds_pg", label: "Receiving yards per player-game", type: "avg", num: ["receiving_yards"], fmt: "dec1" },
-    { id: "pass_yds_tg", label: "Passing yards per team-game", type: "perTeamGame", num: ["passing_yards"], fmt: "dec1" },
-    { id: "rush_yds_tg", label: "Rushing yards per team-game", type: "perTeamGame", num: ["rushing_yards"], fmt: "dec1" },
-    { id: "ints_tg", label: "Interceptions per team-game", type: "perTeamGame", num: ["def_interceptions"], fmt: "dec3" },
-    { id: "sacks_tg", label: "Sacks per team-game", type: "perTeamGame", num: ["def_sacks"], fmt: "dec3" },
-    { id: "comp_pct", label: "Completion percentage", type: "ratio", num: ["completions"], den: ["attempts"], fmt: "pct1", min: 200 },
-    { id: "ypa", label: "Yards per pass attempt", type: "ratio", num: ["passing_yards"], den: ["attempts"], fmt: "dec2", min: 200 },
-    { id: "int_rate", label: "Interception rate (per attempt)", type: "ratio", num: ["passing_interceptions"], den: ["attempts"], fmt: "pct1", min: 200 },
-    { id: "ypc", label: "Yards per carry", type: "ratio", num: ["rushing_yards"], den: ["carries"], fmt: "dec2", min: 100 },
-    { id: "ypr", label: "Yards per reception", type: "ratio", num: ["receiving_yards"], den: ["receptions"], fmt: "dec2", min: 30 },
-    { id: "catch_pct", label: "Catch rate (per target)", type: "ratio", num: ["receptions"], den: ["targets"], fmt: "pct1", min: 50 },
-    { id: "fg_pct", label: "Field goal percentage", type: "ratio", num: ["fg_made"], den: ["fg_att"], fmt: "pct1", min: 15 },
+    // Volume
+    { id: "games", group: "Totals", label: "Player-games", type: "sum", num: null, fmt: "int" },
+    { id: "pass_yds", group: "Totals", label: "Passing yards", type: "sum", num: ["passing_yards"], fmt: "int" },
+    { id: "rush_yds", group: "Totals", label: "Rushing yards", type: "sum", num: ["rushing_yards"], fmt: "int" },
+    { id: "rec_yds", group: "Totals", label: "Receiving yards", type: "sum", num: ["receiving_yards"], fmt: "int" },
+    { id: "receptions", group: "Totals", label: "Receptions", type: "sum", num: ["receptions"], fmt: "int" },
+    { id: "tds", group: "Totals", label: "Touchdowns (pass, rush, receive)", type: "sum", num: ["passing_tds", "rushing_tds", "receiving_tds"], fmt: "int" },
+    { id: "sacks", group: "Totals", label: "Sacks (defense)", type: "sum", num: ["def_sacks"], fmt: "dec1" },
+    { id: "ints_def", group: "Totals", label: "Interceptions (defense)", type: "sum", num: ["def_interceptions"], fmt: "int" },
+    { id: "qb_hits", group: "Totals", label: "QB hits (defense)", type: "sum", num: ["def_qb_hits"], fmt: "int" },
+    { id: "pass_def", group: "Totals", label: "Passes defended", type: "sum", num: ["def_pass_defended"], fmt: "int" },
+    { id: "tfl", group: "Totals", label: "Tackles for loss (2012 onward)", type: "sum", num: ["def_tackles_for_loss"], fmt: "int",
+      desc: "Not recorded in 2009 to 2011, so those seasons add nothing." },
+    { id: "fantasy", group: "Totals", label: "Fantasy points (PPR)", type: "sum", num: ["fantasy_points_ppr"], fmt: "int" },
+    { id: "pass_epa_total", group: "Totals", label: "Passing EPA (total)", type: "sum", num: ["passing_epa"], fmt: "dec1",
+      desc: "Expected points added on pass attempts and sacks." },
+    { id: "rush_epa_total", group: "Totals", label: "Rushing EPA (total)", type: "sum", num: ["rushing_epa"], fmt: "dec1",
+      desc: "Expected points added on rush attempts, including scrambles." },
+    { id: "rec_epa_total", group: "Totals", label: "Receiving EPA (total)", type: "sum", num: ["receiving_epa"], fmt: "dec1",
+      desc: "EPA on plays where the player was targeted." },
+    // Per player-game
+    { id: "fantasy_pg", group: "Per player-game", label: "Fantasy points per player-game", type: "avg", num: ["fantasy_points_ppr"], fmt: "dec2" },
+    { id: "pass_yds_pg", group: "Per player-game", label: "Passing yards per player-game", type: "avg", num: ["passing_yards"], fmt: "dec1" },
+    { id: "rush_yds_pg", group: "Per player-game", label: "Rushing yards per player-game", type: "avg", num: ["rushing_yards"], fmt: "dec1" },
+    { id: "rec_yds_pg", group: "Per player-game", label: "Receiving yards per player-game", type: "avg", num: ["receiving_yards"], fmt: "dec1" },
+    { id: "sacks_pg", group: "Per player-game", label: "Sacks per player-game", type: "avg", num: ["def_sacks"], fmt: "dec3" },
+    { id: "qb_hits_pg", group: "Per player-game", label: "QB hits per player-game", type: "avg", num: ["def_qb_hits"], fmt: "dec3" },
+    // Team rates
+    { id: "pass_yds_tg", group: "Per team-game", label: "Passing yards per team-game", type: "perTeamGame", num: ["passing_yards"], fmt: "dec1" },
+    { id: "rush_yds_tg", group: "Per team-game", label: "Rushing yards per team-game", type: "perTeamGame", num: ["rushing_yards"], fmt: "dec1" },
+    { id: "ints_tg", group: "Per team-game", label: "Interceptions per team-game", type: "perTeamGame", num: ["def_interceptions"], fmt: "dec3" },
+    { id: "sacks_tg", group: "Per team-game", label: "Sacks per team-game", type: "perTeamGame", num: ["def_sacks"], fmt: "dec3" },
+    { id: "qb_hits_tg", group: "Per team-game", label: "QB hits per team-game", type: "perTeamGame", num: ["def_qb_hits"], fmt: "dec2" },
+    { id: "pass_def_tg", group: "Per team-game", label: "Passes defended per team-game", type: "perTeamGame", num: ["def_pass_defended"], fmt: "dec2" },
+    // Basic rates
+    { id: "comp_pct", group: "Rates", label: "Completion percentage", type: "ratio", num: ["completions"], den: ["attempts"], fmt: "pct1", min: 200, desc: "Completions divided by attempts." },
+    { id: "ypa", group: "Rates", label: "Yards per pass attempt", type: "ratio", num: ["passing_yards"], den: ["attempts"], fmt: "dec2", min: 200 },
+    { id: "int_rate", group: "Rates", label: "Interception rate (per attempt)", type: "ratio", num: ["passing_interceptions"], den: ["attempts"], fmt: "pct1", min: 200 },
+    { id: "ypc", group: "Rates", label: "Yards per carry", type: "ratio", num: ["rushing_yards"], den: ["carries"], fmt: "dec2", min: 100 },
+    { id: "ypt", group: "Rates", label: "Yards per target", type: "ratio", num: ["receiving_yards"], den: ["targets"], fmt: "dec2", min: 50 },
+    { id: "ypr", group: "Rates", label: "Yards per reception", type: "ratio", num: ["receiving_yards"], den: ["receptions"], fmt: "dec2", min: 30 },
+    { id: "catch_pct", group: "Rates", label: "Catch rate (per target)", type: "ratio", num: ["receptions"], den: ["targets"], fmt: "pct1", min: 50 },
+    { id: "fg_pct", group: "Rates", label: "Field goal percentage", type: "ratio", num: ["fg_made"], den: ["fg_att"], fmt: "pct1", min: 15 },
+    { id: "ypp", group: "Rates", label: "Yards per punt (gross)", type: "ratio", num: ["pt_yards"], den: ["pt_att"], fmt: "dec1", min: 30 },
+    // Advanced: passing
+    { id: "epa_db", group: "Advanced: passing", label: "EPA per dropback", type: "ratio", num: ["passing_epa"], den: DB, fmt: "dec3", min: 200,
+      desc: "Passing EPA divided by pass attempts plus sacks. Positive means the passer added expected points." },
+    { id: "anya", group: "Advanced: passing", label: "ANY/A (adjusted net yards per attempt)", type: "ratio",
+      num: ["passing_yards", { col: "passing_tds", w: 20 }, { col: "passing_interceptions", w: -45 }, "sack_yards_lost"], den: DB, fmt: "dec2", min: 200,
+      desc: "(Passing yards + 20 x TDs - 45 x interceptions - sack yards lost) divided by (attempts + sacks)." },
+    { id: "cpoe", group: "Advanced: passing", label: "CPOE (completion % over expected)", type: "ratio",
+      num: [{ col: "passing_cpoe", by: "attempts" }], den: ["attempts"], fmt: "dec2", min: 200,
+      desc: "Each game's CPOE weighted by that game's attempts, in percentage points. Adjusts completion rate for throw difficulty." },
+    { id: "air_yds_att", group: "Advanced: passing", label: "Air yards per attempt", type: "ratio", num: ["passing_air_yards"], den: ["attempts"], fmt: "dec2", min: 200,
+      desc: "How far downfield a passer throws, on average, counting incomplete passes." },
+    { id: "pass_fd_rate", group: "Advanced: passing", label: "Pass first-down rate", type: "ratio", num: ["passing_first_downs"], den: ["attempts"], fmt: "pct1", min: 200 },
+    { id: "qb_sack_rate", group: "Advanced: passing", label: "Sack rate (sacks taken per dropback)", type: "ratio", num: ["sacks_suffered"], den: DB, fmt: "pct1", min: 200 },
+    // Advanced: receiving
+    { id: "epa_tgt", group: "Advanced: receiving", label: "Receiving EPA per target", type: "ratio", num: ["receiving_epa"], den: ["targets"], fmt: "dec3", min: 50,
+      desc: "EPA on targeted plays divided by targets." },
+    { id: "racr", group: "Advanced: receiving", label: "RACR (yards per air yard)", type: "ratio", num: ["receiving_yards"], den: ["receiving_air_yards"], fmt: "dec2", min: 300,
+      desc: "Receiving yards divided by receiving air yards. Above 1 means a receiver gains more than the ball travels in the air." },
+    { id: "air_yds_tgt", group: "Advanced: receiving", label: "Air yards per target (aDOT)", type: "ratio", num: ["receiving_air_yards"], den: ["targets"], fmt: "dec2", min: 50,
+      desc: "Average depth of target." },
+    { id: "yac_rec", group: "Advanced: receiving", label: "Yards after catch per reception", type: "ratio", num: ["receiving_yards_after_catch"], den: ["receptions"], fmt: "dec2", min: 30 },
+    { id: "rec_fd_rate", group: "Advanced: receiving", label: "First downs per reception", type: "ratio", num: ["receiving_first_downs"], den: ["receptions"], fmt: "pct1", min: 30 },
+    { id: "target_share", group: "Advanced: receiving", label: "Target share (average per game targeted)", type: "ratio",
+      num: ["target_share"], den: [{ col: "targets", gt0: true }], fmt: "pct1", min: 8,
+      desc: "Average of the player's share of team targets, over games in which he was targeted." },
+    { id: "air_share", group: "Advanced: receiving", label: "Air-yards share (average per game targeted)", type: "ratio",
+      num: ["air_yards_share"], den: [{ col: "targets", gt0: true }], fmt: "pct1", min: 8,
+      desc: "Average of the player's share of team air yards, over games in which he was targeted." },
+    { id: "wopr", group: "Advanced: receiving", label: "WOPR (weighted opportunity rating)", type: "ratio",
+      num: ["wopr"], den: [{ col: "targets", gt0: true }], fmt: "dec2", min: 8,
+      desc: "1.5 x target share + 0.7 x air-yards share, averaged over games in which he was targeted." },
+    // Advanced: rushing
+    { id: "epa_carry", group: "Advanced: rushing", label: "Rushing EPA per carry", type: "ratio", num: ["rushing_epa"], den: ["carries"], fmt: "dec3", min: 100,
+      desc: "Expected points added per rush attempt. Includes quarterback scrambles." },
+    { id: "rush_fd_rate", group: "Advanced: rushing", label: "Rushing first-down rate", type: "ratio", num: ["rushing_first_downs"], den: ["carries"], fmt: "pct1", min: 100 },
+    // Advanced: kicking
+    { id: "fg_pct_30", group: "Advanced: kicking", label: "Field goal % from 30 to 39 yards", type: "ratio", num: ["fg_made_30_39"], den: ["fg_made_30_39", "fg_missed_30_39"], fmt: "pct1", min: 10 },
+    { id: "fg_pct_40", group: "Advanced: kicking", label: "Field goal % from 40 to 49 yards", type: "ratio", num: ["fg_made_40_49"], den: ["fg_made_40_49", "fg_missed_40_49"], fmt: "pct1", min: 10 },
+    { id: "fg_pct_50", group: "Advanced: kicking", label: "Field goal % from 50+ yards", type: "ratio",
+      num: ["fg_made_50_59", "fg_made_60_"], den: ["fg_made_50_59", "fg_missed_50_59", "fg_made_60_", "fg_missed_60_"], fmt: "pct1", min: 8 },
   ];
   const MEASURE_BY_ID = {};
   MEASURES.forEach((m) => (MEASURE_BY_ID[m.id] = m));
@@ -174,6 +234,27 @@
   }
 
   // ------------------------------------------------------------------ aggregation
+  // A term is a column name, or {col, w: weight, by: other column to multiply by, gt0: 1 if the column > 0}.
+  function compileTerms(terms, chunk) {
+    return terms.map((t) => {
+      const o = typeof t === "string" ? { col: t } : t;
+      return { a: chunk.num[o.col], w: o.w === undefined ? 1 : o.w, b: o.by ? chunk.num[o.by] : null, gt0: !!o.gt0 };
+    });
+  }
+  function evalTerms(terms, i) {
+    let sum = 0;
+    for (let j = 0; j < terms.length; j++) {
+      const t = terms[j];
+      let v = t.a[i];
+      if (v !== v) continue;
+      if (t.gt0) v = v > 0 ? 1 : 0;
+      v *= t.w;
+      if (t.b) { const b = t.b[i]; if (b !== b) continue; v *= b; }
+      sum += v;
+    }
+    return sum;
+  }
+
   // Returns Map(groupKey -> {rows, num[], den[], tg:Set|null, team, position}) for the given measures.
   function aggregate(store, filters, groupBy, measures) {
     const f = filters || {};
@@ -183,8 +264,8 @@
     const nm = measures.length;
     for (const chunk of store.chunks) {
       if (!chunkInRange(chunk, f)) continue;
-      const numArrs = measures.map((m) => (m.num ? m.num.map((c) => chunk.num[c]) : null));
-      const denArrs = measures.map((m) => (m.den ? m.den.map((c) => chunk.num[c]) : null));
+      const numArrs = measures.map((m) => (m.num ? compileTerms(m.num, chunk) : null));
+      const denArrs = measures.map((m) => (m.den ? compileTerms(m.den, chunk) : null));
       for (let i = 0; i < chunk.n; i++) {
         if (!rowPasses(chunk, i, f, tables)) continue;
         let key;
@@ -203,10 +284,9 @@
         if (needTG) g.tg.add(chunk.cat.game_id[i] * 64 + chunk.cat.team[i]);
         for (let k = 0; k < nm; k++) {
           const na = numArrs[k];
-          if (na === null) g.num[k] += 1;
-          else for (let j = 0; j < na.length; j++) { const v = na[j][i]; if (v === v) g.num[k] += v; }
+          g.num[k] += na === null ? 1 : evalTerms(na, i);
           const da = denArrs[k];
-          if (da) for (let j = 0; j < da.length; j++) { const v = da[j][i]; if (v === v) g.den[k] += v; }
+          if (da) g.den[k] += evalTerms(da, i);
         }
       }
     }
