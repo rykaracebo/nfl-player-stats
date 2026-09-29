@@ -134,9 +134,11 @@
       for (let i = 0; i < 12; i++) { ctx.fillStyle = i % 2 ? "#17592f" : "#1b6735"; ctx.fillRect(i * 10 * sx, 0, 10 * sx + 1, H); }
       ctx.fillStyle = "rgba(229,20,26,.62)"; ctx.fillRect(0, 0, 10 * sx, H);
       ctx.fillStyle = "rgba(1,51,105,.86)"; ctx.fillRect(110 * sx, 0, 10 * sx, H);
-      ctx.fillStyle = "rgba(255,255,255,.82)"; ctx.font = "700 " + Math.round(H * 0.075) + "px 'Geist', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.save(); ctx.translate(5 * sx, H / 2); ctx.rotate(-Math.PI / 2); ctx.fillText("AFC", 0, 0); ctx.restore();
-      ctx.save(); ctx.translate(115 * sx, H / 2); ctx.rotate(Math.PI / 2); ctx.fillText("NFC", 0, 0); ctx.restore();
+      // end zone lettering uses the same font, size and color as the yard numbers, and both read the same direction
+      ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = "700 " + Math.round(H * 0.09) + "px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      if ("letterSpacing" in ctx) ctx.letterSpacing = Math.round(H * 0.02) + "px";
+      [[5, "AFC"], [115, "NFC"]].forEach(([yd, label]) => { ctx.save(); ctx.translate(yd * sx, H / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(label, 0, 0); ctx.restore(); });
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
       for (let y = 10; y <= 110; y += 5) {
         ctx.strokeStyle = "rgba(255,255,255," + (y === 10 || y === 110 ? 0.95 : y % 10 === 0 ? 0.5 : 0.28) + ")"; ctx.lineWidth = y === 10 || y === 110 ? 3 : 1.5;
         ctx.beginPath(); ctx.moveTo(y * sx, 0); ctx.lineTo(y * sx, H); ctx.stroke();
@@ -148,24 +150,66 @@
       ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 3; ctx.strokeRect(1.5, 1.5, W - 3, H - 3);
     }
 
-    // An NFL-style game ball: pointed ends, brown leather with a highlight, panel seams and white laces.
+    // An NFL-style game ball, drawn once in detail (leather grain, shading, seams, stitching, raised laces) and then reused.
+    let ballSprite = null;
+    const SPR_W = 500, SPR_H = 280, SPR_A = 236;
+    function makeBallSprite() {
+      const c = document.createElement("canvas"); c.width = SPR_W; c.height = SPR_H;
+      const g = c.getContext("2d"), cx0 = SPR_W / 2, cy0 = SPR_H / 2, a = SPR_A, b = a * 0.55;
+      let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      g.translate(cx0, cy0);
+      const outline = () => { g.beginPath(); g.moveTo(-a, 0); g.bezierCurveTo(-a * 0.6, -b * 1.3, a * 0.6, -b * 1.3, a, 0); g.bezierCurveTo(a * 0.6, b * 1.3, -a * 0.6, b * 1.3, -a, 0); g.closePath(); };
+      // soft contact shadow baked under the ball edge
+      g.save(); g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = 14; g.shadowOffsetY = 6; outline(); g.fillStyle = "#6b2a0a"; g.fill(); g.restore();
+      outline(); g.save(); g.clip();
+      // leather base: warm light on top, deep brown underneath
+      let lg = g.createLinearGradient(0, -b, 0, b);
+      lg.addColorStop(0, "#c9773a"); lg.addColorStop(0.35, "#a04a15"); lg.addColorStop(0.7, "#6e2c0a"); lg.addColorStop(1, "#3a1404");
+      g.fillStyle = lg; g.fillRect(-a, -b * 1.4, a * 2, b * 2.8);
+      // darker toward the pointed ends, like a curved surface
+      let eg = g.createLinearGradient(-a, 0, a, 0);
+      eg.addColorStop(0, "rgba(20,6,0,.65)"); eg.addColorStop(0.2, "rgba(20,6,0,0)"); eg.addColorStop(0.8, "rgba(20,6,0,0)"); eg.addColorStop(1, "rgba(20,6,0,.65)");
+      g.fillStyle = eg; g.fillRect(-a, -b * 1.4, a * 2, b * 2.8);
+      // pebbled grain
+      for (let i = 0; i < 5200; i++) {
+        const x = (rnd() * 2 - 1) * a, y = (rnd() * 2 - 1) * b * 1.15, r = 0.7 + rnd() * 1.4;
+        g.fillStyle = rnd() < 0.55 ? "rgba(0,0,0,.14)" : "rgba(255,205,150,.10)";
+        g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+      }
+      // panel seams running tip to tip (top and bottom), with a lighter edge and stitching
+      [-1, 1].forEach((sgn) => {
+        const seam = () => { g.beginPath(); g.moveTo(-a * 0.96, 0); g.bezierCurveTo(-a * 0.55, sgn * b * 0.98, a * 0.55, sgn * b * 0.98, a * 0.96, 0); };
+        seam(); g.strokeStyle = "rgba(25,8,1,.7)"; g.lineWidth = 3.2; g.stroke();
+        g.save(); g.translate(0, -sgn * 1.6); seam(); g.strokeStyle = "rgba(255,200,150,.18)"; g.lineWidth = 1.4; g.stroke(); g.restore();
+        seam(); g.setLineDash([5, 7]); g.strokeStyle = "rgba(240,220,190,.55)"; g.lineWidth = 1.3; g.stroke(); g.setLineDash([]);
+      });
+      // end panel seams near each tip
+      [-1, 1].forEach((sgn) => { g.beginPath(); g.moveTo(sgn * a * 0.7, -b * 0.82); g.quadraticCurveTo(sgn * a * 0.8, 0, sgn * a * 0.7, b * 0.82); g.strokeStyle = "rgba(25,8,1,.6)"; g.lineWidth = 2.4; g.stroke(); });
+      // broad soft highlight and a thin rim light along the underside
+      const hi = g.createRadialGradient(-a * 0.12, -b * 0.55, 4, -a * 0.12, -b * 0.55, a * 0.72);
+      hi.addColorStop(0, "rgba(255,232,205,.62)"); hi.addColorStop(0.5, "rgba(255,225,190,.16)"); hi.addColorStop(1, "rgba(255,225,190,0)");
+      g.fillStyle = hi; g.fillRect(-a, -b * 1.4, a * 2, b * 2.8);
+      const rim = g.createLinearGradient(0, b * 0.55, 0, b); rim.addColorStop(0, "rgba(255,170,110,0)"); rim.addColorStop(1, "rgba(255,170,110,.22)");
+      g.fillStyle = rim; g.fillRect(-a, b * 0.3, a * 2, b);
+      g.restore();
+      outline(); g.lineWidth = 3; g.strokeStyle = "#241002"; g.stroke();
+      // raised laces: a shadow underneath, the cord, and cross laces with rounded ends and eyelets
+      const ly = -b * 0.36;
+      g.lineCap = "round";
+      g.strokeStyle = "rgba(20,6,0,.55)"; g.lineWidth = 9; g.beginPath(); g.moveTo(-a * 0.3, ly + 5); g.lineTo(a * 0.3, ly + 5); g.stroke();
+      for (let k = -3; k <= 3; k++) { g.beginPath(); g.moveTo(k * a * 0.085, ly - b * 0.24 + 5); g.lineTo(k * a * 0.085, ly + b * 0.24 + 5); g.lineWidth = 9; g.stroke(); }
+      const cord = (x1, y1, x2, y2, w) => { const gr = g.createLinearGradient(x1, y1 - w, x1, y1 + w); gr.addColorStop(0, "#ffffff"); gr.addColorStop(1, "#cfc6b6"); g.strokeStyle = gr; g.lineWidth = w; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); };
+      cord(-a * 0.3, ly, a * 0.3, ly, 7);
+      for (let k = -3; k <= 3; k++) cord(k * a * 0.085, ly - b * 0.24, k * a * 0.085, ly + b * 0.24, 7);
+      g.fillStyle = "rgba(20,6,0,.85)"; [-1, 1].forEach((sgn) => { g.beginPath(); g.ellipse(sgn * a * 0.36, ly, 4, 3, 0, 0, TAU); g.fill(); });
+      return c;
+    }
+
     function football(x, y, len, angle, alpha) {
-      const a = len / 2, b = a * 0.52;
+      if (!ballSprite) ballSprite = makeBallSprite();
+      const w = len * (SPR_W / (SPR_A * 2)), h = w * (SPR_H / SPR_W);
       ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.globalAlpha = alpha == null ? 1 : alpha;
-      const outline = () => { ctx.beginPath(); ctx.moveTo(-a, 0); ctx.bezierCurveTo(-a * 0.62, -b * 1.25, a * 0.62, -b * 1.25, a, 0); ctx.bezierCurveTo(a * 0.62, b * 1.25, -a * 0.62, b * 1.25, -a, 0); ctx.closePath(); };
-      outline();
-      const g = ctx.createLinearGradient(0, -b, 0, b); g.addColorStop(0, "#cf7d3f"); g.addColorStop(0.42, "#94440f"); g.addColorStop(1, "#4a1c06");
-      ctx.fillStyle = g; ctx.fill();
-      ctx.save(); ctx.clip();
-      ctx.strokeStyle = "rgba(35,12,2,.55)"; ctx.lineWidth = Math.max(1, len * 0.016);
-      [-1, 1].forEach((s) => { ctx.beginPath(); ctx.moveTo(a * 0.6 * s, -b * 1.1); ctx.quadraticCurveTo(a * 0.68 * s, 0, a * 0.6 * s, b * 1.1); ctx.stroke(); });
-      const hi = ctx.createRadialGradient(-a * 0.08, -b * 0.5, 1, -a * 0.08, -b * 0.5, a * 0.7);
-      hi.addColorStop(0, "rgba(255,225,190,.6)"); hi.addColorStop(1, "rgba(255,225,190,0)"); ctx.fillStyle = hi; ctx.fillRect(-a, -b * 1.3, a * 2, b * 2.6);
-      ctx.restore();
-      outline(); ctx.lineWidth = Math.max(1, len * 0.02); ctx.strokeStyle = "#2a0f03"; ctx.stroke();
-      ctx.strokeStyle = "#fff"; ctx.lineCap = "round"; ctx.lineWidth = Math.max(1.4, len * 0.034);
-      ctx.beginPath(); ctx.moveTo(-a * 0.3, -b * 0.34); ctx.lineTo(a * 0.3, -b * 0.34); ctx.stroke();
-      for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(k * a * 0.12, -b * 0.34 - b * 0.2); ctx.lineTo(k * a * 0.12, -b * 0.34 + b * 0.2); ctx.stroke(); }
+      ctx.drawImage(ballSprite, -w / 2, -h / 2, w, h);
       ctx.restore();
     }
 
@@ -190,7 +234,7 @@
 
       // ball at rest on the 50-yard line before the throw
       const center = px([60, 26.65]);
-      if (tm < THROW_AT) { ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(center[0] + 3, center[1] + 8, W * 0.02, H * 0.014, 0, 0, TAU); ctx.fill(); football(center[0], center[1], Math.max(26, W * 0.05), 0); }
+      if (tm < THROW_AT) { ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(center[0] + 3, center[1] + 8, W * 0.02, H * 0.014, 0, 0, TAU); ctx.fill(); football(center[0], center[1], Math.max(34, W * 0.068), 0); }
 
       // teams
       dots = [];
@@ -222,7 +266,7 @@
       // the pass: arc from the 50-yard line to the target, then carried by the catcher, then back to the line
       let caught = null;
       if (target && tm >= THROW_AT) {
-        const s = slotOf[target.team], arrive = px(yardsAt(s, CATCH_AT)), ballLen = Math.max(26, W * 0.05);
+        const s = slotOf[target.team], arrive = px(yardsAt(s, CATCH_AT)), ballLen = Math.max(34, W * 0.068);
         if (tm < CATCH_AT) {
           const u = clamp01((tm - THROW_AT) / (CATCH_AT - THROW_AT)), lift = Math.sin(u * Math.PI);
           const x = center[0] + (arrive[0] - center[0]) * u, y = center[1] + (arrive[1] - center[1]) * u - lift * H * 0.22;
