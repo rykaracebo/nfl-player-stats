@@ -17,29 +17,29 @@ Status: done / partly / not done.
 ## Report page (`index.html`)
 | # | Requirement | Where | Status |
 |---|---|---|---|
-| 6 | Title, name, one-paragraph summary | top of `index.html` | not done |
-| 7 | 4+ headline numbers with labels | headline block | not done |
-| 8 | 8+ sections: finding heading, 1-2 paragraphs with numbers, a chart | findings 01 to 08+ | not done |
-| 9 | Closing data section: source, what a row is, dropped rows, how every rate is computed | "About the data" | not done |
+| 6 | Title, name, one-paragraph summary | top of `index.html` | done |
+| 7 | 4+ headline numbers with labels | headline block (6 numbers) | done |
+| 8 | 8+ sections: finding heading, 1-2 paragraphs with numbers, a chart | findings 01 to 10 | done |
+| 9 | Closing data section: source, what a row is, dropped rows, how every rate is computed | "About the data" at the bottom of `index.html` | done |
 
 ## Dashboard page (`dashboard.html`)
 | # | Requirement | Where | Status |
 |---|---|---|---|
-| 10 | Loads data and calculates in the browser | dashboard script | not done |
-| 11 | Filters for 4+ variables incl. time and group | filter panel | not done |
-| 12 | 4+ summary numbers that change with filters | summary row | not done |
-| 13 | 4+ charts with a measure switch and a breakdown switch | chart grid | not done |
-| 14 | Table of the numbers behind the view | table panel | not done |
-| 15 | Reset-filters button | filter panel | not done |
+| 10 | Loads data and calculates in the browser | `assets/js/dashboard.js` fetches the CSVs; `assets/js/stats.js` calculates | done, verified in Chrome |
+| 11 | Filters for 4+ variables incl. time and group | season range, week range, team, opponent, season type, unit, position group, player | done, verified in Chrome |
+| 12 | 4+ summary numbers that change with filters | 8 summary cards plus 5 milestone counts | done, verified in Chrome |
+| 13 | 4+ charts with a measure switch and a breakdown switch | 4 charts, measure select and breakdown select | done, verified in Chrome |
+| 14 | Table of the numbers behind the view | table panel, 4 views, CSV download | done, verified in Chrome |
+| 15 | Reset-filters button | "Reset filters" in the filter panel | done, verified in Chrome |
 
 ## Site and repository
 | # | Requirement | Where | Status |
 |---|---|---|---|
-| 16 | Shared nav bar, fonts and colors | `assets/css/style.css` | not done |
+| 16 | Shared nav bar, fonts and colors | `assets/css/style.css`, same nav on both pages | done |
 | 17 | Own folder under home folder, not inside `~/fda-python` | `~/fda_website_project` | done |
-| 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ (Pages enabled; shows 404 until `index.html` is published) | partly |
-| 19 | README listing every file and the data source | `README.md` | partly |
-| 20 | Data files, scripts and site files in the repo | `data/`, `scripts/` | partly |
+| 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ | partly (live site not yet verified) |
+| 19 | README listing every file and the data source | `README.md` | done |
+| 20 | Data files, scripts and site files in the repo | `data/`, `scripts/`, `assets/`, both pages | done |
 | 21 | Commit history showing the work as it was done | small commits per step | in progress |
 
 ## Grading
