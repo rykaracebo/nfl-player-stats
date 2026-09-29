@@ -12,7 +12,7 @@ import pandas as pd
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
-d[NUMERIC] = d[NUMERIC].fillna(0)  # blank = 0; NA columns (tackles for loss 2009-2011) are not used below
+d[NUMERIC] = d[NUMERIC].fillna(0)  # blank = 0; NA = no value in the source, which adds nothing to a sum
 reg = d[d["season_type"] == "REG"].copy()
 SEASONS = sorted(reg["season"].unique())
 FIRST, LAST = int(SEASONS[0]), int(SEASONS[-1])
@@ -398,7 +398,7 @@ page = f"""<!doctype html>
       with the dashboard's season-type filter.</p>
       <p><strong>Rows dropped and other cleaning.</strong></p>
       <ul>{log_html}</ul>
-      <p>Tackles for loss are not recorded in 2009 to 2011 and are left blank (not zero) there. Player names are not unique,
+      <p>Tackles for loss are not recorded in 2009 to 2011 and are marked NA (not zero) there. More generally, NA means the source has no value for that player in that game (for example, no pass attempts means no passing EPA); sums skip NA. Player names are not unique,
       so players are identified by <code>player_id</code>. Full details are in <code>data/DATA_QUALITY.md</code> and
       <code>data/DATA_DICTIONARY.md</code>.</p>
       <p><strong>How every number is computed.</strong></p>

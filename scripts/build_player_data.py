@@ -82,7 +82,7 @@ STATS = [
 ]
 SRC = {"fumbles_lost": "fumbles_lost_total"}
 STAT_COLS = [s for s, _ in STATS]
-COLUMNS = KEYS + [(s, SRC.get(s, s), "number", m, "blank = 0, NA = not recorded that season") for s, m in STATS]
+COLUMNS = KEYS + [(s, SRC.get(s, s), "number", m, "blank = 0, NA = source has no value (no such play or role, or not recorded)") for s, m in STATS]
 
 TEAMS = [  # code, city, name, conference, division  (codes as used by nflverse; Rams are LA)
     ("ARI", "Arizona", "Cardinals", "NFC", "West"), ("ATL", "Atlanta", "Falcons", "NFC", "South"),
@@ -102,6 +102,8 @@ TEAMS = [  # code, city, name, conference, division  (codes as used by nflverse;
     ("SF", "San Francisco", "49ers", "NFC", "West"), ("TB", "Tampa Bay", "Buccaneers", "NFC", "South"),
     ("TEN", "Tennessee", "Titans", "AFC", "South"), ("WAS", "Washington", "Commanders", "NFC", "East"),
 ]
+
+TEAMS_URL = "https://github.com/nflverse/nflverse-data/releases/download/teams/teams_colors_logos.csv"
 
 log = []
 
@@ -168,7 +170,7 @@ def main():
         for y, idx in df.groupby("season").groups.items():
             if (df.loc[idx, c].fillna(0) == 0).all():
                 df.loc[idx, c] = float("nan")
-                note(f"Column {c} has no non-zero value in {y}: written as NA (not recorded), not 0")
+                note(f"Column {c} has no non-zero value in {y}: written as NA (not recorded that season), not 0")
 
     note(f"sack_yards_lost: {int((df['sack_yards_lost'] > 0).sum())} rows with a positive value "
          f"(expected 0; the column is stored as a negative number)")
@@ -179,6 +181,24 @@ def main():
     # teams
     teams = pd.DataFrame(TEAMS, columns=["team", "city", "name", "conference", "division"])
     teams["full_name"] = teams["city"] + " " + teams["name"]
+    # colors, logo links and the official conference and division come from the nflverse teams file
+    os.makedirs(RAW, exist_ok=True)
+    tpath = "data/raw/teams_colors_logos.csv"
+    if not os.path.exists(tpath):
+        urllib.request.urlretrieve(TEAMS_URL, tpath)
+    src = pd.read_csv(tpath).set_index("team_abbr")
+    diffs = []
+    for i, r in teams.iterrows():
+        sr = src.loc[r["team"]]
+        if (sr["team_conf"], sr["team_division"].split()[-1]) != (r["conference"], r["division"]):
+            diffs.append(f"{r['team']}: typed {r['conference']} {r['division']}, nflverse {sr['team_conf']} {sr['team_division']}")
+        teams.loc[i, "conference"] = sr["team_conf"]
+        teams.loc[i, "division"] = sr["team_division"].split()[-1]
+        teams.loc[i, "full_name"] = sr["team_name"]
+        teams.loc[i, "color"] = sr["team_color"]
+        teams.loc[i, "color2"] = sr["team_color2"]
+        teams.loc[i, "logo"] = sr["team_logo_espn"]
+    note(f"Conference and division checked against nflverse: {len(diffs)} differences" + (" (" + "; ".join(diffs) + ") - nflverse values used" if diffs else ""))
     known = set(teams["team"])
     bad = (set(df["team"]) | set(df["opponent_team"])) - known
     note(f"Team codes not in teams.csv: {sorted(bad) if bad else 'none'}. The source already uses one code per franchise "
@@ -217,11 +237,11 @@ def main():
 def write_dictionary():
     lines = ["# Data dictionary", "",
              "Files: `data/seasons/player_games_YYYY.csv`, one per season, one row per player per game. "
-             "In the stat columns a blank cell means 0 and `NA` means the stat was not recorded that season.", "",
+             "In the stat columns a blank cell means 0. `NA` means the source has no value for that player in that game: usually the player had no such play or role (for example, passing EPA is `NA` for players with no pass attempts), and for tackles for loss in 2009 to 2011 the stat was not recorded at all. Sums treat `NA` as nothing to add.", "",
              "| Column | Type | Source field | Meaning | Allowed values / notes |", "|---|---|---|---|---|"]
     for name, src, typ, meaning, allowed in COLUMNS:
         lines.append(f"| `{name}` | {typ} | `{src}` | {meaning} | {allowed} |")
-    lines += ["", "`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`."]
+    lines += ["", "`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`, `color` and `color2` (team colors), `logo` (link to the team logo image, loaded by the site at view time and not stored here)."]
     with open("data/DATA_DICTIONARY.md", "w") as f:
         f.write("\n".join(lines) + "\n")
 

@@ -1,8 +1,8 @@
 /* Calculation module shared by dashboard.html and scripts/check_numbers.js.
    Works in the browser (window.NFLStats) and in Node (require). No dependencies.
 
-   Data: one CSV per season, one row per player per game. In stat columns a blank cell means 0 and NA means
-   "not recorded that season" (stored as NaN and skipped in sums). */
+   Data: one CSV per season, one row per player per game. In stat columns a blank cell means 0 and NA means the source
+   has no value for that player in that game (no such play or role, or not recorded); NA is stored as NaN and skipped in sums. */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
   else root.NFLStats = factory();

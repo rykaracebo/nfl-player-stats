@@ -31,7 +31,7 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `scripts/build_player_data.py` | Downloads the nflverse files, cleans them, and writes everything under `data/`. Also generates the data dictionary and quality summary. |
 | `scripts/build_report.py` | Computes every report number from the CSVs with pandas, writes `index.html` and `data/report.json`. |
 | `scripts/check_numbers.js` | Recomputes the report and advanced-stat numbers with `assets/js/stats.js` and compares them with `data/report.json`. Run with `node scripts/check_numbers.js`. |
-| `data/seasons/player_games_YYYY.csv` | The cleaned data, one file per season. Blank stat cell = 0, `NA` = not recorded that season. |
+| `data/seasons/player_games_YYYY.csv` | The cleaned data, one file per season. Blank stat cell = 0; `NA` = the source has no value (no such play or role, or not recorded that season). |
 | `data/teams.csv` | Team code, city, name, conference and division. |
 | `data/manifest.json` | Seasons, column list and row counts for the files above. |
 | `data/report.json` | Every number printed in the report, plus reference values for the advanced measures. |
