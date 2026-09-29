@@ -1,0 +1,139 @@
+{
+ "source": "nflverse-data stats_player (CC-BY-4.0)",
+ "columns": [
+  "player_id",
+  "player_name",
+  "position",
+  "position_group",
+  "unit",
+  "season",
+  "week",
+  "season_type",
+  "game_id",
+  "team",
+  "opponent_team",
+  "completions",
+  "attempts",
+  "passing_yards",
+  "passing_tds",
+  "passing_interceptions",
+  "sacks_suffered",
+  "carries",
+  "rushing_yards",
+  "rushing_tds",
+  "targets",
+  "receptions",
+  "receiving_yards",
+  "receiving_tds",
+  "def_tackles_solo",
+  "def_tackle_assists",
+  "def_tackles_for_loss",
+  "def_sacks",
+  "def_qb_hits",
+  "def_interceptions",
+  "def_pass_defended",
+  "def_fumbles_forced",
+  "def_tds",
+  "punt_returns",
+  "punt_return_yards",
+  "kickoff_returns",
+  "kickoff_return_yards",
+  "fg_made",
+  "fg_att",
+  "pat_made",
+  "pat_att",
+  "pt_att",
+  "pt_yards",
+  "penalties",
+  "fumbles_lost",
+  "fantasy_points_ppr"
+ ],
+ "seasons": {
+  "2009": {
+   "file": "data/seasons/player_games_2009.csv",
+   "rows": 17669,
+   "bytes": 2034237
+  },
+  "2010": {
+   "file": "data/seasons/player_games_2010.csv",
+   "rows": 17569,
+   "bytes": 2023276
+  },
+  "2011": {
+   "file": "data/seasons/player_games_2011.csv",
+   "rows": 17419,
+   "bytes": 2006618
+  },
+  "2012": {
+   "file": "data/seasons/player_games_2012.csv",
+   "rows": 17398,
+   "bytes": 1972925
+  },
+  "2013": {
+   "file": "data/seasons/player_games_2013.csv",
+   "rows": 17227,
+   "bytes": 1953312
+  },
+  "2014": {
+   "file": "data/seasons/player_games_2014.csv",
+   "rows": 17601,
+   "bytes": 1996259
+  },
+  "2015": {
+   "file": "data/seasons/player_games_2015.csv",
+   "rows": 17592,
+   "bytes": 1995685
+  },
+  "2016": {
+   "file": "data/seasons/player_games_2016.csv",
+   "rows": 17531,
+   "bytes": 1988021
+  },
+  "2017": {
+   "file": "data/seasons/player_games_2017.csv",
+   "rows": 17456,
+   "bytes": 1981187
+  },
+  "2018": {
+   "file": "data/seasons/player_games_2018.csv",
+   "rows": 17393,
+   "bytes": 1974366
+  },
+  "2019": {
+   "file": "data/seasons/player_games_2019.csv",
+   "rows": 17341,
+   "bytes": 1967549
+  },
+  "2020": {
+   "file": "data/seasons/player_games_2020.csv",
+   "rows": 17581,
+   "bytes": 1996143
+  },
+  "2021": {
+   "file": "data/seasons/player_games_2021.csv",
+   "rows": 18947,
+   "bytes": 2150690
+  },
+  "2022": {
+   "file": "data/seasons/player_games_2022.csv",
+   "rows": 18809,
+   "bytes": 2135259
+  },
+  "2023": {
+   "file": "data/seasons/player_games_2023.csv",
+   "rows": 18621,
+   "bytes": 2115805
+  },
+  "2024": {
+   "file": "data/seasons/player_games_2024.csv",
+   "rows": 18961,
+   "bytes": 2154395
+  },
+  "2025": {
+   "file": "data/seasons/player_games_2025.csv",
+   "rows": 19400,
+   "bytes": 2204443
+  }
+ },
+ "rows": 304515
+}
