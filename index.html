@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL Player Stats Report, 2009 to 2025</title>
+<meta name="description" content="What 291,750 NFL player-games say about passing, rushing, receiving and defense from 2009 to 2025.">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<nav class="nav">
+  <a class="brand" href="index.html"><span class="brand-dot"></span>NFL <em>Player Stats</em></a>
+  <div class="nav-links">
+    <a href="index.html" aria-current="page">Report</a>
+    <a href="dashboard.html">Dashboard</a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light and dark theme">&#9681;</button>
+  </div>
+</nav>
+
+<header class="hero">
+  <span class="eyebrow">Financial Data Analytics &middot; Data Website Project</span>
+  <h1>NFL player stats, 2009 to 2025: passing <em>peaked</em>, defenses changed</h1>
+  <p class="byline">By Rykar Acebo</p>
+  <p class="lede">This report covers 291,750 regular-season player-games from the 2009 through 2025 NFL seasons, taken from
+  the nflverse weekly player stats. It looks at seasons and games rather than careers, so the start of the data never cuts a
+  player off. Passing yards per team-game peaked in 2015 at 259.2 and fell to 225.0 by
+  2025, while rushing stayed flat. Defenses tell the matching story: interceptions per team-game fell 32% while sacks per pass
+  attempt rose. The dashboard lets you filter the same data, chase advanced stats like EPA per dropback and CPOE, and look up any player.</p>
+  <a class="btn" href="dashboard.html">Open the dashboard &rarr;</a>
+</header>
+
+<main>
+  <section class="kpis" aria-label="Headline numbers"><div class="kpi card"><div class="kpi-value">291,750</div><div class="kpi-label">Regular-season player-games analyzed</div></div><div class="kpi card"><div class="kpi-value">8,081</div><div class="kpi-label">Different players</div></div><div class="kpi card"><div class="kpi-value">259.2</div><div class="kpi-label">Peak passing yards per team-game (2015)</div></div><div class="kpi card"><div class="kpi-value">225.0</div><div class="kpi-label">Passing yards per team-game in 2025</div></div><div class="kpi card"><div class="kpi-value">7 to 17</div><div class="kpi-label">Range of 1,000-yard rushers per season</div></div><div class="kpi card"><div class="kpi-value">-32%</div><div class="kpi-label">Interceptions per team-game, 2009 to 2025</div></div></section>
+  
+  <section class="finding" id="f1">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 01 &middot; Passing peaked, then slid</span>
+      <h2>Passing peaked in 2015 at 259.2 yards per team-game and has slid to 225.0 in 2025, while rushing stayed flat</h2>
+      <p>Adding up every player&#x27;s passing yards and dividing by team-games, offenses averaged 232.3 passing yards in 2009, climbed to 259.2 in 2015, and fell to 225.0 in 2025, the lowest of the 17 seasons. That is 13.2% below the peak.</p><p>Rushing barely moved. Rushing yards per team-game stayed between 108.8 and 121.6 every season, and finished 2025 at 116.9. The slide is a passing story, not a running one.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:340px"><canvas data-chart='{&quot;kind&quot;:&quot;line&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Passing yards per team-game&quot;,&quot;data&quot;:[232.2578,236.1953,245.0078,245.998,252.2988,251.7539,259.1582,255.5938,239.584,254.3691,251.7793,254.8828,244.1176,234.3838,236.3364,233.5,225.0239]},{&quot;label&quot;:&quot;Rushing yards per team-game&quot;,&quot;data&quot;:[116.6641,114.4551,117.1758,115.916,112.8809,111.332,108.8359,108.9121,109.7109,114.4414,112.9023,118.8828,115.2463,121.5756,112.6599,119.8051,116.9449]}],&quot;fmt&quot;:&quot;yds&quot;,&quot;yTitle&quot;:&quot;Yards per team-game&quot;,&quot;height&quot;:340}' role="img" aria-label="Passing peaked in 2015 at 259.2 yards per team-game and has slid to 225.0 in 2025, while rushing stayed flat"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Team-games</th><th>Passing yards per team-game</th><th>Rushing yards per team-game</th></tr></thead><tbody><tr><td>2009</td><td>512</td><td>232.3</td><td>116.7</td></tr><tr><td>2010</td><td>512</td><td>236.2</td><td>114.5</td></tr><tr><td>2011</td><td>512</td><td>245.0</td><td>117.2</td></tr><tr><td>2012</td><td>512</td><td>246.0</td><td>115.9</td></tr><tr><td>2013</td><td>512</td><td>252.3</td><td>112.9</td></tr><tr><td>2014</td><td>512</td><td>251.8</td><td>111.3</td></tr><tr><td>2015</td><td>512</td><td>259.2</td><td>108.8</td></tr><tr><td>2016</td><td>512</td><td>255.6</td><td>108.9</td></tr><tr><td>2017</td><td>512</td><td>239.6</td><td>109.7</td></tr><tr><td>2018</td><td>512</td><td>254.4</td><td>114.4</td></tr><tr><td>2019</td><td>512</td><td>251.8</td><td>112.9</td></tr><tr><td>2020</td><td>512</td><td>254.9</td><td>118.9</td></tr><tr><td>2021</td><td>544</td><td>244.1</td><td>115.2</td></tr><tr><td>2022</td><td>542</td><td>234.4</td><td>121.6</td></tr><tr><td>2023</td><td>544</td><td>236.3</td><td>112.7</td></tr><tr><td>2024</td><td>544</td><td>233.5</td><td>119.8</td></tr><tr><td>2025</td><td>544</td><td>225.0</td><td>116.9</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f2">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 02 &middot; Passing peaked, then slid</span>
+      <h2>Fewer quarterbacks reach 4,000 yards: 13 did in 2016, only 6 in 2025</h2>
+      <p>A 4,000-yard passing season used to be common. In 2016, 13 quarterbacks got there, the most of any season. In 2024 it was 6 and in 2025 it was 6.</p><p>This counts each player&#x27;s regular-season total for one season. A season of 17 games (18 weeks from 2021) is enough to make the thresholds comparable, though the extra game from 2021 adds a little room.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Players with 4,000+ passing yards&quot;,&quot;data&quot;:[10.0,5.0,10.0,11.0,9.0,11.0,12.0,13.0,8.0,12.0,11.0,12.0,10.0,9.0,10.0,6.0,6.0]}],&quot;fmt&quot;:&quot;int&quot;,&quot;yTitle&quot;:&quot;Players&quot;,&quot;height&quot;:320}' role="img" aria-label="Fewer quarterbacks reach 4,000 yards: 13 did in 2016, only 6 in 2025"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Players with 4,000+ passing yards</th></tr></thead><tbody><tr><td>2009</td><td>10</td></tr><tr><td>2010</td><td>5</td></tr><tr><td>2011</td><td>10</td></tr><tr><td>2012</td><td>11</td></tr><tr><td>2013</td><td>9</td></tr><tr><td>2014</td><td>11</td></tr><tr><td>2015</td><td>12</td></tr><tr><td>2016</td><td>13</td></tr><tr><td>2017</td><td>8</td></tr><tr><td>2018</td><td>12</td></tr><tr><td>2019</td><td>11</td></tr><tr><td>2020</td><td>12</td></tr><tr><td>2021</td><td>10</td></tr><tr><td>2022</td><td>9</td></tr><tr><td>2023</td><td>10</td></tr><tr><td>2024</td><td>6</td></tr><tr><td>2025</td><td>6</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f3">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 03 &middot; The running back roller coaster</span>
+      <h2>1,000-yard rushers swing widely, from 7 in some seasons to 17 in others</h2>
+      <p>The number of players who ran for 1,000 yards in a season was 17 in 2010, fell to 7 in 2015 and 7 in 2021, then came back to 16 in 2024 and 17 in 2025.</p><p>There is no steady trend to explain it. The count is lowest in 2015, 2021 (7) and highest in 2010, 2025 (17).</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Players with 1,000+ rushing yards&quot;,&quot;data&quot;:[15.0,17.0,15.0,16.0,13.0,13.0,7.0,12.0,9.0,9.0,16.0,9.0,7.0,16.0,12.0,16.0,17.0]}],&quot;fmt&quot;:&quot;int&quot;,&quot;yTitle&quot;:&quot;Players&quot;,&quot;height&quot;:320}' role="img" aria-label="1,000-yard rushers swing widely, from 7 in some seasons to 17 in others"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Players with 1,000+ rushing yards</th></tr></thead><tbody><tr><td>2009</td><td>15</td></tr><tr><td>2010</td><td>17</td></tr><tr><td>2011</td><td>15</td></tr><tr><td>2012</td><td>16</td></tr><tr><td>2013</td><td>13</td></tr><tr><td>2014</td><td>13</td></tr><tr><td>2015</td><td>7</td></tr><tr><td>2016</td><td>12</td></tr><tr><td>2017</td><td>9</td></tr><tr><td>2018</td><td>9</td></tr><tr><td>2019</td><td>16</td></tr><tr><td>2020</td><td>9</td></tr><tr><td>2021</td><td>7</td></tr><tr><td>2022</td><td>16</td></tr><tr><td>2023</td><td>12</td></tr><tr><td>2024</td><td>16</td></tr><tr><td>2025</td><td>17</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f4">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 04 &middot; The running back roller coaster</span>
+      <h2>The workhorse back nearly disappeared, then returned: 6 backs had 300+ carries in 2009, 0 in 2023, 6 in 2024</h2>
+      <p>A 300-carry season was routine early on: 6 players in 2009 and 7 in 2010. From 2013 to 2022 the count never passed 3, and in 2023 it hit 0.</p><p>It came back in 2024 with 6 players and 4 in 2025. The counts are small, so one or two bell-cow backs make a visible difference.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Players with 300+ carries&quot;,&quot;data&quot;:[6.0,7.0,2.0,5.0,2.0,2.0,1.0,1.0,1.0,1.0,2.0,2.0,2.0,3.0,0.0,6.0,4.0]}],&quot;fmt&quot;:&quot;int&quot;,&quot;yTitle&quot;:&quot;Players&quot;,&quot;height&quot;:320}' role="img" aria-label="The workhorse back nearly disappeared, then returned: 6 backs had 300+ carries in 2009, 0 in 2023, 6 in 2024"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Players with 300+ carries</th></tr></thead><tbody><tr><td>2009</td><td>6</td></tr><tr><td>2010</td><td>7</td></tr><tr><td>2011</td><td>2</td></tr><tr><td>2012</td><td>5</td></tr><tr><td>2013</td><td>2</td></tr><tr><td>2014</td><td>2</td></tr><tr><td>2015</td><td>1</td></tr><tr><td>2016</td><td>1</td></tr><tr><td>2017</td><td>1</td></tr><tr><td>2018</td><td>1</td></tr><tr><td>2019</td><td>2</td></tr><tr><td>2020</td><td>2</td></tr><tr><td>2021</td><td>2</td></tr><tr><td>2022</td><td>3</td></tr><tr><td>2023</td><td>0</td></tr><tr><td>2024</td><td>6</td></tr><tr><td>2025</td><td>4</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f5">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 05 &middot; Receivers pile up catches</span>
+      <h2>100-catch seasons rose even as passing yards fell: 2 in 2010, 12 at the peak</h2>
+      <p>Only 2 players caught 100 passes in 2010. The count reached 12 in 2023 and was 7 in 2025.</p><p>These are counts of individual players, so a few high-volume receivers can move the number from one season to the next.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Players with 100+ receptions&quot;,&quot;data&quot;:[6.0,2.0,2.0,6.0,5.0,5.0,7.0,3.0,5.0,11.0,5.0,8.0,10.0,9.0,12.0,10.0,7.0]}],&quot;fmt&quot;:&quot;int&quot;,&quot;yTitle&quot;:&quot;Players&quot;,&quot;height&quot;:320}' role="img" aria-label="100-catch seasons rose even as passing yards fell: 2 in 2010, 12 at the peak"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Players with 100+ receptions</th></tr></thead><tbody><tr><td>2009</td><td>6</td></tr><tr><td>2010</td><td>2</td></tr><tr><td>2011</td><td>2</td></tr><tr><td>2012</td><td>6</td></tr><tr><td>2013</td><td>5</td></tr><tr><td>2014</td><td>5</td></tr><tr><td>2015</td><td>7</td></tr><tr><td>2016</td><td>3</td></tr><tr><td>2017</td><td>5</td></tr><tr><td>2018</td><td>11</td></tr><tr><td>2019</td><td>5</td></tr><tr><td>2020</td><td>8</td></tr><tr><td>2021</td><td>10</td></tr><tr><td>2022</td><td>9</td></tr><tr><td>2023</td><td>12</td></tr><tr><td>2024</td><td>10</td></tr><tr><td>2025</td><td>7</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f6">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 06 &middot; Defenses: fewer takeaways, more pressure</span>
+      <h2>Interceptions are disappearing: 1.03 per team-game in 2009, 0.70 in 2025</h2>
+      <p>Defenses came up with 1.025 interceptions per team-game in 2009. By 2025 that had fallen to 0.699, a drop of 32%.</p><p>The decline is gradual, with no single-season cliff. The data cannot say why it happened.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;line&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Interceptions per team-game&quot;,&quot;data&quot;:[1.0254,0.9961,0.9883,0.9141,0.9805,0.8789,0.8516,0.8105,0.8398,0.8184,0.8008,0.7715,0.8088,0.7712,0.7904,0.7114,0.6985]}],&quot;fmt&quot;:&quot;dec3&quot;,&quot;yTitle&quot;:&quot;Interceptions per team-game&quot;,&quot;height&quot;:320}' role="img" aria-label="Interceptions are disappearing: 1.03 per team-game in 2009, 0.70 in 2025"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Interceptions</th><th>Interceptions per team-game</th></tr></thead><tbody><tr><td>2009</td><td>525</td><td>1.025</td></tr><tr><td>2010</td><td>510</td><td>0.996</td></tr><tr><td>2011</td><td>506</td><td>0.988</td></tr><tr><td>2012</td><td>468</td><td>0.914</td></tr><tr><td>2013</td><td>502</td><td>0.980</td></tr><tr><td>2014</td><td>450</td><td>0.879</td></tr><tr><td>2015</td><td>436</td><td>0.852</td></tr><tr><td>2016</td><td>415</td><td>0.811</td></tr><tr><td>2017</td><td>430</td><td>0.840</td></tr><tr><td>2018</td><td>419</td><td>0.818</td></tr><tr><td>2019</td><td>410</td><td>0.801</td></tr><tr><td>2020</td><td>395</td><td>0.771</td></tr><tr><td>2021</td><td>440</td><td>0.809</td></tr><tr><td>2022</td><td>418</td><td>0.771</td></tr><tr><td>2023</td><td>430</td><td>0.790</td></tr><tr><td>2024</td><td>387</td><td>0.711</td></tr><tr><td>2025</td><td>380</td><td>0.699</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f7">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 07 &middot; Defenses: fewer takeaways, more pressure</span>
+      <h2>Players with 6+ interceptions almost vanished: 11 in 2009, 1 in 2025</h2>
+      <p>In 2009, 11 defenders had six or more interceptions. By 2013 it was 4, and in 2025 only 1 player did it.</p><p>The season high in the data is 11 interceptions, by Trevon Diggs in 2021.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Players with 6+ interceptions&quot;,&quot;data&quot;:[11.0,9.0,7.0,6.0,4.0,2.0,5.0,4.0,4.0,4.0,3.0,3.0,3.0,4.0,3.0,5.0,1.0]}],&quot;fmt&quot;:&quot;int&quot;,&quot;yTitle&quot;:&quot;Players&quot;,&quot;height&quot;:320}' role="img" aria-label="Players with 6+ interceptions almost vanished: 11 in 2009, 1 in 2025"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Players with 6+ interceptions</th></tr></thead><tbody><tr><td>2009</td><td>11</td></tr><tr><td>2010</td><td>9</td></tr><tr><td>2011</td><td>7</td></tr><tr><td>2012</td><td>6</td></tr><tr><td>2013</td><td>4</td></tr><tr><td>2014</td><td>2</td></tr><tr><td>2015</td><td>5</td></tr><tr><td>2016</td><td>4</td></tr><tr><td>2017</td><td>4</td></tr><tr><td>2018</td><td>4</td></tr><tr><td>2019</td><td>3</td></tr><tr><td>2020</td><td>3</td></tr><tr><td>2021</td><td>3</td></tr><tr><td>2022</td><td>4</td></tr><tr><td>2023</td><td>3</td></tr><tr><td>2024</td><td>5</td></tr><tr><td>2025</td><td>1</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f8">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 08 &middot; Defenses: fewer takeaways, more pressure</span>
+      <h2>Pass rushes get home more often: sacks per pass attempt rose from 6.4% in 2009 to 7.3% in 2025</h2>
+      <p>Dividing sacks by pass attempts, the sack rate was 6.38% in 2009 and 7.33% in 2025. It peaked at 7.64% in 2023.</p><p>Sacks are not counted in pass attempts, so this rate is sacks per attempt, not per dropback. Defenses are taking the ball away less but reaching the quarterback more.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;line&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Sacks per pass attempt&quot;,&quot;data&quot;:[0.0638,0.0649,0.0678,0.0653,0.071,0.0675,0.0646,0.0605,0.068,0.0719,0.0711,0.0628,0.0658,0.0714,0.0764,0.0732,0.0733]}],&quot;fmt&quot;:&quot;pct&quot;,&quot;yTitle&quot;:&quot;Sacks per pass attempt&quot;,&quot;height&quot;:320}' role="img" aria-label="Pass rushes get home more often: sacks per pass attempt rose from 6.4% in 2009 to 7.3% in 2025"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Sacks</th><th>Pass attempts</th><th>Sacks per pass attempt</th></tr></thead><tbody><tr><td>2009</td><td>1,086.0</td><td>17,035</td><td>6.38%</td></tr><tr><td>2010</td><td>1,121.0</td><td>17,272</td><td>6.49%</td></tr><tr><td>2011</td><td>1,181.0</td><td>17,422</td><td>6.78%</td></tr><tr><td>2012</td><td>1,162.0</td><td>17,788</td><td>6.53%</td></tr><tr><td>2013</td><td>1,288.0</td><td>18,136</td><td>7.10%</td></tr><tr><td>2014</td><td>1,207.0</td><td>17,879</td><td>6.75%</td></tr><tr><td>2015</td><td>1,182.0</td><td>18,298</td><td>6.46%</td></tr><tr><td>2016</td><td>1,106.0</td><td>18,295</td><td>6.05%</td></tr><tr><td>2017</td><td>1,190.0</td><td>17,488</td><td>6.80%</td></tr><tr><td>2018</td><td>1,270.0</td><td>17,670</td><td>7.19%</td></tr><tr><td>2019</td><td>1,269.0</td><td>17,853</td><td>7.11%</td></tr><tr><td>2020</td><td>1,131.0</td><td>18,018</td><td>6.28%</td></tr><tr><td>2021</td><td>1,232.0</td><td>18,712</td><td>6.58%</td></tr><tr><td>2022</td><td>1,291.0</td><td>18,069</td><td>7.14%</td></tr><tr><td>2023</td><td>1,399.0</td><td>18,315</td><td>7.64%</td></tr><tr><td>2024</td><td>1,304.0</td><td>17,811</td><td>7.32%</td></tr><tr><td>2025</td><td>1,278.0</td><td>17,439</td><td>7.33%</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f9">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 09 &middot; Defenses: fewer takeaways, more pressure</span>
+      <h2>J.J. Watt owns 4 of the 10 biggest QB-hit seasons, led by 51 in 2014</h2>
+      <p>The top 10 single seasons for quarterback hits include 4 by J.J. Watt, in 2012 (43), 2013 (46), 2014 (51), 2015 (50). The record in the data is 51.</p><p>QB hits are recorded on only about a third of defensive player-games and not in a way that lines up with sacks, so treat this as a ranking of recorded hits, not a full count of pressure.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:400px"><canvas data-chart='{&quot;kind&quot;:&quot;hbar&quot;,&quot;labels&quot;:[&quot;J.J. Watt 2014&quot;,&quot;J.J. Watt 2015&quot;,&quot;Nick Bosa 2022&quot;,&quot;Zach Allen 2025&quot;,&quot;J.J. Watt 2013&quot;,&quot;J.J. Watt 2012&quot;,&quot;Aaron Donald 2018&quot;,&quot;T.J. Watt 2020&quot;,&quot;Zach Allen 2024&quot;,&quot;Myles Garrett 2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;QB hits&quot;,&quot;data&quot;:[51.0,50.0,48.0,47.0,46.0,43.0,41.0,41.0,40.0,39.0]}],&quot;fmt&quot;:&quot;int&quot;,&quot;yTitle&quot;:&quot;QB hits in the season&quot;,&quot;height&quot;:400}' role="img" aria-label="J.J. Watt owns 4 of the 10 biggest QB-hit seasons, led by 51 in 2014"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Player</th><th>Season</th><th>QB hits</th></tr></thead><tbody><tr><td>J.J. Watt</td><td>2014</td><td>51</td></tr><tr><td>J.J. Watt</td><td>2015</td><td>50</td></tr><tr><td>Nick Bosa</td><td>2022</td><td>48</td></tr><tr><td>Zach Allen</td><td>2025</td><td>47</td></tr><tr><td>J.J. Watt</td><td>2013</td><td>46</td></tr><tr><td>J.J. Watt</td><td>2012</td><td>43</td></tr><tr><td>Aaron Donald</td><td>2018</td><td>41</td></tr><tr><td>T.J. Watt</td><td>2020</td><td>41</td></tr><tr><td>Zach Allen</td><td>2024</td><td>40</td></tr><tr><td>Myles Garrett</td><td>2025</td><td>39</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+  <section class="finding" id="f10">
+    <div class="finding-text">
+      <span class="eyebrow">Finding 10 &middot; Defenses: fewer takeaways, more pressure</span>
+      <h2>The sack leader each season ranged from 15.0 (T.J. Watt, 2020) to 23.0 (Myles Garrett, 2025)</h2>
+      <p>Every season has one clear sack leader, with no ties. The lowest leading total was 15.0 by T.J. Watt in 2020. The highest was 23.0 by Myles Garrett in 2025.</p><p>T.J. Watt led the league in 3 of the 17 seasons. Hover a bar to see who led that season.</p>
+    </div>
+    <figure class="card chart-card">
+      <div class="chart-box" style="height:320px"><canvas data-chart='{&quot;kind&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;2009&quot;,&quot;2010&quot;,&quot;2011&quot;,&quot;2012&quot;,&quot;2013&quot;,&quot;2014&quot;,&quot;2015&quot;,&quot;2016&quot;,&quot;2017&quot;,&quot;2018&quot;,&quot;2019&quot;,&quot;2020&quot;,&quot;2021&quot;,&quot;2022&quot;,&quot;2023&quot;,&quot;2024&quot;,&quot;2025&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;Sacks by the leader&quot;,&quot;data&quot;:[16.5,15.5,22.0,20.5,19.5,22.0,17.5,15.5,17.0,20.5,19.5,15.0,22.5,18.5,19.0,17.5,23.0],&quot;names&quot;:[&quot;Elvis Dumervil&quot;,&quot;DeMarcus Ware&quot;,&quot;Jared Allen&quot;,&quot;J.J. Watt&quot;,&quot;Robert Mathis&quot;,&quot;Justin Houston&quot;,&quot;J.J. Watt&quot;,&quot;Vic Beasley&quot;,&quot;Chandler Jones&quot;,&quot;Aaron Donald&quot;,&quot;Shaquil Barrett&quot;,&quot;T.J. Watt&quot;,&quot;T.J. Watt&quot;,&quot;Nick Bosa&quot;,&quot;T.J. Watt&quot;,&quot;Trey Hendrickson&quot;,&quot;Myles Garrett&quot;]}],&quot;fmt&quot;:&quot;dec1&quot;,&quot;yTitle&quot;:&quot;Sacks by that season&#x27;s leader&quot;,&quot;height&quot;:320}' role="img" aria-label="The sack leader each season ranged from 15.0 (T.J. Watt, 2020) to 23.0 (Myles Garrett, 2025)"></canvas></div>
+      <details class="numbers"><summary>View the numbers</summary><div class="tablewrap"><table class="data"><thead><tr><th>Season</th><th>Leader</th><th>Sacks</th></tr></thead><tbody><tr><td>2009</td><td>Elvis Dumervil</td><td>16.5</td></tr><tr><td>2010</td><td>DeMarcus Ware</td><td>15.5</td></tr><tr><td>2011</td><td>Jared Allen</td><td>22.0</td></tr><tr><td>2012</td><td>J.J. Watt</td><td>20.5</td></tr><tr><td>2013</td><td>Robert Mathis</td><td>19.5</td></tr><tr><td>2014</td><td>Justin Houston</td><td>22.0</td></tr><tr><td>2015</td><td>J.J. Watt</td><td>17.5</td></tr><tr><td>2016</td><td>Vic Beasley</td><td>15.5</td></tr><tr><td>2017</td><td>Chandler Jones</td><td>17.0</td></tr><tr><td>2018</td><td>Aaron Donald</td><td>20.5</td></tr><tr><td>2019</td><td>Shaquil Barrett</td><td>19.5</td></tr><tr><td>2020</td><td>T.J. Watt</td><td>15.0</td></tr><tr><td>2021</td><td>T.J. Watt</td><td>22.5</td></tr><tr><td>2022</td><td>Nick Bosa</td><td>18.5</td></tr><tr><td>2023</td><td>T.J. Watt</td><td>19.0</td></tr><tr><td>2024</td><td>Trey Hendrickson</td><td>17.5</td></tr><tr><td>2025</td><td>Myles Garrett</td><td>23.0</td></tr></tbody></table></div></details>
+    </figure>
+  </section>
+
+  <section class="finding data-section" id="data">
+    <div class="finding-text wide">
+      <span class="eyebrow">About the data</span>
+      <h2>Where the numbers come from and how they are computed</h2>
+      <p><strong>Source.</strong> The <a href="https://github.com/nflverse/nflverse-data/releases/tag/stats_player">nflverse-data
+      <code>stats_player</code> release</a>: weekly player stats, one file per season, licensed CC-BY-4.0. Credit to the nflverse
+      project and its contributors. Definitions of the advanced columns come from the nflverse player stats data dictionary.</p>
+      <p><strong>What one row is.</strong> One row is one player in one game. The cleaned data has 304,515 rows and
+      69 columns for 17 seasons (2009 to 2025), 8,093 players and
+      32 teams. The time column is season (and week) and the group columns are player and team. This report and
+      the dashboard's starting view use regular-season rows only, which is 291,750 of them; playoffs can be added
+      with the dashboard's season-type filter.</p>
+      <p><strong>Rows dropped and other cleaning.</strong></p>
+      <ul><li>Loaded 304,877 player-game rows from 2009 to 2025 (17 seasons)</li><li>Dropped 362 rows with no player ID, name or position group (about one team-level placeholder row per team per week in the source)</li><li>Dropped 0 rows with no opponent team</li><li>Dropped 0 duplicate player-game rows</li><li>Column def_tackles_for_loss has no non-zero value in 2009: written as NA (not recorded), not 0</li><li>Column def_tackles_for_loss has no non-zero value in 2010: written as NA (not recorded), not 0</li><li>Column def_tackles_for_loss has no non-zero value in 2011: written as NA (not recorded), not 0</li><li>Kept 4,536 rows whose kept stat columns are all zero (player appears in the source game record without a tracked stat here). They count as appearances.</li></ul>
+      <p>Tackles for loss are not recorded in 2009 to 2011 and are left blank (not zero) there. Player names are not unique,
+      so players are identified by <code>player_id</code>. Full details are in <code>data/DATA_QUALITY.md</code> and
+      <code>data/DATA_DICTIONARY.md</code>.</p>
+      <p><strong>How every number is computed.</strong></p>
+      <ul>
+        <li><strong>Team-game:</strong> one team in one game. Per-team-game rates add up every player's stat for the season and
+        divide by the number of regular-season team-games (32 teams, 16 games each through 2020, 17 from 2021, with one fewer game
+        in 2022).</li>
+        <li><strong>Player-season counts</strong> (4,000-yard passers, 1,000-yard rushers, 300-carry backs, 100-catch receivers,
+        players with 6+ interceptions): each player's regular-season total for one season is compared to the threshold, and players
+        who met it are counted once. A player who changed teams has one total across teams.</li>
+        <li><strong>Interceptions per team-game</strong> is defensive interceptions divided by team-games.</li>
+        <li><strong>Sacks per pass attempt</strong> is defensive sacks (halves count) divided by pass attempts. Sacks are not part of
+        attempts.</li>
+        <li><strong>QB hits and sack leaders</strong> are single-season player totals. Ranking ties are broken by player name.
+        No two players tied for the sack lead in any season.</li>
+        <li><strong>Advanced stats on the dashboard:</strong> EPA per dropback is passing EPA divided by attempts plus sacks. ANY/A is
+        (passing yards + 20 x touchdowns - 45 x interceptions + sack yards lost) divided by (attempts + sacks), with sack yards
+        stored as negatives. CPOE is each game's CPOE weighted by that game's attempts. RACR is receiving yards divided by receiving
+        air yards. Target share, air-yards share and WOPR are averages over games in which the player was targeted. Each dashboard
+        measure states its definition under the chart.</li>
+      </ul>
+      <p><strong>Limits.</strong> Stats are only as good as the source; tackles depend on stat-crew scoring and are not used here.
+      Metrics that need play-by-play, Next Gen Stats or Pro Football Reference data (EPA allowed, pressure rate, time to throw,
+      missed tackles) are not in this dataset. Reasons for the trends, such as rule changes, are outside the data and are not tested here.</p>
+      <p>Every number on this page is computed by <code>scripts/build_report.py</code> from <code>data/seasons/</code>, and
+      <code>scripts/check_numbers.js</code> recomputes them with the dashboard's own code.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/report.js"></script>
+</body>
+</html>

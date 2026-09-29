@@ -4,7 +4,11 @@
     epa: (v) => (v >= 0 ? "+" : "") + v.toFixed(3),
     pct: (v) => (v * 100).toFixed(1) + "%",
     num: (v) => Math.round(v).toLocaleString("en-US"),
-    yds: (v) => v.toFixed(2),
+    int: (v) => Math.round(v).toLocaleString("en-US"),
+    dec1: (v) => v.toFixed(1),
+    dec2: (v) => v.toFixed(2),
+    dec3: (v) => v.toFixed(3),
+    yds: (v) => v.toFixed(1),
   };
 
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -32,6 +36,7 @@
 
     const datasets = spec.datasets.map((ds, i) => ({
       label: ds.label,
+      names: ds.names || null,
       data: ds.data,
       borderColor: colors[i % colors.length],
       backgroundColor: colors[i % colors.length],
@@ -86,7 +91,10 @@
             borderWidth: 1,
             padding: 10,
             callbacks: {
-              label: (c) => " " + c.dataset.label + ": " + fmt(horizontal ? c.parsed.x : c.parsed.y),
+              label: (c) => {
+                const who = c.dataset.names ? c.dataset.names[c.dataIndex] + " - " : "";
+                return " " + who + c.dataset.label + ": " + fmt(horizontal ? c.parsed.x : c.parsed.y);
+              },
             },
           },
         },
