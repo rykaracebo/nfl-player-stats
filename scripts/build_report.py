@@ -204,6 +204,29 @@ add("Defenses: fewer takeaways, more pressure",
     chart("bar", SEASONS, [("Sacks by the leader", leaders["sacks"], leaders["name"])], "dec1", "Sacks by that season's leader"),
     ["Season", "Leader", "Sacks"], [[int(r.season), r.name, dec(r.sacks)] for r in leaders.itertuples()])
 
+# ------------------------------------------------------------------ reference values for the advanced dashboard measures
+# Computed here with pandas so scripts/check_numbers.js can confirm the dashboard's own code gets the same answers.
+g = reg.groupby("season")
+adv = {}
+dropbacks = g["attempts"].sum() + g["sacks_suffered"].sum()
+adv["epa_db"] = series(g["passing_epa"].sum() / dropbacks)
+adv["anya"] = series((g["passing_yards"].sum() + 20 * g["passing_tds"].sum() - 45 * g["passing_interceptions"].sum()
+                      + g["sack_yards_lost"].sum()) / dropbacks)
+reg["_cpoe_w"] = reg["passing_cpoe"] * reg["attempts"]
+adv["cpoe"] = series(reg.groupby("season")["_cpoe_w"].sum() / g["attempts"].sum())
+adv["racr"] = series(g["receiving_yards"].sum() / g["receiving_air_yards"].sum())
+adv["epa_carry"] = series(g["rushing_epa"].sum() / g["carries"].sum())
+targeted = reg[reg["targets"] > 0]
+adv["target_share"] = series(targeted.groupby("season")["target_share"].mean())
+made50 = g["fg_made_50_59"].sum() + g["fg_made_60_"].sum()
+adv["fg_pct_50"] = series(made50 / (made50 + g["fg_missed_50_59"].sum() + g["fg_missed_60_"].sum()))
+qb = reg.groupby(["season", "player_id", "player_name"], as_index=False).agg(
+    pe=("passing_epa", "sum"), a=("attempts", "sum"), s=("sacks_suffered", "sum"))
+qb = qb[qb["a"] + qb["s"] >= 200]
+qb["v"] = qb["pe"] / (qb["a"] + qb["s"])
+adv["top_epa_db"] = [[r.player_name, int(r.season), float(r.v)] for r in qb.sort_values(["v", "player_name"], ascending=[False, True]).head(10).itertuples()]
+R["advanced"] = adv
+
 R["watt_hits_top10"] = int(len(watt))
 R["watt_led_sacks"] = watt_led
 
