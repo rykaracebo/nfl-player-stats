@@ -41,7 +41,7 @@
       names: ds.names || null,
       data: ds.data,
       borderColor: colors[i % colors.length],
-      backgroundColor: colors[i % colors.length],
+      backgroundColor: ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
       borderWidth: isLine ? 2 : 0,
       pointRadius: isLine ? 4 : 0,
       pointHoverRadius: isLine ? 6 : 0,

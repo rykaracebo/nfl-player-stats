@@ -106,5 +106,15 @@ let tgSum = 0;
 for (const [, g] of perTeam) tgSum += g.tg.size;
 check("team-games summed over teams equals league team-games", tgSum, Object.values(report.team_games).reduce((a, b) => a + b, 0));
 
+// team summary behind the field widget's hover stats (data/team_summary.json and report.json copy): per-team-game rates, all seasons
+const teamMeasures = ["pass_yds_tg", "rush_yds_tg", "sacks_tg", "ints_tg", "qb_hits_tg", "pen_tg"].map((id) => M[id]);
+const teamSummary = JSON.parse(fs.readFileSync(path.join(root, "data/team_summary.json"), "utf8"));
+for (const [key, g] of S.aggregate(store, REG, "team", teamMeasures)) {
+  const code = store.dicts.team.list[key], ref = teamSummary.teams[code];
+  check("team summary " + code + " games", g.tg.size, ref.games);
+  teamMeasures.forEach((m, k) => check("team summary " + code + " " + m.id, S.value(m, g, k), ref[m.id]));
+  teamMeasures.forEach((m) => check("report copy of team summary " + code + " " + m.id, ref[m.id], report.team_summary[code][m.id]));
+}
+
 console.log(checks + " checks, " + failures + " mismatches");
 process.exit(failures ? 1 : 0);

@@ -300,6 +300,22 @@ add("Value over replacement",
 R["watt_hits_top10"] = int(len(watt))
 R["watt_led_sacks"] = watt_led
 
+# ------------------------------------------------------------------ team summary for the field widget (data/team_summary.json)
+team_games_by_team = reg[["game_id", "team"]].drop_duplicates().groupby("team").size()
+tsum = reg.groupby("team")[["passing_yards", "rushing_yards", "def_sacks", "def_interceptions", "def_qb_hits", "penalties"]].sum()
+TEAM_MEASURES = [("pass_yds_tg", "Passing yards per game", 1, "passing_yards"), ("rush_yds_tg", "Rushing yards per game", 1, "rushing_yards"),
+                 ("sacks_tg", "Sacks per game (its defense)", 2, "def_sacks"), ("ints_tg", "Interceptions per game (its defense)", 2, "def_interceptions"),
+                 ("qb_hits_tg", "QB hits per game (its defense)", 2, "def_qb_hits"), ("pen_tg", "Penalties per game", 2, "penalties")]
+team_summary = {
+    "scope": f"Regular season {FIRST} to {LAST}, per team-game",
+    "measures": [{"id": i, "label": l, "digits": dg} for i, l, dg, _ in TEAM_MEASURES],
+    "teams": {t: {"games": int(team_games_by_team[t]), **{i: float(tsum.loc[t, c] / team_games_by_team[t]) for i, _, _, c in TEAM_MEASURES}}
+              for t in tsum.index},
+}
+with open("data/team_summary.json", "w") as f:
+    json.dump(team_summary, f, indent=1, sort_keys=True)
+R["team_summary"] = team_summary["teams"]
+
 # ------------------------------------------------------------------ write report.json
 with open("data/report.json", "w") as f:
     json.dump(R, f, indent=1, sort_keys=True)
@@ -354,13 +370,14 @@ page = f"""<!doctype html>
 <title>NFL Player Stats Report, {FIRST} to {LAST}</title>
 <meta name="description" content="What {num(R['reg_rows'])} NFL player-games say about passing, rushing, receiving and defense from {FIRST} to {LAST}.">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}}catch(e){{}}</script>
 </head>
 <body>
 <div class="ambient" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 <nav class="nav">
-  <a class="brand" href="index.html"><span class="brand-dot"></span>NFL <em>Player Stats</em></a>
+  <a class="brand" href="index.html"><svg class="brand-ball" viewBox="0 0 52 32" aria-hidden="true"><ellipse cx="26" cy="16" rx="25" ry="15" fill="#8a3f12" stroke="#4d1e06" stroke-width="2"/><g stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="M8 8Q6 16 8 24M44 8Q46 16 44 24"/><path d="M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5"/></g></svg>NFL <em>Player Stats</em></a>
   <div class="nav-links">
     <a href="index.html" aria-current="page">Report</a>
     <a href="dashboard.html">Dashboard</a>
@@ -379,6 +396,8 @@ page = f"""<!doctype html>
   attempt rose. A last pair of findings uses a value-over-replacement stat built for this site. The dashboard lets you filter the same data, switch between player and team views, and chase advanced stats like EPA per dropback and CPOE.</p>
   <a class="btn" href="dashboard.html">Open the dashboard &rarr;</a>
 </header>
+
+<section class="fieldcard card" id="field-root" aria-label="Team explorer"></section>
 
 <main>
   <section class="kpis" aria-label="Headline numbers">{kpi_html}</section>
@@ -436,9 +455,11 @@ page = f"""<!doctype html>
   </section>
 </main>
 
-<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a></footer>
+<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a><br>NFL team names and logos belong to the NFL and its teams. They appear here only to identify teams, are loaded from links in the nflverse teams file, and are not stored in this repository.</footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="assets/js/charts.js"></script>
+<script src="assets/js/teams.js"></script>
+<script src="assets/js/field.js"></script>
 <script src="assets/js/report.js"></script>
 </body>
 </html>

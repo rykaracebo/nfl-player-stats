@@ -14,7 +14,8 @@
   const EXTRA_MEASURES = ["pass_yds", "rush_yds", "rec_yds", "tds", "sacks", "ints_def"];
 
   const store = S.newStore();
-  let teamNames = {};
+  let fieldApi = null;
+  const teamCodes = () => NFLTeams.list.map((t) => t.team);
   let players = [];
   let seasonsAll = [];
   let totalRows = 0;
@@ -44,10 +45,7 @@
   async function load() {
     const manifest = await (await fetch("data/manifest.json")).json();
     seasonsAll = Object.keys(manifest.seasons).map(Number).sort((a, b) => a - b);
-    try {
-      const t = await (await fetch("data/teams.csv")).text();
-      t.trim().split("\n").slice(1).forEach((line) => { const f = line.split(","); teamNames[f[0]] = f[5]; });
-    } catch (e) { /* team names are optional */ }
+    try { await NFLTeams.load(); } catch (e) { /* team names and colors are optional */ }
     let done = 0;
     await Promise.all(seasonsAll.map(async (y) => {
       const r = await fetch(manifest.seasons[y].file);
@@ -108,10 +106,9 @@
     const weekOpts = Array.from({ length: 22 }, (_, i) => [i + 1, String(i + 1)]);
     fillSelect($("f-week-min"), weekOpts, 1);
     fillSelect($("f-week-max"), weekOpts, 22);
-    const teamList = store.dicts.team.list.slice().sort((a, b) => (teamNames[a] || a).localeCompare(teamNames[b] || b));
-    const teamOpts = [["", "All teams"]].concat(teamList.map((t) => [t, teamNames[t] || t]));
-    fillSelect($("f-team"), teamOpts, "");
-    fillSelect($("f-opp"), [["", "All opponents"]].concat(teamList.map((t) => [t, teamNames[t] || t])), "");
+    const teamList = store.dicts.team.list.slice().sort((a, b) => NFLTeams.name(a).localeCompare(NFLTeams.name(b)));
+    fillSelect($("f-team"), [["", "All teams"]].concat(teamList.map((t) => [t, NFLTeams.name(t)])), "");
+    fillSelect($("f-opp"), [["", "All opponents"]].concat(teamList.map((t) => [t, NFLTeams.name(t)])), "");
 
     for (const col of Object.keys(CHIPS)) {
       const box = $("chips-" + col);
@@ -144,6 +141,7 @@
       state.weekMin = +$("f-week-min").value; state.weekMax = +$("f-week-max").value;
       if (state.weekMin > state.weekMax) { state.weekMax = state.weekMin; $("f-week-max").value = state.weekMax; }
       state.team = $("f-team").value; state.opp = $("f-opp").value;
+      if (fieldApi) fieldApi.setSelected(state.team || null);
       update();
     };
     ["f-season-min", "f-season-max", "f-week-min", "f-week-max", "f-team", "f-opp"].forEach((id) => $(id).addEventListener("change", onFilter));
@@ -170,6 +168,7 @@
     $("f-team").value = ""; $("f-opp").value = "";
     $("player-search").value = "";
     $("player-results").hidden = true;
+    if (fieldApi) fieldApi.setSelected(null);
     syncChips();
     update();
   }
@@ -188,7 +187,8 @@
         const li = document.createElement("li");
         li.setAttribute("role", "option"); li.tabIndex = 0;
         li.innerHTML = "<b></b><span></span>";
-        li.firstChild.textContent = p.name;
+        li.firstChild.innerHTML = NFLTeams.badge(p.team) + " ";
+        li.firstChild.appendChild(document.createTextNode(p.name));
         li.lastChild.textContent = p.position_group + " · " + p.team + " · " + p.first + (p.last !== p.first ? "–" + p.last : "");
         const pick = () => selectPlayer(p);
         li.addEventListener("click", pick);
@@ -227,6 +227,7 @@
     const t = TEAM_BREAKDOWN.find((x) => x[0] === b.id);
     return t ? { id: b.id, label: t[1] } : b;
   };
+  const isTeamCol = (col) => col === "team" || col === "opponent_team";
   const cardsHtml = (cards) => cards.map(([v, fmt, l]) => "<div class='kpi card'><div class='kpi-value'>" + S.format(fmt, v) + "</div><div class='kpi-label'>" + l + "</div></div>").join("");
   const nn = (v) => (v === undefined || Number.isNaN(v) ? null : v);
   // With a player selected we show every value; otherwise ratios need a minimum sample so tiny groups do not distort charts.
@@ -273,8 +274,9 @@
     if (state.player) {
       ban.hidden = false;
       ban.innerHTML = "<span></span><button type='button' class='btn ghost small'>Clear player</button>";
-      ban.firstChild.textContent = "Showing " + state.player.name + " (" + state.player.position_group + ", last team " + state.player.team +
-        ", seasons " + state.player.first + " to " + state.player.last + "). Every number below is for this player and the filters above.";
+      ban.firstChild.innerHTML = NFLTeams.badge(state.player.team) + " ";
+      ban.firstChild.appendChild(document.createTextNode(" Showing " + state.player.name + " (" + state.player.position_group + ", last team " + state.player.team +
+        ", seasons " + state.player.first + " to " + state.player.last + "). Every number below is for this player and the filters above."));
       ban.lastChild.addEventListener("click", () => { state.player = null; $("player-search").value = ""; update(); });
     } else ban.hidden = true;
 
@@ -319,7 +321,7 @@
     $("t3").textContent = "Top 10 team-seasons: " + m.label;
     $("s3").textContent = "Each bar is one team's season" + (col === "opponent_team" ? " (stats allowed by that team's defense)" : "") + "." + minNote(m);
     if (!top.length) { showEmpty(3, "No team-seasons qualify with these filters."); return; }
-    draw(3, { kind: "hbar", labels: top.map((x) => x[0]), datasets: [{ label: m.label, data: top.map((x) => x[1]) }], colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
+    draw(3, { kind: "hbar", labels: top.map((x) => x[0]), datasets: [{ label: m.label, data: top.map((x) => x[1]), barColors: top.map((x) => NFLTeams.color(x[0].split(" ")[0])) }], colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
   }
 
   function defaultDesc(m) {
@@ -355,7 +357,7 @@
     draw(1, {
       kind: "line", labels: seasons,
       datasets: cats.map((c) => ({ label: catLabel(b.id, c), data: seasons.map((s) => nn(byCat.get(c).get(s))) })),
-      colors: cats.length === 1 ? ["--accent"] : seriesColors(b.id, cats), fmt: FMT[m.fmt], yTitle: m.label,
+      colors: cats.length === 1 && !isTeamCol(b.id) ? ["--accent"] : isTeamCol(b.id) ? cats.map((c) => NFLTeams.color(store.dicts[b.id].list[c])) : seriesColors(b.id, cats), fmt: FMT[m.fmt], yTitle: m.label,
     });
   }
 
@@ -370,7 +372,7 @@
     $("s2").textContent = (items.length > LIMIT ? "Top " + LIMIT + " of " + items.length : items.length + (items.length === 1 ? " group" : " groups")) + "." + minNote(m);
     if (!top.length) { showEmpty(2, "No value can be computed for this measure with these filters."); return; }
     $("box2").style.height = Math.max(300, top.length * 26 + 70) + "px";
-    draw(2, { kind: "hbar", labels: top.map((x) => x[0]), datasets: [{ label: m.label, data: top.map((x) => x[1]) }], colors: ["--accent"], fmt: FMT[m.fmt], yTitle: m.label });
+    draw(2, { kind: "hbar", labels: top.map((x) => x[0]), datasets: [{ label: m.label, data: top.map((x) => x[1]), barColors: isTeamCol(b.id) ? top.map((x) => NFLTeams.color(x[0])) : null }], colors: ["--accent"], fmt: FMT[m.fmt], yTitle: m.label });
   }
 
   // Team-game rates do not apply to one player's season, so those measures rank the matching player total.
@@ -383,7 +385,7 @@
     $("s3").textContent = "Each bar is one player's season" + (m !== m0 ? " (team-game rates do not apply to players, so this ranks the total)" : "") +
       (m.type === "ratio" && m.min ? " (minimum " + m.min + " in the denominator)" : "");
     if (!top.length) { showEmpty(3, "No player-seasons qualify with these filters."); return; }
-    draw(3, { kind: "hbar", labels: top.map((x) => x.name + " " + x.season + " (" + x.team + ")"), datasets: [{ label: m.label, data: top.map((x) => x.value) }], colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
+    draw(3, { kind: "hbar", labels: top.map((x) => x.name + " " + x.season + " (" + x.team + ")"), datasets: [{ label: m.label, data: top.map((x) => x.value), barColors: top.map((x) => NFLTeams.color(x.team)) }], colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
   }
 
   function chartWeek(f, m) {
@@ -402,7 +404,7 @@
     const K = S.REPLACEMENT_K[pos];
     const rows = res.rows.slice().sort((a, b) => b.epaor - a.epaor || a.name.localeCompare(b.name));
     const top = rows.slice(0, 15);
-    draw(5, { kind: "hbar", labels: top.map((x) => x.name + " (" + x.team + ")"), datasets: [{ label: "EPA over replacement", data: top.map((x) => x.epaor) }], colors: ["--series-3"], fmt: "dec1", yTitle: "Expected points over replacement" });
+    draw(5, { kind: "hbar", labels: top.map((x) => x.name + " (" + x.team + ")"), datasets: [{ label: "EPA over replacement", data: top.map((x) => x.epaor), barColors: top.map((x) => NFLTeams.color(x.team)) }], colors: ["--series-3"], fmt: "dec1", yTitle: "Expected points over replacement" });
     const opp = pos === "QB" ? "attempts + sacks + carries" : "carries + targets";
     $("d-note").textContent = season + " " + pos + ": " + rows.length + " players with at least one opportunity (" + opp + "). The top " + K +
       " by opportunities are starters (" + S.format("dec3", res.starterRate) + " EPA per opportunity); the other " + res.poolSize +
@@ -413,7 +415,7 @@
     table.className = "data";
     table.innerHTML = "<thead><tr>" + head.map((h, i) => "<th style='text-align:" + (i === 1 || i === 2 ? "left" : "right") + "'>" + h + "</th>").join("") + "</tr></thead>";
     const tb = document.createElement("tbody");
-    body.forEach((r) => { const tr = document.createElement("tr"); r.forEach((c, i) => { const td = document.createElement("td"); td.textContent = c; if (i === 1 || i === 2) td.style.textAlign = "left"; tr.appendChild(td); }); tb.appendChild(tr); });
+    body.forEach((r) => { const tr = document.createElement("tr"); r.forEach((c, i) => { const td = document.createElement("td"); if (i === 2) td.innerHTML = NFLTeams.badge(String(c)); else td.textContent = c; if (i === 1 || i === 2) td.style.textAlign = "left"; tr.appendChild(td); }); tb.appendChild(tr); });
     table.appendChild(tb);
     $("d-table").innerHTML = ""; $("d-table").appendChild(table);
   }
@@ -427,7 +429,7 @@
       const col = b.id === "opponent_team" ? "opponent_team" : "team";
       const ms = [S.MEASURE_BY_ID.team_games, m].concat(TEAM_EXTRAS.filter((id) => id !== m.id).map((id) => S.MEASURE_BY_ID[id]));
       const g = S.aggregate(store, f, col + "|season", ms);
-      head = [{ label: col === "team" ? "Team" : "Opponent", num: false }, { label: "Season", num: true }].concat(ms.map((x) => ({ label: x.label, num: true })));
+      head = [{ label: col === "team" ? "Team" : "Opponent", num: false, team: true }, { label: "Season", num: true }].concat(ms.map((x) => ({ label: x.label, num: true })));
       rows = [];
       for (const [key, v] of g) {
         const code = store.dicts[col].list[Math.floor(key / 64)], season = (key % 64) + 2000;
@@ -441,7 +443,7 @@
       const extras = view === "teams" ? TEAM_EXTRAS : EXTRA_MEASURES;
       const ms = (view === "teams" ? [S.MEASURE_BY_ID.team_games] : []).concat([m], extras.filter((id) => id !== m.id).map((id) => S.MEASURE_BY_ID[id]));
       const t = S.groupTable(store, f, groupBy, ms, !state.player);
-      head = [{ label: tableView === "season" ? "Season" : b.label.split(" (")[0], num: false }].concat(view === "teams" ? [] : [{ label: "Player-games", num: true }], ms.map((x) => ({ label: x.label, num: true })));
+      head = [{ label: tableView === "season" ? "Season" : b.label.split(" (")[0], num: false, team: tableView !== "season" && isTeamCol(b.id) }].concat(view === "teams" ? [] : [{ label: "Player-games", num: true }], ms.map((x) => ({ label: x.label, num: true })));
       rows = t.map((r) => {
         const label = tableView === "season" ? r.label : catLabel(b.id, r.key);
         const lead = view === "teams" ? [] : [r.rows];
@@ -453,7 +455,7 @@
       note = "The first measure column is your selected measure. Click a heading to sort.";
     } else if (tableView === "players") {
       title = "Top player-seasons";
-      head = ["Rank", "Player", "Season", "Team", "Pos", "Games", m.label].map((l, i) => ({ label: l, num: i !== 1 && i !== 3 && i !== 4 }));
+      head = ["Rank", "Player", "Season", "Team", "Pos", "Games", m.label].map((l, i) => ({ label: l, num: i !== 1 && i !== 3 && i !== 4, team: i === 3 }));
       {
         const pm = playerMeasure(m);
         head[6] = { label: pm.label, num: true };
@@ -469,7 +471,7 @@
       const labels = ["Pass yds", "Rush yds", "Rec yds", "Rec", "Sacks", "Int (def)", "Fantasy pts"];
       const limit = state.player ? 600 : 200;
       const gl = S.gameLog(store, f, cols, limit);
-      head = ["Season", "Wk", "Type", "Player", "Team", "Opp", "Pos"].map((l, i) => ({ label: l, num: i < 2 })).concat(labels.map((l) => ({ label: l, num: true })));
+      head = ["Season", "Wk", "Type", "Player", "Team", "Opp", "Pos"].map((l, i) => ({ label: l, num: i < 2, team: i === 4 || i === 5 })).concat(labels.map((l) => ({ label: l, num: true })));
       rows = gl.rows.map((r) => {
         const vals = cols.map((c) => r[c]);
         return { raw: [r.season, r.week, r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals),
@@ -515,7 +517,7 @@
     const tbody = document.createElement("tbody");
     sorted.slice(0, 1000).forEach((r) => {
       const row = document.createElement("tr");
-      r.cells.forEach((c, i) => { const td = document.createElement("td"); td.textContent = c; if (!head[i].num) td.style.textAlign = "left"; row.appendChild(td); });
+      r.cells.forEach((c, i) => { const td = document.createElement("td"); if (head[i].team && NFLTeams.byCode[c]) td.innerHTML = NFLTeams.badge(String(c)); else td.textContent = c; if (!head[i].num) td.style.textAlign = "left"; row.appendChild(td); });
       tbody.appendChild(row);
     });
     table.appendChild(tbody);
@@ -539,8 +541,17 @@
     buildControls();
     $("loading").hidden = true;
     $("app").hidden = false;
-    update();
-    renderDeep();
+    const qs = new URLSearchParams(location.search);
+    if (qs.get("team") && NFLTeams.byCode[qs.get("team")]) { state.team = qs.get("team"); $("f-team").value = state.team; }
+    if (qs.get("view") === "teams") applyView("teams"); else { update(); renderDeep(); }
+    fetch("data/team_summary.json").then((r) => r.json()).then((summary) => {
+      fieldApi = NFLField.mount($("field-root"), {
+        teams: NFLTeams.list, summary, selected: state.team || null,
+        title: "Pick a team", blurb: "Hover a team to freeze the play and see its numbers. Click one to filter the whole dashboard to it. Dot size follows the stat you pick.",
+        linkFor: () => "#",
+        onSelect: (code) => { state.team = code; $("f-team").value = code; if (fieldApi) fieldApi.setSelected(code); update(); },
+      });
+    }).catch(() => { $("field-root").hidden = true; });
   }).catch((err) => {
     $("loading-text").textContent = "Could not load the data (" + err.message + "). If you opened this file directly, serve the folder with a local web server or use the published site.";
     $("status").textContent = "Load failed";
