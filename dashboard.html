@@ -35,6 +35,17 @@
   </div>
 
   <div id="app" hidden>
+    <section class="card viewbar" aria-label="What to look at">
+      <div>
+        <span class="lbl">Look at</span>
+        <div class="seg" role="group" aria-label="Players or teams">
+          <button type="button" id="view-players" aria-pressed="true">Players</button>
+          <button type="button" id="view-teams" aria-pressed="false">Teams</button>
+        </div>
+      </div>
+      <p class="hint" id="view-hint"></p>
+    </section>
+
     <section class="card filters" aria-label="Filters">
       <div class="filter-grid">
         <div class="field">
@@ -65,7 +76,7 @@
           <span class="lbl">Position group</span>
           <div class="chips" id="chips-position_group"></div>
         </div>
-        <div class="field wide2 search">
+        <div class="field wide2 search" id="player-field">
           <label for="player-search">Player search</label>
           <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" aria-controls="player-results">
           <ul class="results" id="player-results" hidden role="listbox"></ul>
@@ -100,6 +111,23 @@
       <div class="card panel"><h3 id="t2"></h3><p class="sub" id="s2"></p><div class="chart-box" id="box2"><canvas id="c2" role="img" aria-label="Measure by category"></canvas></div><p class="empty" id="e2" hidden></p></div>
       <div class="card panel"><h3 id="t3"></h3><p class="sub" id="s3"></p><div class="chart-box"><canvas id="c3" role="img" aria-label="Top player-seasons"></canvas></div><p class="empty" id="e3" hidden></p></div>
       <div class="card panel"><h3 id="t4"></h3><p class="sub" id="s4"></p><div class="chart-box"><canvas id="c4" role="img" aria-label="Measure by week"></canvas></div><p class="empty" id="e4" hidden></p></div>
+    </section>
+
+    <section class="card deep" id="deep" aria-label="EPA over replacement">
+      <div class="table-head">
+        <div>
+          <h3>Deep dive: EPA over replacement</h3>
+          <p class="sub">Expected points a player added beyond a replacement-level player on the same workload. Regular season only; this panel ignores the filters above.</p>
+        </div>
+        <div class="table-tools">
+          <label class="sr" for="d-season">Season</label><select id="d-season"></select>
+          <label class="sr" for="d-pos">Position</label><select id="d-pos"></select>
+        </div>
+      </div>
+      <div class="chart-box" id="box5"><canvas id="c5" role="img" aria-label="Top players by EPA over replacement"></canvas></div>
+      <p class="empty" id="e5" hidden></p>
+      <p class="hint" id="d-note"></p>
+      <div class="tablewrap" id="d-table"></div>
     </section>
 
     <section class="card table-panel" aria-label="Table">

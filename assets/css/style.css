@@ -225,3 +225,14 @@ input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-o
 .filter-note { color: var(--faint); font-size: 12px; }
 .panel .empty { padding: 60px 10px; }
 @media (max-width: 860px) { .field.wide2 { grid-column: auto; } .banner { flex-direction: column; align-items: flex-start; } }
+
+/* players / teams switch and deep dive */
+.viewbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 14px 20px; margin-bottom: 18px; }
+.viewbar .hint { margin: 0; max-width: 620px; }
+.seg { display: inline-flex; background: var(--surface2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; margin-top: 6px; }
+.seg button { border: 0; background: transparent; color: var(--dim); padding: 7px 20px; border-radius: 999px; font-family: var(--sans); font-size: 14px; font-weight: 500; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.deep { padding: 18px 20px; margin-bottom: 18px; }
+.deep .chart-box { height: 420px; }
+.deep .tablewrap { max-height: 360px; }
