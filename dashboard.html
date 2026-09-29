@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL Player Stats Dashboard, 2009 to 2025</title>
+<meta name="description" content="Filter 300,000 NFL player-games by season, team, position and player, and switch between basic and advanced stats.">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<nav class="nav">
+  <a class="brand" href="index.html"><span class="brand-dot"></span>NFL <em>Player Stats</em></a>
+  <div class="nav-links">
+    <a href="index.html">Report</a>
+    <a href="dashboard.html" aria-current="page">Dashboard</a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light and dark theme">&#9681;</button>
+  </div>
+</nav>
+
+<main class="dash">
+  <div class="dash-head">
+    <div>
+      <span class="eyebrow">Interactive</span>
+      <h1>Player <em>dashboard</em></h1>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite">Loading data&hellip;</div>
+  </div>
+
+  <div class="loading card" id="loading">
+    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+    <p id="loading-text">Loading 17 seasons of player-games&hellip;</p>
+  </div>
+
+  <div id="app" hidden>
+    <section class="card filters" aria-label="Filters">
+      <div class="filter-grid">
+        <div class="field">
+          <label for="f-season-min">Season from</label>
+          <div class="pair"><select id="f-season-min"></select><span>to</span><select id="f-season-max" aria-label="Season to"></select></div>
+        </div>
+        <div class="field">
+          <label for="f-week-min">Week from</label>
+          <div class="pair"><select id="f-week-min"></select><span>to</span><select id="f-week-max" aria-label="Week to"></select></div>
+        </div>
+        <div class="field">
+          <label for="f-team">Team</label>
+          <select id="f-team"></select>
+        </div>
+        <div class="field">
+          <label for="f-opp">Opponent</label>
+          <select id="f-opp"></select>
+        </div>
+        <div class="field">
+          <span class="lbl">Season type</span>
+          <div class="chips" id="chips-season_type"></div>
+        </div>
+        <div class="field">
+          <span class="lbl">Unit</span>
+          <div class="chips" id="chips-unit"></div>
+        </div>
+        <div class="field wide2">
+          <span class="lbl">Position group</span>
+          <div class="chips" id="chips-position_group"></div>
+        </div>
+        <div class="field wide2 search">
+          <label for="player-search">Player search</label>
+          <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" aria-controls="player-results">
+          <ul class="results" id="player-results" hidden role="listbox"></ul>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn ghost" id="btn-reset" type="button">Reset filters</button>
+        <span class="filter-note" id="filter-note"></span>
+      </div>
+    </section>
+
+    <div class="banner card" id="player-banner" hidden></div>
+
+    <section class="card controls" aria-label="Chart controls">
+      <div class="field">
+        <label for="m-select">Measure</label>
+        <select id="m-select"></select>
+        <p class="hint" id="m-desc"></p>
+      </div>
+      <div class="field">
+        <label for="b-select">Break down by</label>
+        <select id="b-select"></select>
+        <p class="hint">Applies to the trend chart, the category chart and the table.</p>
+      </div>
+    </section>
+
+    <section class="summary" id="summary" aria-label="Summary numbers"></section>
+    <section class="summary small" id="milestones" aria-label="Milestone seasons in view"></section>
+
+    <section class="charts">
+      <div class="card panel"><h3 id="t1"></h3><p class="sub" id="s1"></p><div class="chart-box"><canvas id="c1" role="img" aria-label="Trend by season"></canvas></div><p class="empty" id="e1" hidden></p></div>
+      <div class="card panel"><h3 id="t2"></h3><p class="sub" id="s2"></p><div class="chart-box" id="box2"><canvas id="c2" role="img" aria-label="Measure by category"></canvas></div><p class="empty" id="e2" hidden></p></div>
+      <div class="card panel"><h3 id="t3"></h3><p class="sub" id="s3"></p><div class="chart-box"><canvas id="c3" role="img" aria-label="Top player-seasons"></canvas></div><p class="empty" id="e3" hidden></p></div>
+      <div class="card panel"><h3 id="t4"></h3><p class="sub" id="s4"></p><div class="chart-box"><canvas id="c4" role="img" aria-label="Measure by week"></canvas></div><p class="empty" id="e4" hidden></p></div>
+    </section>
+
+    <section class="card table-panel" aria-label="Table">
+      <div class="table-head">
+        <h3 id="table-title">The numbers behind this view</h3>
+        <div class="table-tools">
+          <label class="sr" for="table-view">Table view</label>
+          <select id="table-view"></select>
+          <button class="btn ghost small" id="btn-csv" type="button">Download CSV</button>
+        </div>
+      </div>
+      <p class="sub" id="table-note"></p>
+      <div class="tablewrap" id="table-box"></div>
+    </section>
+
+    <p class="method">
+      The starting view is regular season only, all seasons, which matches the <a href="index.html">report</a>. Tick Playoffs to include them.
+      Counts and totals add up players' stats; rates divide the two sums shown in each measure's definition. Player-season rankings
+      treat each player's season as one row, so nothing is a career total. Per-team-game rates count team-games among the rows in view.
+      Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> weekly player stats (CC-BY-4.0).
+    </p>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="assets/js/stats.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>

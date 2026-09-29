@@ -179,6 +179,9 @@
     { id: "fg_pct_50", group: "Advanced: kicking", label: "Field goal % from 50+ yards", type: "ratio",
       num: ["fg_made_50_59", "fg_made_60_"], den: ["fg_made_50_59", "fg_missed_50_59", "fg_made_60_", "fg_missed_60_"], fmt: "pct1", min: 8 },
   ];
+  // Team-game rates cannot rank one player's season; these are the player totals they are built from.
+  const PLAYER_TOTAL = { pass_yds_tg: "pass_yds", rush_yds_tg: "rush_yds", ints_tg: "ints_def", sacks_tg: "sacks", qb_hits_tg: "qb_hits", pass_def_tg: "pass_def" };
+  MEASURES.forEach((m) => { if (PLAYER_TOTAL[m.id]) m.playerMeasure = PLAYER_TOTAL[m.id]; });
   const MEASURE_BY_ID = {};
   MEASURES.forEach((m) => (MEASURE_BY_ID[m.id] = m));
 
@@ -273,6 +276,7 @@
         else if (groupBy === "season") key = chunk.season;
         else if (groupBy === "week") key = chunk.week[i];
         else if (groupBy === "player_season") key = chunk.cat.player_id[i] * 64 + (chunk.season - PS_SEASON_BASE);
+        else if (groupBy.indexOf("|season") > 0) key = chunk.cat[groupBy.split("|")[0]][i] * 64 + (chunk.season - PS_SEASON_BASE);
         else key = chunk.cat[groupBy][i];
         let g = groups.get(key);
         if (!g) {
@@ -304,6 +308,13 @@
     }
   }
 
+  // Like value(), but a ratio whose denominator is below the measure's minimum is NaN (too small a sample to trust).
+  function valueMin(measure, g, k) {
+    k = k || 0;
+    if (measure.type === "ratio" && measure.min && g.den[k] < measure.min) return NaN;
+    return value(measure, g, k);
+  }
+
   function decode(store, groupBy, key) {
     if (groupBy === "season" || groupBy === "week") return String(key);
     if (groupBy === "all") return "All";
@@ -311,11 +322,12 @@
   }
 
   // Sorted list of {label, key, values[]} for a categorical/season/week grouping.
-  function groupTable(store, filters, groupBy, measures) {
+  function groupTable(store, filters, groupBy, measures, applyMin) {
     const groups = aggregate(store, filters, groupBy, measures);
     const rows = [];
+    const val = applyMin ? valueMin : value;
     for (const [key, g] of groups) {
-      rows.push({ key, label: decode(store, groupBy, key), rows: g.rows, values: measures.map((m, k) => value(m, g, k)) });
+      rows.push({ key, label: decode(store, groupBy, key), rows: g.rows, values: measures.map((m, k) => val(m, g, k)) });
     }
     return rows;
   }
@@ -430,6 +442,6 @@
     return list;
   }
 
-  return { newStore, addSeason, MEASURES, MEASURE_BY_ID, BREAKDOWNS, MILESTONES, format, aggregate, value,
+  return { newStore, addSeason, MEASURES, MEASURE_BY_ID, BREAKDOWNS, MILESTONES, format, aggregate, value, valueMin,
            groupTable, countPlayers, milestones, topPlayerSeasons, gameLog, playerIndex, decode };
 });

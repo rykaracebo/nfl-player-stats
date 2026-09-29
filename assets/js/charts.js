@@ -26,7 +26,9 @@
     const prev = registry.get(canvas);
     if (prev) prev.chart.destroy();
     const fmt = FORMATS[spec.fmt] || FORMATS.num;
-    const colors = spec.colors || palette(spec.datasets.length);
+    // spec.colors may hold CSS variable names ("--series-2") so they follow the light/dark theme
+    const resolve = (c) => (c && c.indexOf("--") === 0 ? cssVar(c) : c);
+    const colors = (spec.colors || palette(spec.datasets.length)).map(resolve);
     const isLine = spec.kind === "line";
     const horizontal = spec.kind === "hbar";
     const dim = cssVar("--dim");
@@ -46,7 +48,7 @@
       pointBackgroundColor: colors[i % colors.length],
       pointBorderColor: surface,
       pointBorderWidth: 2,
-      tension: 0.25,
+      tension: 0,
       borderRadius: isLine ? 0 : 4,
       borderSkipped: false,
       maxBarThickness: horizontal ? 18 : 64,
