@@ -33,7 +33,8 @@
     const horizontal = spec.kind === "hbar";
     const dim = cssVar("--dim");
     const grid = cssVar("--grid");
-    const multi = spec.datasets.length > 1;
+    const stacked = !!spec.stacked; // segmented bars: each dataset is one team's slice of every bar
+    const multi = spec.datasets.length > 1 && !stacked;
     const surface = cssVar("--surface");
     // year and week axes get fewer labels so they never crowd; named categories keep every label
     const yearish = spec.labels.length > 0 && spec.labels.every((l) => /^(19|20)\d\d$/.test(String(l)));
@@ -44,9 +45,11 @@
       label: ds.label,
       names: ds.names || null,
       data: ds.data,
-      borderColor: colors[i % colors.length],
-      backgroundColor: ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
-      borderWidth: isLine ? (multi ? 1.8 : 2.4) : 0,
+      borderColor: stacked ? surface : colors[i % colors.length],
+      tips: ds.tips || null,
+      backgroundColor: ds.barTeams && window.NFLTeams ? ds.barTeams.map((t) => (t ? NFLTeams.color(t) : "rgba(0,0,0,0)"))
+        : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
+      borderWidth: isLine ? (multi ? 1.8 : 2.4) : stacked ? 2 : 0,
       pointRadius: isLine ? (multi ? 0 : 3) : 0,
       pointHoverRadius: isLine ? 5 : 0,
       pointBackgroundColor: colors[i % colors.length],
@@ -62,12 +65,14 @@
 
     // no rotated axis titles: the chart heading already names the measure
     const valueAxis = {
+      stacked,
       grid: { color: grid, drawTicks: false },
       border: { display: false },
       ticks: { color: dim, font: { family: "Geist Mono", size: 11 }, callback: (v) => fmt(v), maxTicksLimit: 6, padding: 8 },
       beginAtZero: !isLine,
     };
     const labelAxis = {
+      stacked,
       grid: { display: false },
       border: { color: grid },
       ticks: { color: dim, font: { size: 12 }, autoSkip: horizontal ? false : thin, maxTicksLimit: yearish ? 9 : 12, maxRotation: 0, padding: 6 },
@@ -98,8 +103,10 @@
             borderColor: cssVar("--line"),
             borderWidth: 1,
             padding: 10,
+            filter: (item) => !item.dataset.tips || !!item.dataset.tips[item.dataIndex],
             callbacks: {
               label: (c) => {
+                if (c.dataset.tips) return " " + c.dataset.tips[c.dataIndex];
                 const who = c.dataset.names ? c.dataset.names[c.dataIndex] + " - " : "";
                 return " " + who + c.dataset.label + ": " + fmt(horizontal ? c.parsed.x : c.parsed.y);
               },

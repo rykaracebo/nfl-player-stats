@@ -228,6 +228,27 @@
     return t ? { id: b.id, label: t[1] } : b;
   };
   const isTeamCol = (col) => col === "team" || col === "opponent_team";
+  // Team badges for one code or several joined by "/" (a player who changed teams in a season).
+  const badges = (str) => String(str).split("/").map((t) => NFLTeams.badge(t)).join(" ");
+  const allTeams = (str) => String(str).split("/").every((t) => NFLTeams.byCode[t]);
+  // Segmented bars: one dataset per team slot. Each bar's length is its total; each segment is that team's share of it.
+  function segmentDatasets(items, fmt) {
+    const maxSeg = Math.max.apply(null, [1].concat(items.map((it) => it.parts.length)));
+    const ds = [];
+    for (let j = 0; j < maxSeg; j++) {
+      ds.push({
+        label: "Team " + (j + 1),
+        data: items.map((it) => (it.parts[j] ? it.parts[j].share * it.total : 0)),
+        barTeams: items.map((it) => (it.parts[j] ? it.parts[j].team : null)),
+        tips: items.map((it) => {
+          const p = it.parts[j];
+          if (!p) return null;
+          return p.team + ": " + (Number.isNaN(p.value) ? "n/a" : S.format(fmt, p.value)) + (it.parts.length > 1 ? " (" + Math.round(p.share * 100) + "% of his workload)" : "");
+        }),
+      });
+    }
+    return ds;
+  }
   const cardsHtml = (cards) => cards.map(([v, fmt, l]) => "<div class='kpi card'><div class='kpi-value'>" + S.format(fmt, v) + "</div><div class='kpi-label'>" + l + "</div></div>").join("");
   const nn = (v) => (v === undefined || Number.isNaN(v) ? null : v);
   // With a player selected we show every value; otherwise ratios need a minimum sample so tiny groups do not distort charts.
@@ -387,7 +408,8 @@
     $("s3").textContent = "Each bar is one player's season" + (m !== m0 ? " (team-game rates do not apply to players, so this ranks the total)" : "") +
       (m.type === "ratio" && m.min ? " (minimum " + m.min + " in the denominator)" : "");
     if (!top.length) { showEmpty(3, "No player-seasons qualify with these filters."); return; }
-    draw(3, { kind: "hbar", labels: top.map((x) => x.name + " " + x.season + " (" + x.team + ")"), datasets: [{ label: m.label, data: top.map((x) => x.value), barColors: top.map((x) => NFLTeams.color(x.team)) }], colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
+    draw(3, { kind: "hbar", stacked: true, labels: top.map((x) => x.name + " " + x.season + " (" + x.teams.join("/") + ")"),
+      datasets: segmentDatasets(top.map((x) => ({ total: x.value, parts: x.parts })), m.fmt), colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
   }
 
   function chartWeek(f, m) {
@@ -406,18 +428,20 @@
     const K = S.REPLACEMENT_K[pos];
     const rows = res.rows.slice().sort((a, b) => b.epaor - a.epaor || a.name.localeCompare(b.name));
     const top = rows.slice(0, 15);
-    draw(5, { kind: "hbar", labels: top.map((x) => x.name + " (" + x.team + ")"), datasets: [{ label: "EPA over replacement", data: top.map((x) => x.epaor), barColors: top.map((x) => NFLTeams.color(x.team)) }], colors: ["--series-3"], fmt: "dec1", yTitle: "Expected points over replacement" });
+    draw(5, { kind: "hbar", stacked: true, labels: top.map((x) => x.name + " (" + x.teams.join("/") + ")"),
+      datasets: segmentDatasets(top.map((x) => ({ total: x.epaor, parts: x.parts.map((p) => ({ team: p.team, value: p.epaor, share: p.share })) })), "dec1"),
+      colors: ["--series-3"], fmt: "dec1", yTitle: "Expected points over replacement" });
     const opp = pos === "QB" ? "attempts + sacks + carries" : "carries + targets";
     $("d-note").textContent = season + " " + pos + ": " + rows.length + " players with at least one opportunity (" + opp + "). The top " + K +
       " by opportunities are starters (" + S.format("dec3", res.starterRate) + " EPA per opportunity); the other " + res.poolSize +
-      " form the replacement pool (" + S.format("dec3", res.r) + "). EPAOR = total EPA \u2212 replacement rate \u00d7 opportunities. Regular season only. The team shown is the first team the player appeared for that season.";
+      " form the replacement pool (" + S.format("dec3", res.r) + "). EPAOR = total EPA \u2212 replacement rate \u00d7 opportunities. Regular season only. A player who changed teams shows every team; the bar splits by share of opportunities.";
     const head = ["Rank", "Player", "Team", "Games", "Opportunities", "Total EPA", "EPA per opportunity", "EPA over replacement"];
-    const body = rows.slice(0, 25).map((x, i) => [i + 1, x.name, x.team, x.games, S.format("int", x.opp), S.format("dec1", x.epa), S.format("dec3", x.epa / x.opp), S.format("dec1", x.epaor)]);
+    const body = rows.slice(0, 25).map((x, i) => [i + 1, x.name, x.teams.join("/"), x.games, S.format("int", x.opp), S.format("dec1", x.epa), S.format("dec3", x.epa / x.opp), S.format("dec1", x.epaor)]);
     const table = document.createElement("table");
     table.className = "data";
     table.innerHTML = "<thead><tr>" + head.map((h, i) => "<th style='text-align:" + (i === 1 || i === 2 ? "left" : "right") + "'>" + h + "</th>").join("") + "</tr></thead>";
     const tb = document.createElement("tbody");
-    body.forEach((r) => { const tr = document.createElement("tr"); r.forEach((c, i) => { const td = document.createElement("td"); if (i === 2) td.innerHTML = NFLTeams.badge(String(c)); else td.textContent = c; if (i === 1 || i === 2) td.style.textAlign = "left"; tr.appendChild(td); }); tb.appendChild(tr); });
+    body.forEach((r) => { const tr = document.createElement("tr"); r.forEach((c, i) => { const td = document.createElement("td"); if (i === 2 && allTeams(c)) td.innerHTML = badges(c); else td.textContent = c; if (i === 1 || i === 2) td.style.textAlign = "left"; tr.appendChild(td); }); tb.appendChild(tr); });
     table.appendChild(tb);
     $("d-table").innerHTML = ""; $("d-table").appendChild(table);
   }
@@ -462,7 +486,7 @@
         const pm = playerMeasure(m);
         head[6] = { label: pm.label, num: true };
         const top = S.topPlayerSeasons(store, f, pm, 50);
-        rows = top.map((x, i) => ({ raw: [i + 1, x.name, x.season, x.team, x.position, x.games, x.value], cells: [i + 1, x.name, x.season, x.team, x.position, x.games, S.format(pm.fmt, x.value)] }));
+        rows = top.map((x, i) => ({ raw: [i + 1, x.name, x.season, x.teams.join("/"), x.position, x.games, x.value], cells: [i + 1, x.name, x.season, x.teams.join("/"), x.position, x.games, S.format(pm.fmt, x.value)] }));
         note = "Top 50 player-seasons for " + pm.label + (pm !== m ? " (team-game rates do not apply to players, so this ranks the total)" : "") +
           (pm.type === "ratio" && pm.min ? " (minimum " + pm.min + " in the denominator)" : "") + ".";
       }
@@ -519,7 +543,7 @@
     const tbody = document.createElement("tbody");
     sorted.slice(0, 1000).forEach((r) => {
       const row = document.createElement("tr");
-      r.cells.forEach((c, i) => { const td = document.createElement("td"); if (head[i].team && NFLTeams.byCode[c]) td.innerHTML = NFLTeams.badge(String(c)); else td.textContent = c; if (!head[i].num) td.style.textAlign = "left"; row.appendChild(td); });
+      r.cells.forEach((c, i) => { const td = document.createElement("td"); if (head[i].team && allTeams(c)) td.innerHTML = badges(c); else td.textContent = c; if (!head[i].num) td.style.textAlign = "left"; row.appendChild(td); });
       tbody.appendChild(row);
     });
     table.appendChild(tbody);

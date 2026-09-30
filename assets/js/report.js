@@ -1,10 +1,10 @@
 /* Draws every chart on the report page from the spec stored in its canvas, and mounts the team field. */
 (function () {
-  document.querySelectorAll("canvas[data-chart]").forEach((canvas) => {
-    const spec = JSON.parse(canvas.dataset.chart);
-    NFLCharts.buildChart(canvas, spec);
-  });
+  const drawCharts = () => document.querySelectorAll("canvas[data-chart]").forEach((canvas) => NFLCharts.buildChart(canvas, JSON.parse(canvas.dataset.chart)));
   NFLCharts.initTheme();
+
+  // team colors are needed for the team-colored bars, so load them first (charts still draw if that fails)
+  (window.NFLTeams ? NFLTeams.load().then(drawCharts, drawCharts) : Promise.resolve(drawCharts()));
 
   const root = document.getElementById("field-root");
   if (root && window.NFLField) {

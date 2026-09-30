@@ -268,8 +268,9 @@
   }
 
   // Returns Map(groupKey -> {rows, num[], den[], tg:Set|null, team, position}) for the given measures.
-  function aggregate(store, filters, groupBy, measures) {
+  function aggregate(store, filters, groupBy, measures, opts) {
     const f = filters || {};
+    const trackTeams = !!(opts && opts.byTeam);
     const tables = allowedTables(store, f.cats);
     const needTG = measures.some((m) => m.type === "perTeamGame" || m.type === "teamGames");
     const groups = new Map();
@@ -290,20 +291,51 @@
         let g = groups.get(key);
         if (!g) {
           g = { rows: 0, num: new Float64Array(nm), den: new Float64Array(nm), tg: needTG ? new Set() : null,
-                team: chunk.cat.team[i], position: chunk.cat.position[i] };
+                team: chunk.cat.team[i], position: chunk.cat.position[i], teams: trackTeams ? new Map() : null };
           groups.set(key, g);
         }
         g.rows++;
         if (needTG) g.tg.add(chunk.cat.game_id[i] * 64 + chunk.cat.team[i]);
+        let t = null;
+        if (trackTeams) {
+          const tc = chunk.cat.team[i];
+          t = g.teams.get(tc);
+          if (!t) { t = { rows: 0, num: new Float64Array(nm), den: new Float64Array(nm) }; g.teams.set(tc, t); }
+          t.rows++;
+        }
         for (let k = 0; k < nm; k++) {
           const na = numArrs[k];
-          g.num[k] += na === null ? 1 : evalTerms(na, i);
+          const nv = na === null ? 1 : evalTerms(na, i);
+          g.num[k] += nv;
           const da = denArrs[k];
-          if (da) g.den[k] += evalTerms(da, i);
+          const dv = da ? evalTerms(da, i) : 0;
+          if (da) g.den[k] += dv;
+          if (t) { t.num[k] += nv; t.den[k] += dv; }
         }
       }
     }
     return groups;
+  }
+
+  // How one group's value splits across the teams a player played for (needs aggregate(..., {byTeam: true})).
+  // Each part has the team's own value, and a share used to split the bar: sums split by each team's contribution, rates by each
+  // team's share of the denominator (attempts, carries, targets), averages by games. If a sum has a negative part, split by games.
+  function teamParts(store, measure, g, k) {
+    k = k || 0;
+    if (!g.teams) return [];
+    const parts = [];
+    for (const [tc, t] of g.teams) {
+      let own, w;
+      if (measure.type === "sum") { own = t.num[k]; w = t.num[k]; }
+      else if (measure.type === "ratio") { own = t.den[k] > 0 ? t.num[k] / t.den[k] : NaN; w = t.den[k]; }
+      else if (measure.type === "avg") { own = t.rows ? t.num[k] / t.rows : NaN; w = t.rows; }
+      else { own = NaN; w = t.rows; }
+      parts.push({ team: store.dicts.team.list[tc], value: own, weight: w, rows: t.rows });
+    }
+    let total = parts.reduce((a, p) => a + p.weight, 0);
+    if (parts.some((p) => p.weight < 0) || !(total > 0)) { parts.forEach((p) => (p.weight = p.rows)); total = parts.reduce((a, p) => a + p.weight, 0); }
+    parts.forEach((p) => (p.share = total > 0 ? p.weight / total : 1 / parts.length));
+    return parts;
   }
 
   function value(measure, g, k) {
@@ -389,14 +421,15 @@
   function epaOverReplacement(store, position, seasonMin, seasonMax) {
     const def = EPAOR_DEF[position], K = REPLACEMENT_K[position];
     const ms = [{ type: "sum", num: def.epa }, { type: "sum", num: def.opp }];
-    const groups = aggregate(store, { seasonMin, seasonMax, cats: { season_type: ["REG"], position_group: [position] } }, "player_season", ms);
+    const groups = aggregate(store, { seasonMin, seasonMax, cats: { season_type: ["REG"], position_group: [position] } }, "player_season", ms, { byTeam: true });
     const bySeason = new Map();
     for (const [key, g] of groups) {
       if (!(g.num[1] > 0)) continue;
       const season = (key % 64) + PS_SEASON_BASE, pc = Math.floor(key / 64);
       if (!bySeason.has(season)) bySeason.set(season, []);
       bySeason.get(season).push({ id: store.dicts.player_id.list[pc], name: store.playerNames[pc], season,
-        team: store.dicts.team.list[g.team], games: g.rows, epa: g.num[0], opp: g.num[1] });
+        team: store.dicts.team.list[g.team], games: g.rows, epa: g.num[0], opp: g.num[1],
+        parts: Array.from(g.teams, ([tc, t]) => ({ team: store.dicts.team.list[tc], epa: t.num[0], opp: t.num[1] })) });
     }
     const out = new Map();
     for (const [season, list] of bySeason) {
@@ -404,7 +437,12 @@
       let pe = 0, po = 0, se = 0, so = 0;
       list.forEach((x, i) => { if (i >= K) { pe += x.epa; po += x.opp; } else { se += x.epa; so += x.opp; } });
       const r = po > 0 ? pe / po : 0;
-      list.forEach((x) => { x.epaor = x.epa - r * x.opp; });
+      list.forEach((x) => {
+        x.epaor = x.epa - r * x.opp;
+        // each team's own EPAOR adds up to the player's; bars split by share of opportunities
+        x.parts.forEach((p) => { p.epaor = p.epa - r * p.opp; p.value = p.epaor; p.share = x.opp > 0 ? p.opp / x.opp : 1 / x.parts.length; });
+        x.teams = x.parts.map((p) => p.team);
+      });
       out.set(season, { r, starterRate: so > 0 ? se / so : NaN, poolSize: Math.max(0, list.length - K), rows: list });
     }
     return out;
@@ -436,7 +474,7 @@
 
   // Top player-seasons for a measure (each player's season is one row; ratios need the measure's minimum).
   function topPlayerSeasons(store, filters, measure, n) {
-    const groups = aggregate(store, filters, "player_season", [measure]);
+    const groups = aggregate(store, filters, "player_season", [measure], { byTeam: true });
     const rows = [];
     for (const [key, g] of groups) {
       if (measure.type === "ratio" && measure.min && g.den[0] < measure.min) continue;
@@ -447,10 +485,13 @@
         playerCode: pc, playerId: store.dicts.player_id.list[pc], name: store.playerNames[pc],
         season: (key % 64) + PS_SEASON_BASE, team: store.dicts.team.list[g.team],
         position: store.dicts.position.list[g.position], games: g.rows, value: v,
+        parts: teamParts(store, measure, g, 0),
       });
     }
     rows.sort((a, b) => b.value - a.value || a.name.localeCompare(b.name));
-    return rows.slice(0, n);
+    const top = rows.slice(0, n);
+    top.forEach((r) => (r.teams = r.parts.map((p) => p.team)));
+    return top;
   }
 
   // Player game log, in season/week order.
@@ -505,5 +546,5 @@
   }
 
   return { newStore, addSeason, MEASURES, MEASURE_BY_ID, BREAKDOWNS, MILESTONES, format, aggregate, value, valueMin,
-           groupTable, countPlayers, countDistinct, epaOverReplacement, REPLACEMENT_K, milestones, topPlayerSeasons, gameLog, playerIndex, decode };
+           groupTable, countPlayers, countDistinct, epaOverReplacement, teamParts, REPLACEMENT_K, milestones, topPlayerSeasons, gameLog, playerIndex, decode };
 });

@@ -63,6 +63,7 @@ c100rec = count_by_season(ps["receptions"] >= 100)
 c6int = count_by_season(ps["def_interceptions"] >= 6)
 
 hits = ps.sort_values(["def_qb_hits", "player_name"], ascending=[False, True]).head(10)
+team_hits = reg.groupby(["season", "player_id", "team"], as_index=False).agg(qb_hits=("def_qb_hits", "sum"), first=("week", "min"))
 lead = ps.sort_values(["season", "def_sacks", "player_name"], ascending=[True, False, True]).groupby("season").head(2)
 sack_leaders = ps.loc[ps.groupby("season")["def_sacks"].idxmax()].set_index("season")
 ties = {int(s): int((g["def_sacks"] == g["def_sacks"].max()).sum()) for s, g in ps.groupby("season")}
@@ -97,6 +98,24 @@ def chart(kind, labels, datasets, fmt, y_title, height=320):
             e["names"] = list(item[2])
         ds.append(e)
     return {"kind": kind, "labels": [str(x) for x in labels], "datasets": ds, "fmt": fmt, "yTitle": y_title, "height": height}
+
+
+def seg_chart(labels, items, fmt, height=320):
+    """Horizontal bars split into team segments. items: one list of (team, own_value, share) per bar, plus the bar total."""
+    n_seg = max(len(parts) for _, parts in items)
+    datasets = []
+    for j in range(n_seg):
+        data, teams, tips = [], [], []
+        for total, parts in items:
+            if j < len(parts):
+                team, own, share = parts[j]
+                data.append(round(float(share * total), 4)); teams.append(team)
+                text = f"{team}: {own:,.0f}" if fmt == "int" else f"{team}: {own:,.1f}"
+                tips.append(text + (f" ({round(share * 100)}% of his workload)" if len(parts) > 1 else ""))
+            else:
+                data.append(0); teams.append(None); tips.append(None)
+        datasets.append({"label": f"Team {j + 1}", "data": data, "barTeams": teams, "tips": tips})
+    return {"kind": "hbar", "stacked": True, "labels": labels, "datasets": datasets, "fmt": fmt, "yTitle": "", "height": height}
 
 
 def add(theme, title, paras, spec, head, rows):
@@ -181,6 +200,13 @@ add("Defenses: fewer takeaways, more pressure",
     ["Season", "Sacks", "Pass attempts", "Sacks per pass attempt"],
     [[int(s), dec(by_season.loc[s, "def_sacks"]), num(by_season.loc[s, "attempts"]), pct(sack_rate[s], 2)] for s in SEASONS])
 
+HIT_PARTS = {}
+for r in hits.itertuples():
+    td = team_hits[(team_hits["season"] == r.season) & (team_hits["player_id"] == r.player_id)].sort_values("first")
+    tot = float(td["qb_hits"].sum())
+    HIT_PARTS[(r.season, r.player_id)] = (list(td["team"]), [(t.team, float(t.qb_hits), (float(t.qb_hits) / tot if tot > 0 else 1 / len(td))) for t in td.itertuples()])
+R["qb_hits_top_parts"] = [[r.player_name, int(r.season), [[t, v] for t, v, _ in HIT_PARTS[(r.season, r.player_id)][1]]] for r in hits.itertuples()]
+
 watt = hits[hits["player_name"] == "J.J. Watt"]
 add("Defenses: fewer takeaways, more pressure",
     f"J.J. Watt owns {len(watt)} of the {len(hits)} biggest QB-hit seasons, led by {dec(watt['def_qb_hits'].max(), 0)} in {int(watt.sort_values('def_qb_hits', ascending=False).iloc[0]['season'])}",
@@ -189,8 +215,9 @@ add("Defenses: fewer takeaways, more pressure",
      f". The record in the data is {int(hits.iloc[0]['def_qb_hits'])}.",
      "The source does not say how consistently QB hits were recorded over time, so treat this as a ranking of recorded hits, "
      "not a full count of pressure."],
-    chart("hbar", [f"{r.player_name} {int(r.season)}" for r in hits.itertuples()], [("QB hits", hits["def_qb_hits"])], "int", "QB hits in the season", 400),
-    ["Player", "Season", "QB hits"], [[r.player_name, int(r.season), int(r.def_qb_hits)] for r in hits.itertuples()])
+    seg_chart([f"{r.player_name} {int(r.season)} ({'/'.join(HIT_PARTS[(r.season, r.player_id)][0])})" for r in hits.itertuples()],
+              [(float(r.def_qb_hits), HIT_PARTS[(r.season, r.player_id)][1]) for r in hits.itertuples()], "int", 400),
+    ["Player", "Season", "Team", "QB hits"], [[r.player_name, int(r.season), "/".join(HIT_PARTS[(r.season, r.player_id)][0]), int(r.def_qb_hits)] for r in hits.itertuples()])
 
 leaders = pd.DataFrame({"season": SEASONS, "name": [sack_leaders.loc[s, "player_name"] for s in SEASONS],
                         "sacks": [sack_leaders.loc[s, "def_sacks"] for s in SEASONS]})
@@ -246,13 +273,14 @@ def epaor(pos):
     pl = sub.groupby(["season", "player_id"], as_index=False).agg(
         name=("player_name", "first"), epa=("epa", "sum"), opp=("opp", "sum"), yards=("passing_yards", "sum"))
     pl = pl[pl["opp"] > 0]
+    tdf = sub.groupby(["season", "player_id", "team"], as_index=False).agg(epa=("epa", "sum"), opp=("opp", "sum"), first=("week", "min"))
     out = {}
     for season, g in pl.groupby("season"):
         g = g.sort_values(["opp", "player_id"], ascending=[False, True]).reset_index(drop=True)
         pool, starters = g.iloc[K_START[pos]:], g.iloc[:K_START[pos]]
         r = pool["epa"].sum() / pool["opp"].sum() if pool["opp"].sum() > 0 else 0.0
         g["epaor"] = g["epa"] - r * g["opp"]
-        out[int(season)] = {"r": float(r), "starter": float(starters["epa"].sum() / starters["opp"].sum()), "pool": int(len(pool)), "df": g}
+        out[int(season)] = {"r": float(r), "starter": float(starters["epa"].sum() / starters["opp"].sum()), "pool": int(len(pool)), "df": g, "teams": tdf[tdf["season"] == season]}
     return out
 
 
@@ -268,6 +296,13 @@ top_yards = qb_all.sort_values(["yards", "name"], ascending=[False, True]).head(
 key = lambda df: set(zip(df["season"], df["player_id"]))
 overlap = len(key(top_epaor) & key(top_yards))
 best = top_epaor.iloc[0]
+EPA_PARTS = {}
+for r in top_epaor.itertuples():
+    season = int(r.season); rate = EPAOR["QB"][season]["r"]
+    td = EPAOR["QB"][season]["teams"]; td = td[td["player_id"] == r.player_id].sort_values("first")
+    tot_opp = float(td["opp"].sum())
+    EPA_PARTS[(season, r.player_id)] = (list(td["team"]), [(t.team, float(t.epa - rate * t.opp), float(t.opp) / tot_opp) for t in td.itertuples()])
+R["epaor_top10_parts"] = [[r.name, int(r.season), [[t, v] for t, v, _ in EPA_PARTS[(int(r.season), r.player_id)][1]]] for r in top_epaor.itertuples()]
 R["epaor_overlap"] = overlap
 add("Value over replacement",
     f"By expected points over replacement, {best['name']} in {int(best['season'])} was the best quarterback season, and only {overlap} of the top 10 also top the passing-yards list",
@@ -277,9 +312,10 @@ add("Value over replacement",
      f"Ranking all quarterback seasons by EPAOR and by passing yards, {overlap} of the top 10 seasons appear on both lists. Passing yards "
      f"reward volume; EPAOR also rewards efficiency and counts sacks, interceptions and scrambles. This is this site's own version of a "
      f"value-over-replacement stat, not a full WAR. The replacement rule is in the data section below."],
-    chart("hbar", [f"{r.name} {int(r.season)}" for r in top_epaor.itertuples()], [("EPA over replacement", top_epaor["epaor"])], "dec1", "Expected points over replacement", 420),
-    ["Rank", "Player-season", "EPAOR", "Total EPA", "Opportunities", "Passing-yards rank"],
-    [[i + 1, f"{r.name} {int(r.season)}", dec(r.epaor), dec(r.epa), num(r.opp), int(r.yards_rank)] for i, r in enumerate(top_epaor.itertuples())])
+    seg_chart([f"{r.name} {int(r.season)} ({'/'.join(EPA_PARTS[(int(r.season), r.player_id)][0])})" for r in top_epaor.itertuples()],
+              [(float(r.epaor), EPA_PARTS[(int(r.season), r.player_id)][1]) for r in top_epaor.itertuples()], "dec1", 420),
+    ["Rank", "Player-season", "Team", "EPAOR", "Total EPA", "Opportunities", "Passing-yards rank"],
+    [[i + 1, f"{r.name} {int(r.season)}", "/".join(EPA_PARTS[(int(r.season), r.player_id)][0]), dec(r.epaor), dec(r.epa), num(r.opp), int(r.yards_rank)] for i, r in enumerate(top_epaor.itertuples())])
 
 qb_r = pd.Series({s: v["r"] for s, v in EPAOR["QB"].items()})
 qb_st = pd.Series({s: v["starter"] for s, v in EPAOR["QB"].items()})

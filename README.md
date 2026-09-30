@@ -69,7 +69,9 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
 
 ## Design and credits
 
-- The look is a football theme: NFL-style navy, red and white, a turf-green field, and team colors in the charts.
+- The look is a football theme: NFL-style navy, red and white, a turf-green field, and team colors in the charts. Player bars
+  are colored by team, and a player who changed teams in a season gets a bar split into one segment per team (sums split by each
+  team's contribution, rates by each team's share of attempts, carries or targets). The checker confirms the segments add up.
 - **This is an unofficial, non-commercial student project.** The NFL name and shield and the team names and logos belong to the
   NFL and its teams. They appear only to identify the league and teams. Logos (including the league shield printed on the ball
   in the play board) are loaded by the visitor's browser from the links in the nflverse teams file (`team_logo_espn`,

@@ -116,5 +116,32 @@ for (const [key, g] of S.aggregate(store, REG, "team", teamMeasures)) {
   teamMeasures.forEach((m) => check("report copy of team summary " + code + " " + m.id, ref[m.id], report.team_summary[code][m.id]));
 }
 
+// team-split bars: the report's splits (pandas) match the dashboard code, and segments always add up to the bar's total
+report.qb_hits_top_parts.forEach(([name, season, parts], i) => {
+  const row = hits[i];
+  check("QB hits split " + name + " " + season + " teams", row.parts.map((p) => p.team).join("/"), parts.map((p) => p[0]).join("/"));
+  parts.forEach(([team, v], k) => check("QB hits split " + name + " " + season + " " + team, row.parts[k].value, v));
+});
+report.epaor_top10_parts.forEach(([name, season, parts]) => {
+  const row = S.epaOverReplacement(store, "QB", season, season).get(season).rows.find((r) => r.name === name);
+  check("EPAOR split " + name + " " + season + " teams", row.parts.map((p) => p.team).join("/"), parts.map((p) => p[0]).join("/"));
+  parts.forEach(([team, v], k) => check("EPAOR split " + name + " " + season + " " + team, row.parts[k].epaor, v));
+});
+for (const id of ["pass_yds", "rush_yds", "rec_yds", "sacks", "qb_hits", "tds", "receptions", "fantasy"]) {
+  const all = S.topPlayerSeasons(store, REG, M[id], 100000);
+  const bad = all.filter((r) => Math.abs(r.parts.reduce((a, p) => a + p.value, 0) - r.value) > 1e-6 * Math.max(1, Math.abs(r.value))).length;
+  check("split segments add up to the total for " + id + " (" + all.length + " player-seasons, " + all.filter((r) => r.parts.length > 1).length + " with 2+ teams)", bad, 0);
+  const shareBad = all.filter((r) => Math.abs(r.parts.reduce((a, p) => a + p.share, 0) - 1) > 1e-9).length;
+  check("team shares add up to 1 for " + id, shareBad, 0);
+}
+for (const pos of ["QB", "RB", "WR", "TE"]) {
+  let bad = 0, multi = 0;
+  for (const res of S.epaOverReplacement(store, pos, null, null).values()) for (const r of res.rows) {
+    if (r.parts.length > 1) multi++;
+    if (Math.abs(r.parts.reduce((a, p) => a + p.epaor, 0) - r.epaor) > 1e-6 * Math.max(1, Math.abs(r.epaor))) bad++;
+  }
+  check("EPAOR team parts add up to the player's EPAOR for " + pos + " (" + multi + " with 2+ teams)", bad, 0);
+}
+
 console.log(checks + " checks, " + failures + " mismatches");
 process.exit(failures ? 1 : 0);
