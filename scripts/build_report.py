@@ -137,7 +137,7 @@ def player_blocks(key, col, threshold, unit, height=340):
             blocks.append({"name": r.player_name, "value": float(getattr(r, col)),
                            "parts": [(t.team, float(t.v), float(t.v) / tot if tot > 0 else 1 / len(g)) for t in g.itertuples()]})
         per_season[int(sn)] = blocks
-        listing[int(sn)] = "; ".join(f"{b['name']} ({'/'.join(p[0] for p in b['parts'])}) {b['value']:,.0f}" for b in blocks)
+        listing[int(sn)] = "; ".join(f"{b['name']} ({'/'.join(p[0] for p in b['parts'])}) {b['value']:,.0f}" for b in reversed(blocks))  # listed top block first, the way the bar is read
     BLOCKS[key] = {str(sn): [[b["name"], b["value"]] for b in bl] for sn, bl in per_season.items()}
     n_blocks = max(len(b) for b in per_season.values()); n_parts = max(len(bl["parts"]) for b in per_season.values() for bl in b)
     datasets = []
@@ -187,7 +187,7 @@ add("Passing peaked, then slid",
      "This counts each player's regular-season total for one season. Seasons were 16 games through 2020 and 17 from 2021, so "
      "counts from 2021 on have a little extra room to reach the threshold."],
     BLK["pass4000"][0],
-    ["Season", "Players with 4,000+ passing yards", "Who (team) and total"], [[int(s), int(c4000[s]), BLK["pass4000"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 4,000+ passing yards", "Who (team) and total, top block first"], [[int(s), int(c4000[s]), BLK["pass4000"][1][int(s)]] for s in SEASONS])
 
 hi = ps.sort_values("rushing_yards", ascending=False)
 add("The running back roller coaster",
@@ -197,7 +197,7 @@ add("The running back roller coaster",
      f"There is no steady trend to explain it. The count is lowest in {', '.join(str(int(s)) for s in c1000[c1000 == c1000.min()].index)} "
      f"({int(c1000.min())}) and highest in {', '.join(str(int(s)) for s in c1000[c1000 == c1000.max()].index)} ({int(c1000.max())})."],
     BLK["rush1000"][0],
-    ["Season", "Players with 1,000+ rushing yards", "Who (team) and total"], [[int(s), int(c1000[s]), BLK["rush1000"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 1,000+ rushing yards", "Who (team) and total, top block first"], [[int(s), int(c1000[s]), BLK["rush1000"][1][int(s)]] for s in SEASONS])
 
 add("The running back roller coaster",
     f"The workhorse back nearly disappeared, then returned: {int(c300[FIRST])} backs had 300+ carries in {FIRST}, {int(c300[2023])} in 2023, {int(c300[2024])} in 2024",
@@ -206,7 +206,7 @@ add("The running back roller coaster",
      f"It came back in 2024 with {int(c300[2024])} players, then {int(c300[LAST])} in {LAST}. The counts are small, so one or two "
      f"bell-cow backs make a visible difference."],
     BLK["carries300"][0],
-    ["Season", "Players with 300+ carries", "Who (team) and total"], [[int(s), int(c300[s]), BLK["carries300"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 300+ carries", "Who (team) and total, top block first"], [[int(s), int(c300[s]), BLK["carries300"][1][int(s)]] for s in SEASONS])
 
 add("Receivers pile up catches",
     f"100-catch seasons climbed from {int(c100rec[2010])} in 2010 to {int(c100rec.max())} at the peak, even though team passing yards were below their {peak_pass} high",
@@ -214,7 +214,7 @@ add("Receivers pile up catches",
      f"{', '.join(str(int(s)) for s in c100rec[c100rec == c100rec.max()].index)} and was {int(c100rec[LAST])} in {LAST}.",
      "These are counts of individual players, so a few high-volume receivers can move the number from one season to the next."],
     BLK["rec100"][0],
-    ["Season", "Players with 100+ receptions", "Who (team) and total"], [[int(s), int(c100rec[s]), BLK["rec100"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 100+ receptions", "Who (team) and total, top block first"], [[int(s), int(c100rec[s]), BLK["rec100"][1][int(s)]] for s in SEASONS])
 
 add("Defenses: fewer takeaways, more pressure",
     f"Interceptions are disappearing: {dec(int_tg[FIRST], 2)} per team-game in {FIRST}, {dec(int_tg[LAST], 2)} in {LAST}",
@@ -233,7 +233,7 @@ add("Defenses: fewer takeaways, more pressure",
      f"{ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['player_name']} in "
      f"{int(ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['season'])}."],
     BLK["int6"][0],
-    ["Season", "Players with 6+ interceptions", "Who (team) and total"], [[int(s), int(c6int[s]), BLK["int6"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 6+ interceptions", "Who (team) and total, top block first"], [[int(s), int(c6int[s]), BLK["int6"][1][int(s)]] for s in SEASONS])
 
 add("Defenses: fewer takeaways, more pressure",
     f"Pass rushes get home more often: sacks per pass attempt rose from {pct(sack_rate[FIRST])} in {FIRST} to {pct(sack_rate[LAST])} in {LAST}",
