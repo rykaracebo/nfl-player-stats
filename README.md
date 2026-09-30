@@ -75,4 +75,5 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
   in the play board) are loaded by the visitor's browser from the links in the nflverse teams file (`team_logo_espn`,
   `team_league_logo`) and are not stored in this repository; if one cannot load, a color badge or a plain crest is shown instead.
   The rest of the ball's printing ("PLAYER STATS", "2009-2025") is this project's own.
-- Fonts: Geist and Instrument Serif (copied from the author's other project).
+- Fonts: Geist and Instrument Serif (copied from the author's other project) and Bebas Neue for the field lettering
+  (SIL Open Font License 1.1, by Dharma Type, self-hosted in `assets/fonts/`).

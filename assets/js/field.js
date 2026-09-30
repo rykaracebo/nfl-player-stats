@@ -134,19 +134,22 @@
       for (let i = 0; i < 12; i++) { ctx.fillStyle = i % 2 ? "#17592f" : "#1b6735"; ctx.fillRect(i * 10 * sx, 0, 10 * sx + 1, H); }
       ctx.fillStyle = "rgba(229,20,26,.62)"; ctx.fillRect(0, 0, 10 * sx, H);
       ctx.fillStyle = "rgba(1,51,105,.86)"; ctx.fillRect(110 * sx, 0, 10 * sx, H);
-      // end zone lettering uses the same font, size and color as the yard numbers, and both read the same direction
-      ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = "700 " + Math.round(H * 0.09) + "px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      if ("letterSpacing" in ctx) ctx.letterSpacing = Math.round(H * 0.02) + "px";
-      [[5, "AFC"], [115, "NFC"]].forEach(([yd, label]) => { ctx.save(); ctx.translate(yd * sx, H / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(label, 0, 0); ctx.restore(); });
+      // end zone lettering: bold field-paint face; both words sit with their bottoms toward midfield
+      ctx.fillStyle = "rgba(255,255,255,.88)"; ctx.font = Math.round(H * 0.15) + "px 'Bebas Neue', 'Geist', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      if ("letterSpacing" in ctx) ctx.letterSpacing = Math.round(H * 0.025) + "px";
+      [[5, "AFC", -Math.PI / 2], [115, "NFC", Math.PI / 2]].forEach(([yd, label, rot]) => { ctx.save(); ctx.translate(yd * sx, H / 2); ctx.rotate(rot); ctx.fillText(label, 0, 0); ctx.restore(); });
       if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+      // midfield logo painted on the turf
+      if (leagueImg) { const lh = H * 0.44, lw = lh * (leagueImg.naturalWidth / leagueImg.naturalHeight); ctx.save(); ctx.globalAlpha = 0.86; ctx.drawImage(leagueImg, 60 * sx - lw / 2, H / 2 - lh / 2, lw, lh); ctx.restore(); }
       for (let y = 10; y <= 110; y += 5) {
         ctx.strokeStyle = "rgba(255,255,255," + (y === 10 || y === 110 ? 0.95 : y % 10 === 0 ? 0.5 : 0.28) + ")"; ctx.lineWidth = y === 10 || y === 110 ? 3 : 1.5;
         ctx.beginPath(); ctx.moveTo(y * sx, 0); ctx.lineTo(y * sx, H); ctx.stroke();
       }
       ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1;
       for (let y = 11; y < 110; y++) { if (y % 5 === 0) continue; [0.37, 0.63].forEach((f) => { ctx.beginPath(); ctx.moveTo(y * sx, H * f - H * 0.012); ctx.lineTo(y * sx, H * f + H * 0.012); ctx.stroke(); }); }
-      ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "700 " + Math.round(H * 0.06) + "px 'Geist Mono', monospace";
+      ctx.fillStyle = "rgba(255,255,255,.72)"; ctx.font = Math.round(H * 0.085) + "px 'Bebas Neue', 'Geist', sans-serif"; if ("letterSpacing" in ctx) ctx.letterSpacing = Math.round(H * 0.006) + "px";
       [10, 20, 30, 40, 50, 40, 30, 20, 10].forEach((n, i) => { const x = (20 + i * 10) * sx; ctx.fillText(String(n), x, H * 0.075); ctx.save(); ctx.translate(x, H * 0.925); ctx.rotate(Math.PI); ctx.fillText(String(n), 0, 0); ctx.restore(); });
+      if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
       ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 3; ctx.strokeRect(1.5, 1.5, W - 3, H - 3);
     }
 
@@ -204,7 +207,7 @@
       // printed marks: a small crest in the middle, text on either side (like a stamped game ball)
       const ink = "rgba(18,6,2,.86)", edge = "rgba(255,190,150,.16)";
       const text = (str, x, y, size, weight) => {
-        g.font = weight + " " + size + "px 'Geist', 'Helvetica Neue', Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        g.font = size * 1.12 + "px 'Bebas Neue', 'Geist', Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
         if ("letterSpacing" in g) g.letterSpacing = Math.round(size * 0.12) + "px";
         g.fillStyle = edge; g.fillText(str, x + 1, y + 1.3); g.fillStyle = ink; g.fillText(str, x, y);
         if ("letterSpacing" in g) g.letterSpacing = "0px";
@@ -250,7 +253,7 @@
       g.restore();
       return c;
     }
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { ballSprite = null; redrawIfPaused(); });
+    if (document.fonts && document.fonts.load) document.fonts.load("20px 'Bebas Neue'").then(() => { ballSprite = null; redrawIfPaused(); if (!paused) draw(); });
 
     function football(x, y, len, angle, alpha) {
       if (!ballSprite) ballSprite = makeBallSprite();
