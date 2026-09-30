@@ -106,6 +106,7 @@
     const labelAxis = {
       stacked,
       grid: { display: false },
+      offset: isLine && spec.labels.length === 1, // a lone x value sits in the middle of the chart, not against the left edge
       border: { color: grid },
       ticks: { color: dim, font: { size: 12 }, autoSkip: horizontal ? false : thin, maxTicksLimit: yearish ? 9 : 12, maxRotation: 0, padding: 6 },
     };

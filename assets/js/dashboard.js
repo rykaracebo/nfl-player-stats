@@ -706,12 +706,10 @@
       shown.forEach((c) => datasets.push({ label: catLabel(b.id, c), data: seasons.map((s) => nn(byCat.get(c).get(s))) }));
       catColors(b, shown).forEach((c) => colors.push(c));
     }
-    // One season has no trend to draw, so it becomes a group of bars centered under that year
-    const oneSeason = seasons.length === 1;
-    if (oneSeason && colors[0] === "--fg") colors[0] = "--dim";
-    $("s1").textContent = (oneSeason ? "Only " + seasons[0] + " is selected, so the bars show that season; widen the season range to see a trend. " : "") +
+    const oneSeason = seasons.length === 1; // one x value: the dots sit in the middle of the chart
+    $("s1").textContent = (oneSeason ? "Only " + seasons[0] + " is selected, so each dot is that season's value; widen the season range to see a trend, or use the week chart for movement within it. " : "") +
       splitNote(b, cats) + (comparable(m) && !single ? " The thick line is all rows in view." : "") + minNote(m);
-    draw(1, { kind: oneSeason ? "bar" : "line", labels: seasons, datasets, colors, fmt: FMT[m.fmt], yTitle: m.label });
+    draw(1, { kind: "line", labels: seasons, datasets, colors, fmt: FMT[m.fmt], yTitle: m.label });
   }
 
   function chartCategory(f, m, b) {

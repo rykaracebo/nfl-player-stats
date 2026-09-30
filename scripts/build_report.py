@@ -9,7 +9,7 @@ import json
 
 import pandas as pd
 
-ASSET_V = "20260930a"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20260930b"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
