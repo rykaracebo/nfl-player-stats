@@ -13,9 +13,7 @@
   };
 
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  let highlight = null; // team code whose blocks stay bright; every other team is dimmed (null = none)
-  const rgba = (hex, a) => { const h = hex.replace("#", ""); return "rgba(" + [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(",") + "," + a + ")"; };
-  const teamFill = (team) => (!team ? "rgba(0,0,0,0)" : highlight && highlight !== team ? rgba(NFLTeams.color(team), 0.16) : NFLTeams.color(team));
+  const teamFill = (team) => (!team ? "rgba(0,0,0,0)" : NFLTeams.color(team));
 
   // Prints the team code inside every block or bar segment that is big enough for it, so colour is never the only clue.
   const teamLabels = {
@@ -35,8 +33,6 @@
           const w = ctx.measureText(team).width;
           if (horizontal ? len < w + 10 || thick < 12 : thick < w + 4 || len < 12) return;
           const cx = horizontal ? (p.x + p.base) / 2 : p.x, cy = horizontal ? p.y : (p.y + p.base) / 2;
-          const dimmed = highlight && highlight !== team;
-          ctx.globalAlpha = dimmed ? 0.35 : 1;
           ctx.fillStyle = NFLTeams.inkOn(NFLTeams.color(team));
           ctx.fillText(team, cx, cy + 0.5);
         });
@@ -173,9 +169,5 @@
     });
   }
 
-  function setHighlight(team) {
-    highlight = team || null;
-    for (const { chart } of registry.values()) chart.update("none");
-  }
-  window.NFLCharts = { reducedMotion, setHighlight, FORMATS, buildChart, initTheme, palette, cssVar, registry };
+  window.NFLCharts = { reducedMotion, FORMATS, buildChart, initTheme, palette, cssVar, registry };
 })();

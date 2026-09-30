@@ -542,12 +542,6 @@ page = f"""<!doctype html>
 
 <main>
   <section class="kpis" aria-label="Headline numbers">{kpi_html}</section>
-  <div class="highlight-bar" id="highlight-bar" hidden>
-    <label for="team-highlight">Highlight a team</label>
-    <select id="team-highlight"><option value="">No team highlighted</option></select>
-    <p class="hint" id="highlight-hint">Dims every other team in the blocks and bars below. Each block also shows its team code.</p>
-    <span class="sr" id="highlight-live" role="status" aria-live="polite"></span>
-  </div>
   {''.join(sec_html)}
 
   <section class="finding data-section" id="data">
