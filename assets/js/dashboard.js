@@ -706,7 +706,8 @@
       shown.forEach((c) => datasets.push({ label: catLabel(b.id, c), data: seasons.map((s) => nn(byCat.get(c).get(s))) }));
       catColors(b, shown).forEach((c) => colors.push(c));
     }
-    $("s1").textContent = splitNote(b, cats) + (comparable(m) && !single ? " The thick line is all rows in view." : "") + minNote(m);
+    $("s1").textContent = (seasons.length === 1 ? "One season selected, so each dot is that season's value; the week chart shows movement within it. " : "") +
+      splitNote(b, cats) + (comparable(m) && !single ? " The thick line is all rows in view." : "") + minNote(m);
     draw(1, { kind: "line", labels: seasons, datasets, colors, fmt: FMT[m.fmt], yTitle: m.label });
   }
 

@@ -86,8 +86,8 @@
         : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
       borderWidth: ds.width || (isLine ? (multi ? 1.8 : 2.4) : ds.barTeams ? 1 : stacked ? 1.5 : 0),
       borderDash: ds.dash || [],
-      pointRadius: isLine ? (multi ? 0 : 3) : 0,
-      pointHoverRadius: isLine ? 5 : 0,
+      pointRadius: isLine ? (spec.labels.length === 1 ? 6 : multi ? 0 : 3) : 0, // one label = one point per line, so the dots must show
+      pointHoverRadius: isLine ? 8 : 0,
       pointBackgroundColor: colors[i % colors.length],
       pointBorderColor: surface,
       pointBorderWidth: 2,
