@@ -167,10 +167,12 @@
       const g = c.getContext("2d"), a = SPR_A, b = a * 0.55;
       let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
       g.translate(SPR_W / 2, SPR_H / 2 + 6);
+      // lemon-shaped profile: full in the middle, tapering to soft points (exponent below 1 would blunt the ends toward an ellipse)
       const outline = () => {
-        g.beginPath(); g.moveTo(-a, 0);
-        g.bezierCurveTo(-a * 0.99, -b * 0.6, -a * 0.55, -b, 0, -b); g.bezierCurveTo(a * 0.55, -b, a * 0.99, -b * 0.6, a, 0);
-        g.bezierCurveTo(a * 0.99, b * 0.6, a * 0.55, b, 0, b); g.bezierCurveTo(-a * 0.55, b, -a * 0.99, b * 0.6, -a, 0); g.closePath();
+        const N = 90; g.beginPath();
+        for (let i = 0; i <= N; i++) { const u = -1 + (2 * i) / N, x = a * u, y = -b * Math.pow(Math.max(0, 1 - u * u), 0.92); i ? g.lineTo(x, y) : g.moveTo(x, y); }
+        for (let i = N; i >= 0; i--) { const u = -1 + (2 * i) / N, x = a * u, y = b * Math.pow(Math.max(0, 1 - u * u), 0.92); g.lineTo(x, y); }
+        g.closePath();
       };
       g.save(); g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 16; g.shadowOffsetY = 7; outline(); g.fillStyle = "#6a2a18"; g.fill(); g.restore();
       outline(); g.save(); g.clip();
@@ -314,8 +316,8 @@
         const s = slotOf[target.team], arrive = px(yardsAt(s, CATCH_AT)), ballLen = Math.max(52, W * 0.105);
         if (tm < CATCH_AT) {
           const u = clamp01((tm - THROW_AT) / (CATCH_AT - THROW_AT)), lift = Math.sin(u * Math.PI);
-          const x = center[0] + (arrive[0] - center[0]) * u, y = center[1] + (arrive[1] - center[1]) * u - lift * H * 0.22;
-          const ahead = { x: center[0] + (arrive[0] - center[0]) * (u + 0.02), y: center[1] + (arrive[1] - center[1]) * (u + 0.02) - Math.sin(Math.min(1, u + 0.02) * Math.PI) * H * 0.22 };
+          const x = center[0] + (arrive[0] - center[0]) * u, y = Math.max(ballLen * 0.5, center[1] + (arrive[1] - center[1]) * u - lift * H * 0.22);
+          const ahead = { x: center[0] + (arrive[0] - center[0]) * (u + 0.02), y: Math.max(ballLen * 0.5, center[1] + (arrive[1] - center[1]) * (u + 0.02) - Math.sin(Math.min(1, u + 0.02) * Math.PI) * H * 0.22) };
           ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(center[0] + (arrive[0] - center[0]) * u, center[1] + (arrive[1] - center[1]) * u + 6, ballLen * 0.4, ballLen * 0.13, 0, 0, TAU); ctx.fill();
           football(x, y, ballLen * (1 + lift * 0.35), Math.atan2(ahead.y - y, ahead.x - x));
         } else if (tm < HOLD_UNTIL) {
