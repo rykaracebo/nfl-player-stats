@@ -40,6 +40,18 @@
       ctx.restore();
     },
   };
+  // Shades the column of the x value in spec.mark (the one season the visitor picked, drawn among all seasons for context).
+  const seasonMark = {
+    id: "seasonMark",
+    beforeDatasetsDraw(chart) {
+      const idx = chart.config.options.plugins.seasonMark && chart.config.options.plugins.seasonMark.index;
+      if (idx == null || idx < 0) return;
+      const x = chart.scales.x, area = chart.chartArea, n = chart.data.labels.length;
+      const step = n > 1 ? (x.getPixelForValue(1) - x.getPixelForValue(0)) : area.width;
+      const c = x.getPixelForValue(idx), left = Math.max(area.left, c - step / 2), right = Math.min(area.right, c + step / 2);
+      const ctx = chart.ctx; ctx.save(); ctx.fillStyle = cssVar("--fg") + "1f"; ctx.fillRect(left, area.top, right - left, area.bottom - area.top); ctx.restore();
+    },
+  };
   const reducedMotion = () => !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const registry = new Map(); // canvas -> {chart, spec}
 
@@ -82,7 +94,8 @@
         : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
       borderWidth: ds.width || (isLine ? (multi ? 1.8 : 2.4) : ds.barTeams ? 1 : stacked ? 1.5 : 0),
       borderDash: ds.dash || [],
-      pointRadius: isLine ? (spec.labels.length === 1 ? 6 : multi ? 0 : 3) : 0, // one label = one point per line, so the dots must show
+      // one label = one point per line, so the dots must show; a marked x value (the season picked on the dashboard) gets a big dot
+      pointRadius: isLine ? (spec.mark != null ? spec.labels.map((_, k) => (k === spec.mark ? 6 : multi ? 0 : 2)) : spec.labels.length === 1 ? 6 : multi ? 0 : 3) : 0,
       pointHoverRadius: isLine ? 8 : 0,
       pointBackgroundColor: colors[i % colors.length],
       pointBorderColor: surface,
@@ -111,7 +124,7 @@
     };
 
     const chart = new Chart(canvas, {
-      plugins: [teamLabels],
+      plugins: [teamLabels, seasonMark],
       type: isLine ? "line" : "bar",
       data: { labels: spec.labels, datasets },
       options: {
@@ -123,6 +136,7 @@
         interaction: { mode: isLine ? "index" : "nearest", intersect: !isLine && false, axis: horizontal ? "y" : "x" },
         scales: horizontal ? { x: valueAxis, y: labelAxis } : { x: labelAxis, y: valueAxis },
         plugins: {
+          seasonMark: { index: spec.mark == null ? null : spec.mark },
           legend: {
             display: multi,
             position: "top",
