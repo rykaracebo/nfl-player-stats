@@ -118,6 +118,8 @@
             borderWidth: 1,
             padding: 10,
             filter: (item) => !item.dataset.tips || !!item.dataset.tips[item.dataIndex],
+            // stacked blocks are drawn bottom-up, so list the top block first: the tooltip then reads the way the bar does, top down
+            itemSort: stacked && !horizontal ? (a, b) => b.datasetIndex - a.datasetIndex : undefined,
             callbacks: {
               label: (c) => {
                 if (c.dataset.tips) return " " + c.dataset.tips[c.dataIndex];
