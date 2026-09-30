@@ -451,10 +451,12 @@ def esc(x):
     return html.escape(str(x))
 
 
-def table_html(head, rows):
-    th = "".join(f"<th>{esc(h)}</th>" for h in head)
+def table_html(head, rows, title=""):
+    th = "".join(f'<th scope="col">{esc(h)}</th>' for h in head)
     body = "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>" for r in rows)
-    return f'<div class="tablewrap"><table class="data"><thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div>'
+    cap = f"<caption>{esc(title)}</caption>" if title else ""
+    return (f'<div class="tablewrap" tabindex="0" role="region" aria-label="{esc("The numbers behind: " + title)} (scrollable)">'
+            f'<table class="data">{cap}<thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div>')
 
 
 sec_html = []
@@ -469,8 +471,9 @@ for i, s in enumerate(sections, 1):
       {paras}
     </div>
     <figure class="card chart-card">
+      <figcaption class="chart-caption">Chart for finding {i}: {esc(s['theme'])}. The numbers behind it are in the table under the chart.</figcaption>
       <div class="chart-box" style="height:{s['chart']['height']}px"><canvas data-chart='{esc(spec)}' role="img" aria-label="{esc(s['title'])}"></canvas></div>
-      <details class="numbers"><summary>View the numbers</summary>{table_html(s['head'], s['rows'])}</details>
+      <details class="numbers"><summary>View the numbers</summary>{table_html(s['head'], s['rows'], s['title'])}</details>
     </figure>
   </section>""")
 
@@ -507,12 +510,13 @@ page = f"""<!doctype html>
 <meta name="description" content="What {num(R['reg_rows'])} NFL player-games say about passing, rushing, receiving and defense from {FIRST} to {LAST}.">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-<script>try{{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}}catch(e){{}}</script>
+<script>try{{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}}catch(e){{}}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to the report</a>
 <div class="ambient" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
-<nav class="nav">
+<nav class="nav" aria-label="Main">
   <a class="brand" href="index.html"><svg class="brand-ball" viewBox="0 0 52 32" aria-hidden="true"><ellipse cx="26" cy="16" rx="25" ry="15" fill="#8a3f12" stroke="#4d1e06" stroke-width="2"/><g stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="M8 8Q6 16 8 24M44 8Q46 16 44 24"/><path d="M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5"/></g></svg>NFL <em>Player Stats</em></a>
   <div class="nav-links">
     <a href="index.html" aria-current="page">Report</a>
@@ -521,7 +525,7 @@ page = f"""<!doctype html>
   </div>
 </nav>
 
-<header class="hero">
+<header class="hero" id="main" tabindex="-1">
   <span class="eyebrow">Financial Data Analytics &middot; Data Website Project</span>
   <h1>NFL player stats, {FIRST} to {LAST}: passing <em>peaked</em>, defenses changed</h1>
   <p class="byline">By Rykar Acebo</p>
@@ -538,6 +542,12 @@ page = f"""<!doctype html>
 
 <main>
   <section class="kpis" aria-label="Headline numbers">{kpi_html}</section>
+  <div class="highlight-bar" id="highlight-bar" hidden>
+    <label for="team-highlight">Highlight a team</label>
+    <select id="team-highlight"><option value="">No team highlighted</option></select>
+    <p class="hint" id="highlight-hint">Dims every other team in the blocks and bars below. Each block also shows its team code.</p>
+    <span class="sr" id="highlight-live" role="status" aria-live="polite"></span>
+  </div>
   {''.join(sec_html)}
 
   <section class="finding data-section" id="data">

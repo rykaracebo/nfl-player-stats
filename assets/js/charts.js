@@ -13,6 +13,38 @@
   };
 
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  let highlight = null; // team code whose blocks stay bright; every other team is dimmed (null = none)
+  const rgba = (hex, a) => { const h = hex.replace("#", ""); return "rgba(" + [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(",") + "," + a + ")"; };
+  const teamFill = (team) => (!team ? "rgba(0,0,0,0)" : highlight && highlight !== team ? rgba(NFLTeams.color(team), 0.16) : NFLTeams.color(team));
+
+  // Prints the team code inside every block or bar segment that is big enough for it, so colour is never the only clue.
+  const teamLabels = {
+    id: "teamLabels",
+    afterDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.font = "600 9.5px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      chart.data.datasets.forEach((ds, di) => {
+        if (!ds.barTeams || !chart.isDatasetVisible(di)) return;
+        chart.getDatasetMeta(di).data.forEach((bar, i) => {
+          const team = ds.barTeams[i];
+          if (!team || !(ds.data[i] > 0)) return;
+          const p = bar.getProps(["x", "y", "base", "width", "height"], true);
+          const horizontal = chart.options.indexAxis === "y";
+          const len = horizontal ? Math.abs(p.x - p.base) : Math.abs(p.y - p.base), thick = horizontal ? p.height : p.width;
+          const w = ctx.measureText(team).width;
+          if (horizontal ? len < w + 10 || thick < 12 : thick < w + 4 || len < 12) return;
+          const cx = horizontal ? (p.x + p.base) / 2 : p.x, cy = horizontal ? p.y : (p.y + p.base) / 2;
+          const dimmed = highlight && highlight !== team;
+          ctx.globalAlpha = dimmed ? 0.35 : 1;
+          ctx.fillStyle = NFLTeams.inkOn(NFLTeams.color(team));
+          ctx.fillText(team, cx, cy + 0.5);
+        });
+      });
+      ctx.restore();
+    },
+  };
+  const reducedMotion = () => !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const registry = new Map(); // canvas -> {chart, spec}
 
   function palette(count) {
@@ -37,6 +69,7 @@
     const stacked = !!spec.stacked; // segmented bars: each dataset is one team's slice of every bar
     const multi = spec.datasets.length > 1 && !stacked;
     const surface = cssVar("--surface");
+    const teamOutline = cssVar("--fg") + "55"; // a thin outline so a block still shows against a look-alike neighbour or the card
     // year and week axes get fewer labels so they never crowd; named categories keep every label
     const yearish = spec.labels.length > 0 && spec.labels.every((l) => /^(19|20)\d\d$/.test(String(l)));
     const numericAxis = spec.labels.length > 0 && spec.labels.every((l) => /^\d+$/.test(String(l)));
@@ -46,11 +79,12 @@
       label: ds.label,
       names: ds.names || null,
       data: ds.data,
-      borderColor: stacked ? surface : colors[i % colors.length],
+      borderColor: ds.barTeams ? teamOutline : stacked ? surface : colors[i % colors.length],
       tips: ds.tips || null,
-      backgroundColor: ds.barTeams && window.NFLTeams ? ds.barTeams.map((t) => (t ? NFLTeams.color(t) : "rgba(0,0,0,0)"))
+      barTeams: ds.barTeams || null,
+      backgroundColor: ds.barTeams && window.NFLTeams ? (c) => teamFill(ds.barTeams[c.dataIndex])
         : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
-      borderWidth: ds.width || (isLine ? (multi ? 1.8 : 2.4) : stacked ? 1.5 : 0),
+      borderWidth: ds.width || (isLine ? (multi ? 1.8 : 2.4) : ds.barTeams ? 1 : stacked ? 1.5 : 0),
       borderDash: ds.dash || [],
       pointRadius: isLine ? (multi ? 0 : 3) : 0,
       pointHoverRadius: isLine ? 5 : 0,
@@ -81,13 +115,14 @@
     };
 
     const chart = new Chart(canvas, {
+      plugins: [teamLabels],
       type: isLine ? "line" : "bar",
       data: { labels: spec.labels, datasets },
       options: {
         indexAxis: horizontal ? "y" : "x",
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 350 },
+        animation: reducedMotion() ? false : { duration: 350 },
         layout: { padding: { top: 6, right: 10, bottom: 2, left: 2 } },
         interaction: { mode: isLine ? "index" : "nearest", intersect: !isLine && false, axis: horizontal ? "y" : "x" },
         scales: horizontal ? { x: valueAxis, y: labelAxis } : { x: labelAxis, y: valueAxis },
@@ -138,6 +173,9 @@
     });
   }
 
-  const reducedMotion = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  window.NFLCharts = { reducedMotion, FORMATS, buildChart, initTheme, palette, cssVar, registry };
+  function setHighlight(team) {
+    highlight = team || null;
+    for (const { chart } of registry.values()) chart.update("none");
+  }
+  window.NFLCharts = { reducedMotion, setHighlight, FORMATS, buildChart, initTheme, palette, cssVar, registry };
 })();
