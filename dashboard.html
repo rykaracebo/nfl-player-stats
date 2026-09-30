@@ -10,9 +10,10 @@
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to the dashboard</a>
 <div class="ambient" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
-<nav class="nav">
+<nav class="nav" aria-label="Main">
   <a class="brand" href="index.html"><svg class="brand-ball" viewBox="0 0 52 32" aria-hidden="true"><ellipse cx="26" cy="16" rx="25" ry="15" fill="#8a3f12" stroke="#4d1e06" stroke-width="2"/><g stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="M8 8Q6 16 8 24M44 8Q46 16 44 24"/><path d="M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5"/></g></svg>NFL <em>Player Stats</em></a>
   <div class="nav-links">
     <a href="index.html">Report</a>
@@ -21,40 +22,62 @@
   </div>
 </nav>
 
-<main class="dash">
+<main class="dash" id="main">
   <div class="dash-head">
     <div>
       <span class="eyebrow">Interactive</span>
       <h1>NFL stats <em>dashboard</em></h1>
     </div>
-    <div class="status" id="status" role="status" aria-live="polite">Loading data&hellip;</div>
+    <div class="status" id="status">Loading data&hellip;</div>
   </div>
+  <div class="sr" id="announce" role="status" aria-live="polite"></div>
 
   <div class="loading card" id="loading">
     <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
     <p id="loading-text">Loading 17 seasons of player-games&hellip;</p>
   </div>
+  <noscript><p class="card loading">This dashboard needs JavaScript to load and filter the data. The <a href="index.html">report</a> works without it.</p></noscript>
 
   <div id="app" hidden>
-    <section class="card viewbar" aria-label="What to look at">
-      <div>
-        <span class="lbl">Look at</span>
-        <div class="seg" role="group" aria-label="Players or teams">
-          <button type="button" id="view-players" aria-pressed="true">Players</button>
-          <button type="button" id="view-teams" aria-pressed="false">Teams</button>
-        </div>
-      </div>
-      <p class="hint" id="view-hint"></p>
+    <section class="presets" aria-label="One-click starting points">
+      <span class="lbl">Try this</span>
+      <div class="preset-row" id="presets"></div>
     </section>
 
-    <section class="fieldcard card" id="field-root" aria-label="Team picker"></section>
+    <details class="card fieldpanel" id="field-panel">
+      <summary><span class="fp-title">Pick a team on the field</span><span class="fp-current" id="field-current">All teams</span></summary>
+      <div class="fp-body">
+        <p class="field-status" id="field-status" hidden></p>
+        <div id="field-root" class="fieldbody" role="group" aria-label="Team picker"></div>
+      </div>
+    </details>
 
     <section class="card filters" aria-label="Filters">
       <div class="filter-grid">
         <div class="field">
+          <span class="lbl" id="lbl-view">Look at</span>
+          <div class="seg" role="group" aria-labelledby="lbl-view">
+            <button type="button" id="view-players" aria-pressed="true">Players</button>
+            <button type="button" id="view-teams" aria-pressed="false">Teams</button>
+          </div>
+        </div>
+        <div class="field">
           <label for="f-season-min">Season from</label>
           <div class="pair"><select id="f-season-min"></select><span>to</span><select id="f-season-max" aria-label="Season to"></select></div>
         </div>
+        <div class="field wide2">
+          <span class="lbl" id="lbl-pos">Position group</span>
+          <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
+        </div>
+        <div class="field wide2 search" id="player-field">
+          <label for="player-search">Player search</label>
+          <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="player-results" aria-describedby="player-help">
+          <ul class="results" id="player-results" hidden role="listbox" aria-label="Matching players"></ul>
+          <span class="sr" id="player-help">Type at least two letters, then use the arrow keys to choose a player and Enter to select.</span>
+        </div>
+      </div>
+      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters <span id="more-count"></span></button>
+      <div class="filter-grid more-grid" id="more-filters" hidden>
         <div class="field">
           <label for="f-week-min">Week from</label>
           <div class="pair"><select id="f-week-min"></select><span>to</span><select id="f-week-max" aria-label="Week to"></select></div>
@@ -68,69 +91,54 @@
           <select id="f-opp"></select>
         </div>
         <div class="field">
-          <span class="lbl">Season type</span>
-          <div class="chips" id="chips-season_type"></div>
+          <span class="lbl" id="lbl-st">Season type</span>
+          <div class="chips" id="chips-season_type" role="group" aria-labelledby="lbl-st"></div>
         </div>
         <div class="field">
-          <span class="lbl">Unit</span>
-          <div class="chips" id="chips-unit"></div>
-        </div>
-        <div class="field wide2">
-          <span class="lbl">Position group</span>
-          <div class="chips" id="chips-position_group"></div>
-        </div>
-        <div class="field wide2 search" id="player-field">
-          <label for="player-search">Player search</label>
-          <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" aria-controls="player-results">
-          <ul class="results" id="player-results" hidden role="listbox"></ul>
+          <span class="lbl" id="lbl-unit">Unit</span>
+          <div class="chips" id="chips-unit" role="group" aria-labelledby="lbl-unit"></div>
         </div>
       </div>
-      <div class="filter-actions">
-        <button class="btn ghost" id="btn-reset" type="button">Reset filters</button>
-        <span class="filter-note" id="filter-note"></span>
-      </div>
+      <p class="sentence" id="view-sentence"></p>
     </section>
+
+    <div class="actionbar" id="actionbar">
+      <span class="filter-count" id="filter-count"></span>
+      <button class="btn small" id="btn-reset" type="button">Reset all</button>
+      <button class="btn ghost small" id="btn-link" type="button">Copy link to this view</button>
+    </div>
 
     <div class="banner card" id="player-banner" hidden></div>
 
-    <section class="card controls" aria-label="Chart controls">
+    <section class="card controls" aria-label="What to show">
       <div class="field">
         <label for="m-select">Measure</label>
         <select id="m-select"></select>
         <p class="hint" id="m-desc"></p>
+        <div class="minrow" id="min-row" hidden>
+          <label for="min-select">Minimum</label>
+          <select id="min-select"></select>
+          <p class="hint" id="min-line"></p>
+        </div>
       </div>
       <div class="field">
         <label for="b-select">Break down by</label>
         <select id="b-select"></select>
-        <p class="hint">Applies to the trend chart, the category chart and the table.</p>
+        <p class="hint" id="b-desc">Splits the trend, category and week charts and the table.</p>
       </div>
+      <details class="glossary-box">
+        <summary>Glossary of every measure</summary>
+        <dl class="glossary" id="glossary"></dl>
+      </details>
     </section>
 
     <section class="summary" id="summary" aria-label="Summary numbers"></section>
-    <section class="summary small" id="milestones" aria-label="Milestone seasons in view"></section>
 
-    <section class="charts">
+    <section class="charts" aria-label="Charts">
       <div class="card panel"><h3 id="t1"></h3><p class="sub" id="s1"></p><div class="chart-box"><canvas id="c1" role="img" aria-label="Trend by season"></canvas></div><p class="empty" id="e1" hidden></p></div>
       <div class="card panel"><h3 id="t2"></h3><p class="sub" id="s2"></p><div class="chart-box" id="box2"><canvas id="c2" role="img" aria-label="Measure by category"></canvas></div><p class="empty" id="e2" hidden></p></div>
       <div class="card panel"><h3 id="t3"></h3><p class="sub" id="s3"></p><div class="chart-box"><canvas id="c3" role="img" aria-label="Top player-seasons"></canvas></div><p class="empty" id="e3" hidden></p></div>
       <div class="card panel"><h3 id="t4"></h3><p class="sub" id="s4"></p><div class="chart-box"><canvas id="c4" role="img" aria-label="Measure by week"></canvas></div><p class="empty" id="e4" hidden></p></div>
-    </section>
-
-    <section class="card deep" id="deep" aria-label="EPA over replacement">
-      <div class="table-head">
-        <div>
-          <h3>Deep dive: EPA over replacement</h3>
-          <p class="sub">Expected points a player added beyond a replacement-level player on the same workload. Regular season only; this panel ignores the filters above.</p>
-        </div>
-        <div class="table-tools">
-          <label class="sr" for="d-season">Season</label><select id="d-season"></select>
-          <label class="sr" for="d-pos">Position</label><select id="d-pos"></select>
-        </div>
-      </div>
-      <div class="chart-box" id="box5"><canvas id="c5" role="img" aria-label="Top players by EPA over replacement"></canvas></div>
-      <p class="empty" id="e5" hidden></p>
-      <p class="hint" id="d-note"></p>
-      <div class="tablewrap" id="d-table"></div>
     </section>
 
     <section class="card table-panel" aria-label="Table">
@@ -143,11 +151,39 @@
         </div>
       </div>
       <p class="sub" id="table-note"></p>
-      <div class="tablewrap" id="table-box"></div>
+      <div class="tablewrap" id="table-box" tabindex="0" role="region" aria-label="Table of the numbers behind the current view (scrollable)"></div>
     </section>
 
+    <details class="card advanced" id="advanced">
+      <summary><span class="fp-title">Advanced</span><span class="fp-current">Milestone seasons and EPA over replacement</span></summary>
+      <div class="adv-body">
+        <h3>Milestone seasons in view</h3>
+        <p class="sub">Player-seasons that reached each mark. These follow the filters above.</p>
+        <section class="summary small" id="milestones" aria-label="Milestone seasons in view"></section>
+
+        <section class="deep" id="deep" aria-label="EPA over replacement">
+          <div class="table-head">
+            <div>
+              <h3>Deep dive: EPA over replacement</h3>
+              <p class="sub"><strong>This panel ignores the filters above</strong>; it always uses the regular season, for the season and position you pick here.
+              Expected points a player added beyond a replacement-level player on the same workload. How it is computed: findings
+              <a href="index.html#f11">11</a> and <a href="index.html#f12">12</a> of the report.</p>
+            </div>
+            <div class="table-tools">
+              <label class="sr" for="d-season">Season</label><select id="d-season"></select>
+              <label class="sr" for="d-pos">Position</label><select id="d-pos"></select>
+            </div>
+          </div>
+          <div class="chart-box" id="box5"><canvas id="c5" role="img" aria-label="Top players by EPA over replacement"></canvas></div>
+          <p class="empty" id="e5" hidden></p>
+          <p class="hint" id="d-note"></p>
+          <div class="tablewrap" id="d-table" tabindex="0" role="region" aria-label="Top players by EPA over replacement (scrollable)"></div>
+        </section>
+      </div>
+    </details>
+
     <p class="method">
-      The starting view is regular season only, all seasons, which matches the <a href="index.html">report</a>. Tick Playoffs to include them.
+      The starting view is regular season only, all seasons, passing yards per team-game, which matches the <a href="index.html">report</a>. Tick Playoffs under "More filters" to include them.
       Counts and totals add up players' stats; rates divide the two sums shown in each measure's definition. Player-season rankings
       treat each player's season as one row, so nothing is a career total. Per-team-game rates count team-games among the rows in view.
       Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> weekly player stats (CC-BY-4.0). This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams; they appear only to identify the league and teams and are loaded from links in the nflverse teams file.

@@ -50,7 +50,8 @@
       tips: ds.tips || null,
       backgroundColor: ds.barTeams && window.NFLTeams ? ds.barTeams.map((t) => (t ? NFLTeams.color(t) : "rgba(0,0,0,0)"))
         : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
-      borderWidth: isLine ? (multi ? 1.8 : 2.4) : stacked ? 1.5 : 0,
+      borderWidth: ds.width || (isLine ? (multi ? 1.8 : 2.4) : stacked ? 1.5 : 0),
+      borderDash: ds.dash || [],
       pointRadius: isLine ? (multi ? 0 : 3) : 0,
       pointHoverRadius: isLine ? 5 : 0,
       pointBackgroundColor: colors[i % colors.length],
@@ -137,5 +138,6 @@
     });
   }
 
-  window.NFLCharts = { FORMATS, buildChart, initTheme, palette, cssVar, registry };
+  const reducedMotion = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  window.NFLCharts = { reducedMotion, FORMATS, buildChart, initTheme, palette, cssVar, registry };
 })();

@@ -31,7 +31,8 @@
 
   function mount(container, opts) {
     const teams = opts.teams, summary = opts.summary, measures = summary.measures;
-    let measureId = measures[0].id, conf = "All";
+    const sized = opts.measureSelect !== false; // the dashboard has its own Measure picker, so its field has no second one and equal-size dots
+    let measureId = measures[0].id, conf = "All", flash = null, flashRaf = 0;
     let paused = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     let hover = null, selected = opts.selected || null;
     let clock = paused ? 4.2 : 0, last = performance.now(), cycle = 0, target = null, tipKey = null;
@@ -40,7 +41,7 @@
     container.innerHTML =
       "<div class='field-head'><div><h2></h2><p></p></div><div class='field-tools'>" +
       "<div class='seg' role='group' aria-label='Conference'></div>" +
-      "<label class='sr' for='field-measure'>Dot size shows</label><select id='field-measure'></select>" +
+      (sized ? "<label class='sr' for='field-measure'>Dot size shows</label><select id='field-measure'></select>" : "") +
       "<button type='button' class='btn ghost small' id='field-pause'></button></div></div>" +
       "<div class='field-wrap'><canvas role='img'></canvas><div class='field-tip' hidden></div></div>" +
       "<p class='field-caption' aria-live='polite'></p>" +
@@ -60,8 +61,10 @@
       seg.appendChild(b);
     });
     const sel = container.querySelector("select");
-    measures.forEach((m) => { const o = document.createElement("option"); o.value = m.id; o.textContent = "Dot size: " + m.label; sel.appendChild(o); });
-    sel.addEventListener("change", () => { measureId = sel.value; tipKey = null; redrawIfPaused(); });
+    if (sel) {
+      measures.forEach((m) => { const o = document.createElement("option"); o.value = m.id; o.textContent = "Dot size: " + m.label; sel.appendChild(o); });
+      sel.addEventListener("change", () => { measureId = sel.value; tipKey = null; redrawIfPaused(); });
+    }
     const pauseBtn = container.querySelector("#field-pause");
     const setPauseLabel = () => (pauseBtn.textContent = paused ? "Play" : "Pause");
     setPauseLabel();
@@ -299,7 +302,7 @@
       slots.forEach((s) => {
         const t = s.t, pos = px(yardsAt(s, tm));
         const v = summary.teams[t.team] ? summary.teams[t.team][measureId] : NaN;
-        const norm = hi > lo && !Number.isNaN(v) ? (v - lo) / (hi - lo) : 0.5, rad = r0 * (0.8 + 0.6 * norm);
+        const norm = sized && hi > lo && !Number.isNaN(v) ? (v - lo) / (hi - lo) : 0.5, rad = r0 * (0.8 + 0.6 * norm);
         const on = conf === "All" || conf === t.conference, col = NFLTeams.color(t.team);
         const isHover = hover === t.team, isSel = selected === t.team;
         const running = tm > RUN_START && tm < RUN_START + RUN_DUR;
@@ -317,6 +320,11 @@
           const sz = (rad - 1.5) * 1.55; ctx.drawImage(im, pos[0] - sz / 2, pos[1] - sz / 2, sz, sz); ctx.restore();
         } else { ctx.fillStyle = "#fff"; ctx.font = "700 " + Math.round(rad * 0.75) + "px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(t.team, pos[0], pos[1] + 1); }
         if (isSel || isHover) { ctx.font = "700 11px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillStyle = "#ffb612"; ctx.fillText(t.team, pos[0], pos[1] + rad + 5); }
+        if (flash && flash.team === t.team) { // a ring that spreads out from the dot you just clicked
+          const u = Math.min(1, (performance.now() - flash.start) / 1100);
+          ctx.globalAlpha = 1 - u; ctx.strokeStyle = "#ffb612"; ctx.lineWidth = 4 * (1 - u) + 1;
+          ctx.beginPath(); ctx.arc(pos[0], pos[1], rad + 6 + u * 34, 0, TAU); ctx.stroke();
+        }
         ctx.globalAlpha = 1;
         dots.push({ t, x: pos[0], y: pos[1], r: rad, on });
       });
@@ -344,9 +352,13 @@
 
       const focus = hover || (caught && caught.team);
       caption.textContent = focus
-        ? (hover ? "" : "Completed pass to ") + focus + " · " + NFLTeams.name(focus) + " · " + m.label + " " + fmt(m, summary.teams[focus][measureId]) + " (rank " + rankOf(focus, measureId) + " of 32)"
+        ? (hover ? "" : "Completed pass to ") + focus + " · " + NFLTeams.name(focus) + (sized ? " · " + m.label + " " + fmt(m, summary.teams[focus][measureId]) + " (rank " + rankOf(focus, measureId) + " of 32)" : "")
         : "AFC teams run right, NFC teams run left. The ball goes to a random team every few seconds. " + summary.scope + ". Hover a team to freeze the play.";
       if (!hover) { if (caught) showTip(dots.find((d) => d.t.team === caught.team)); else { tip.hidden = true; tipKey = null; } }
+      if (flash) { // keep redrawing while the click ring plays, even when the play is paused or frozen
+        if (performance.now() - flash.start > 1100) flash = null;
+        else if (!flashRaf) { flashRaf = requestAnimationFrame(() => { flashRaf = 0; draw(); }); }
+      }
     }
 
     // ---------------------------------------------------------------- interaction
@@ -364,8 +376,8 @@
         tip.innerHTML = "<b></b><div class='row'><span></span><span></span></div>";
         tip.firstChild.innerHTML = NFLTeams.badge(t.team) + " "; tip.firstChild.appendChild(document.createTextNode(t.full_name));
         const sub = tip.querySelector(".row"); sub.firstChild.textContent = t.conference + " " + t.division; sub.lastChild.textContent = s.games + " games";
-        measures.forEach((m) => { const row = document.createElement("div"); row.className = "row"; if (m.id === measureId) row.style.color = "#ffb612"; row.innerHTML = "<span></span><span></span>"; row.firstChild.textContent = m.label; row.lastChild.textContent = fmt(m, s[m.id]); tip.appendChild(row); });
-        const go = document.createElement("div"); go.className = "go"; go.textContent = "Click to open this team"; tip.appendChild(go);
+        measures.forEach((m) => { const row = document.createElement("div"); row.className = "row"; if (sized && m.id === measureId) row.style.color = "#ffb612"; row.innerHTML = "<span></span><span></span>"; row.firstChild.textContent = m.label; row.lastChild.textContent = fmt(m, s[m.id]); tip.appendChild(row); });
+        const go = document.createElement("div"); go.className = "go"; go.textContent = opts.goText || "Click to open this team"; tip.appendChild(go);
       }
       tip.hidden = false;
       const w = wrap.clientWidth, left = d.x + d.r + 14 + 235 > w ? d.x - d.r - 14 - 235 : d.x + d.r + 14;
@@ -378,7 +390,7 @@
       showTip(d);
     });
     canvas.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; tipKey = null; last = performance.now(); redrawIfPaused(); });
-    canvas.addEventListener("click", (e) => { const d = pick(e); if (d && opts.onSelect) { selected = d.t.team; opts.onSelect(d.t.team); redrawIfPaused(); } });
+    canvas.addEventListener("click", (e) => { const d = pick(e); if (d && opts.onSelect) { selected = d.t.team; flash = { team: d.t.team, start: performance.now() }; opts.onSelect(d.t.team); draw(); } });
 
     function pickTarget() {
       const pool = teams.filter((t) => conf === "All" || t.conference === conf);
