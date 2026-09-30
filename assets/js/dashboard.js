@@ -463,6 +463,19 @@
     }
     return parts.join(", ");
   }
+  const span = (first, last) => (first === last ? String(first) : first + " to " + last);
+  function playerNotice() {
+    const p = state.player;
+    if (!p || state.h2h || !(state.team || state.opp)) return "";
+    const joined = p.teams.map((t) => "the " + NFLTeams.name(t.team) + " (" + span(t.first, t.last) + ")");
+    const list = joined.length > 1 ? joined.slice(0, -1).join(", ") + " and " + joined[joined.length - 1] : joined[0];
+    if (state.team) {
+      const name = "the " + NFLTeams.name(state.team), mine = p.teams.find((t) => t.team === state.team);
+      if (!mine) return p.name + " did not play for " + name + " in any season from " + seasonsAll[0] + " to " + seasonsAll[seasonsAll.length - 1] + ". Teams in this data: " + list + ".";
+      return p.name + " has no games for " + name + " with these filters. The games with this team were in " + span(mine.first, mine.last) + ", so try widening the seasons, weeks or season type.";
+    }
+    return p.name + " has no games against the " + NFLTeams.name(state.opp) + " with these filters. Try widening the seasons, weeks or season type.";
+  }
   function paintState(rowsText) {
     const a = activeFilters(), sentence = describe();
     $("view-sentence").textContent = "Showing: " + sentence + ".";
@@ -642,6 +655,10 @@
     $("m-desc").textContent = "What is this? " + m.what;
     paintMinLine(f, m);
 
+    // a player with no games for the chosen team or opponent: say so instead of showing a wall of zeros
+    const note = !rows && state.view === "players" ? playerNotice() : "";
+    $("player-notice").hidden = !note; $("player-notice").textContent = note;
+
     // player banner
     const ban = $("player-banner");
     if (state.player) {
@@ -658,7 +675,7 @@
 
     if (!rows) {
       $("summary").innerHTML = cardsHtml([[0, "int", state.view === "teams" ? "Team-games" : "Player-games"]]);
-      const msg = state.view === "teams" ? "No team-games match these filters. Try widening the season range or clearing a filter." : NO_ROWS;
+      const msg = state.view === "teams" ? "No team-games match these filters. Try widening the season range or clearing a filter." : note ? "No games to show. See the note above." : NO_ROWS;
       for (let n = 1; n <= 4; n++) showEmpty(n, msg);
       ["t1", "t2", "t3", "t4"].forEach((id) => ($(id).textContent = m.label)); ["s1", "s2", "s3", "s4"].forEach((id) => ($(id).textContent = ""));
       renderTable(f);

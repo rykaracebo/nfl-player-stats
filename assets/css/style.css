@@ -242,6 +242,7 @@ input[type="search"] {
 .results li.none { color: var(--dim); cursor: default; }
 .banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 18px; margin-bottom: 18px; font-size: 14px; color: var(--dim); }
 .banner span { color: var(--fg); }
+.notice { margin: -8px 0 18px; padding: 12px 18px; font-size: 14px; color: var(--fg); border-left: 3px solid var(--accent); }
 .hint { color: var(--faint); font-size: 12px; margin: 6px 0 0; }
 .summary.small { margin-top: -4px; }
 .summary.small .kpi { padding: 12px 16px; }

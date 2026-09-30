@@ -586,24 +586,27 @@
     return { rows: out, total };
   }
 
-  // Player list for the search box: id, name, position group and team from the player's last row.
+  // Player list for the search box: id, name, position group and team from the player's last row, plus every team he appeared for and when.
   function playerIndex(store) {
     const info = new Map();
     for (const chunk of store.chunks) {
       for (let i = 0; i < chunk.n; i++) {
         const p = chunk.cat.player_id[i];
         let e = info.get(p);
-        if (!e) { e = { id: store.dicts.player_id.list[p], name: store.playerNames[p], first: chunk.season, last: chunk.season, pg: 0, team: 0, games: 0 }; info.set(p, e); }
+        if (!e) { e = { id: store.dicts.player_id.list[p], name: store.playerNames[p], first: chunk.season, last: chunk.season, pg: 0, team: 0, games: 0, teams: new Map() }; info.set(p, e); }
         e.last = chunk.season;
         e.pg = chunk.cat.position_group[i];
         e.team = chunk.cat.team[i];
         e.games++;
+        const span = e.teams.get(e.team);
+        if (!span) e.teams.set(e.team, [chunk.season, chunk.season]); else span[1] = chunk.season;
       }
     }
     const list = [];
     for (const e of info.values()) {
       list.push({ id: e.id, name: e.name, position_group: store.dicts.position_group.list[e.pg],
-                  team: store.dicts.team.list[e.team], first: e.first, last: e.last, games: e.games });
+                  team: store.dicts.team.list[e.team], first: e.first, last: e.last, games: e.games,
+                  teams: [...e.teams].map(([t, sp]) => ({ team: store.dicts.team.list[t], first: sp[0], last: sp[1] })).sort((x, y) => x.first - y.first) });
     }
     list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
