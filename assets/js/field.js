@@ -66,8 +66,14 @@
       sel.addEventListener("change", () => { measureId = sel.value; tipKey = null; redrawIfPaused(); });
     }
     const pauseBtn = container.querySelector("#field-pause");
-    const setPauseLabel = () => (pauseBtn.textContent = paused ? "Play" : "Pause");
+    const setPauseLabel = () => { pauseBtn.textContent = paused ? "Play" : "Pause"; pauseBtn.setAttribute("aria-label", paused ? "Play the field animation" : "Pause the field animation"); };
     setPauseLabel();
+    // follow the visitor's motion setting, even if they change it while the page is open
+    const motionQuery = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionQuery && motionQuery.addEventListener) motionQuery.addEventListener("change", (e) => { paused = e.matches; setPauseLabel(); last = performance.now(); if (paused) draw(); });
+    // no drawing while the field is scrolled out of view
+    let onScreen = true;
+    if (window.IntersectionObserver) new IntersectionObserver((entries) => { onScreen = entries[0].isIntersecting; last = performance.now(); if (onScreen && (paused || hover)) draw(); }).observe(container);
     pauseBtn.addEventListener("click", () => { paused = !paused; setPauseLabel(); last = performance.now(); redrawIfPaused(); });
 
     const ul = container.querySelector("ul");
@@ -121,7 +127,8 @@
     let W = 0, H = 0, sx = 1, sy = 1, dpr = 1, dots = [];
     function layout() {
       const rect = wrap.getBoundingClientRect();
-      W = Math.max(320, Math.round(rect.width));
+      W = Math.round(rect.width);
+      if (!W) return;
       H = Math.round(W / (W < 640 ? 1.25 : 2));
       dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.height = H + "px";
@@ -368,29 +375,49 @@
       dots.forEach((d) => { if (!d.on) return; const dd = Math.hypot(d.x - x, d.y - y); if (dd <= d.r + 8 && dd < bd) { bd = dd; best = d; } });
       return best;
     }
+    let stuck = null; // touch: the team whose tooltip a first tap left open
     function showTip(d) {
       if (!d) { tip.hidden = true; tipKey = null; return; }
-      const t = d.t, s = summary.teams[t.team], key = t.team + measureId;
+      const t = d.t, s = summary.teams[t.team], key = t.team + measureId + (stuck === t.team ? "!" : "");
       if (key !== tipKey) {
         tipKey = key;
         tip.innerHTML = "<b></b><div class='row'><span></span><span></span></div>";
         tip.firstChild.innerHTML = NFLTeams.badge(t.team) + " "; tip.firstChild.appendChild(document.createTextNode(t.full_name));
         const sub = tip.querySelector(".row"); sub.firstChild.textContent = t.conference + " " + t.division; sub.lastChild.textContent = s.games + " games";
         measures.forEach((m) => { const row = document.createElement("div"); row.className = "row"; if (sized && m.id === measureId) row.style.color = "#ffb612"; row.innerHTML = "<span></span><span></span>"; row.firstChild.textContent = m.label; row.lastChild.textContent = fmt(m, s[m.id]); tip.appendChild(row); });
-        const go = document.createElement("div"); go.className = "go"; go.textContent = opts.goText || "Click to open this team"; tip.appendChild(go);
+        if (stuck === t.team) { // touch: a real button, so a second tap on the dot is not the only way in
+          const b = document.createElement("button"); b.type = "button"; b.className = "btn small go-btn"; b.textContent = opts.goButton || "Open team";
+          b.addEventListener("click", (ev) => { ev.stopPropagation(); chooseTeam(t.team); });
+          tip.appendChild(b);
+        } else { const go = document.createElement("div"); go.className = "go"; go.textContent = opts.goText || "Click to open this team"; tip.appendChild(go); }
       }
+      tip.classList.toggle("sticky", stuck === t.team);
       tip.hidden = false;
       const w = wrap.clientWidth, left = d.x + d.r + 14 + 235 > w ? d.x - d.r - 14 - 235 : d.x + d.r + 14;
       tip.style.left = Math.max(6, left) + "px"; tip.style.top = Math.max(6, Math.min(H - tip.offsetHeight - 6, d.y - 20)) + "px";
     }
     canvas.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return; // a finger dragging to scroll is not hovering
       const d = pick(e), code = d ? d.t.team : null;
       canvas.style.cursor = d ? "pointer" : "default";
       if (code !== hover) { hover = code; tipKey = null; redrawIfPaused(); if (hover) draw(); }
       showTip(d);
     });
-    canvas.addEventListener("pointerleave", () => { hover = null; tip.hidden = true; tipKey = null; last = performance.now(); redrawIfPaused(); });
-    canvas.addEventListener("click", (e) => { const d = pick(e); if (d && opts.onSelect) { selected = d.t.team; flash = { team: d.t.team, start: performance.now() }; opts.onSelect(d.t.team); draw(); } });
+    canvas.addEventListener("pointerleave", (e) => { if (e.pointerType === "touch" && stuck) return; hover = null; tip.hidden = true; tipKey = null; last = performance.now(); redrawIfPaused(); });
+    function chooseTeam(code) {
+      stuck = null; hover = null; tip.hidden = true; tip.classList.remove("sticky"); tipKey = null; last = performance.now();
+      selected = code; flash = { team: code, start: performance.now() };
+      if (opts.onSelect) opts.onSelect(code);
+      draw();
+    }
+    canvas.addEventListener("click", (e) => {
+      const d = pick(e);
+      if (e.pointerType === "touch") {
+        if (!d) { stuck = null; hover = null; tip.hidden = true; tip.classList.remove("sticky"); tipKey = null; last = performance.now(); redrawIfPaused(); return; }
+        if (stuck !== d.t.team) { stuck = d.t.team; hover = d.t.team; tipKey = null; draw(); showTip(d); return; } // first tap: show the numbers
+      }
+      if (d && opts.onSelect) chooseTeam(d.t.team);
+    });
 
     function pickTarget() {
       const pool = teams.filter((t) => conf === "All" || t.conference === conf);
@@ -399,7 +426,7 @@
     function redrawIfPaused() { if (paused || hover) draw(); }
     function frame(now) {
       const dt = Math.min(0.1, (now - last) / 1000); last = now;
-      if (!paused && !document.hidden && !hover) {
+      if (!paused && !document.hidden && !hover && onScreen) {
         const before = Math.floor(clock / CYCLE);
         clock += dt;
         if (Math.floor(clock / CYCLE) !== before || !target) { cycle++; target = pickTarget(); tipKey = null; }

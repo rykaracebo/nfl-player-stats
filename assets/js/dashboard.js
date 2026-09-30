@@ -312,7 +312,7 @@
       fieldApi = NFLField.mount($("field-root"), {
         teams: NFLTeams.list, summary, selected: state.team || null,
         title: "The league on the field", blurb: "Hover a team to freeze the play and see its numbers. Click a team to filter the whole dashboard to it.",
-        measureSelect: false, goText: "Click to filter to this team",
+        measureSelect: false, goText: "Click to filter to this team", goButton: "Filter to this team",
         linkFor: () => "#",
         onSelect: (code) => selectTeam(code),
       });
