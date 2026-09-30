@@ -101,7 +101,7 @@
     { id: "rec_yds", group: "Totals", label: "Receiving yards", type: "sum", num: ["receiving_yards"], fmt: "int" },
     { id: "receptions", group: "Totals", label: "Receptions", type: "sum", num: ["receptions"], fmt: "int" },
     { id: "tds", group: "Totals", label: "Touchdowns (pass, rush, receive)", type: "sum", num: ["passing_tds", "rushing_tds", "receiving_tds"], fmt: "int" },
-    { id: "sacks", group: "Totals", label: "Sacks (defense)", type: "sum", num: ["def_sacks"], fmt: "dec1" },
+    { id: "sacks", group: "Totals", label: "Sacks (defense)", type: "sum", num: ["def_sacks"], fmt: "half" },
     { id: "ints_def", group: "Totals", label: "Interceptions (defense)", type: "sum", num: ["def_interceptions"], fmt: "int" },
     { id: "qb_hits", group: "Totals", label: "QB hits (defense)", type: "sum", num: ["def_qb_hits"], fmt: "int" },
     { id: "pass_def", group: "Totals", label: "Passes defended", type: "sum", num: ["def_pass_defended"], fmt: "int" },
@@ -208,6 +208,7 @@
     switch (fmt) {
       case "int": return Math.round(v).toLocaleString("en-US");
       case "dec1": return v.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      case "half": return Number.isInteger(v) ? Math.round(v).toLocaleString("en-US") : v.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });  // whole counts print without .0; half sacks keep .5
       case "dec2": return v.toFixed(2);
       case "dec3": return v.toFixed(3);
       case "pct1": return (v * 100).toFixed(1) + "%";

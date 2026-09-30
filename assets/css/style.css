@@ -143,6 +143,9 @@ h1 em { color: var(--accent-text); }
 .finding-text ul { color: var(--dim); padding-left: 20px; }
 .finding-text li { margin-bottom: 8px; }
 .finding-text strong { color: var(--fg); font-weight: 600; }
+.glossary { color: var(--dim); margin: 0 0 14px; }
+.glossary dt { color: var(--fg); font-weight: 600; margin-top: 10px; }
+.glossary dd { margin: 2px 0 0; }
 .finding-text.wide { grid-column: 1 / -1; max-width: 800px; }
 .data-section { grid-template-columns: 1fr; }
 .chart-card { margin: 0; padding: 20px 20px 12px; }

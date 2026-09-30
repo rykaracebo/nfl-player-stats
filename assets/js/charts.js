@@ -6,6 +6,7 @@
     num: (v) => Math.round(v).toLocaleString("en-US"),
     int: (v) => Math.round(v).toLocaleString("en-US"),
     dec1: (v) => v.toFixed(1),
+    half: (v) => (Number.isInteger(v) ? Math.round(v).toLocaleString("en-US") : v.toFixed(1)),
     dec2: (v) => v.toFixed(2),
     dec3: (v) => v.toFixed(3),
     yds: (v) => v.toFixed(1),

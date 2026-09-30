@@ -4,7 +4,7 @@
   "use strict";
   const S = NFLStats, C = NFLCharts;
   const $ = (id) => document.getElementById(id);
-  const FMT = { int: "int", dec1: "dec1", dec2: "dec2", dec3: "dec3", pct1: "pct" };
+  const FMT = { int: "int", half: "half", dec1: "dec1", dec2: "dec2", dec3: "dec3", pct1: "pct" };
   const SEASON_TYPE_LABEL = { REG: "Regular season", POST: "Playoffs" };
   const CHIPS = {
     season_type: [["REG", "Regular season"], ["POST", "Playoffs"]],
@@ -307,7 +307,7 @@
     const cards = [
       [rows, "int", "Player-games"], [playerCount, "int", "Different players"],
       [sum ? sum.num[1] : 0, "int", "Passing yards"], [sum ? sum.num[2] : 0, "int", "Rushing yards"], [sum ? sum.num[3] : 0, "int", "Receiving yards"],
-      [sum ? sum.num[4] : 0, "int", "Touchdowns (pass, rush, receive)"], [sum ? sum.num[5] : 0, "dec1", "Sacks"], [sum ? sum.num[6] : 0, "int", "Interceptions (defense)"],
+      [sum ? sum.num[4] : 0, "int", "Touchdowns (pass, rush, receive)"], [sum ? sum.num[5] : 0, "half", "Sacks"], [sum ? sum.num[6] : 0, "int", "Interceptions (defense)"],
     ];
     $("summary").innerHTML = cardsHtml(cards);
     const ms = S.milestones(store, f).total;
@@ -501,7 +501,7 @@
       rows = gl.rows.map((r) => {
         const vals = cols.map((c) => r[c]);
         return { raw: [r.season, r.week, r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals),
-                 cells: [r.season, r.week, r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals.map((v, k) => (Number.isNaN(v) ? "n/a" : cols[k] === "fantasy_points_ppr" ? v.toFixed(1) : (cols[k] === "def_sacks" ? S.format("dec1", v) : S.format("int", v))))) };
+                 cells: [r.season, r.week, r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals.map((v, k) => (Number.isNaN(v) ? "n/a" : cols[k] === "fantasy_points_ppr" ? v.toFixed(1) : (cols[k] === "def_sacks" ? S.format("half", v) : S.format("int", v))))) };
       });
       note = "Showing the first " + rows.length.toLocaleString("en-US") + " of " + gl.total.toLocaleString("en-US") + " player-games" + (gl.total > limit ? ". Pick a player or narrow the filters to see the rest." : ".");
       tableSort = tableSort || null;
