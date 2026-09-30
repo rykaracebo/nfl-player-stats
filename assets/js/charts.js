@@ -49,18 +49,18 @@
       tips: ds.tips || null,
       backgroundColor: ds.barTeams && window.NFLTeams ? ds.barTeams.map((t) => (t ? NFLTeams.color(t) : "rgba(0,0,0,0)"))
         : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
-      borderWidth: isLine ? (multi ? 1.8 : 2.4) : stacked ? 2 : 0,
+      borderWidth: isLine ? (multi ? 1.8 : 2.4) : stacked ? 1.5 : 0,
       pointRadius: isLine ? (multi ? 0 : 3) : 0,
       pointHoverRadius: isLine ? 5 : 0,
       pointBackgroundColor: colors[i % colors.length],
       pointBorderColor: surface,
       pointBorderWidth: 2,
       tension: 0,
-      borderRadius: isLine ? 0 : 3,
+      borderRadius: isLine ? 0 : stacked && !horizontal ? 2 : 3,
       borderSkipped: false,
-      maxBarThickness: horizontal ? 16 : 44,
-      categoryPercentage: 0.78,
-      barPercentage: 0.86,
+      maxBarThickness: horizontal ? 16 : stacked ? 60 : 44,
+      categoryPercentage: stacked && !horizontal ? 0.94 : 0.78,
+      barPercentage: stacked && !horizontal ? 0.94 : 0.86,
     }));
 
     // no rotated axis titles: the chart heading already names the measure

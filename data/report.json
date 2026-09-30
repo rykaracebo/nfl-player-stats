@@ -186,6 +186,2675 @@
    ]
   ]
  },
+ "blocks": {
+  "carries300": {
+   "2009": [
+    [
+     "Chris Johnson",
+     358.0
+    ],
+    [
+     "Thomas Jones",
+     332.0
+    ],
+    [
+     "Steven Jackson",
+     325.0
+    ],
+    [
+     "Adrian Peterson",
+     315.0
+    ],
+    [
+     "Maurice Jones-Drew",
+     312.0
+    ],
+    [
+     "Cedric Benson",
+     301.0
+    ]
+   ],
+   "2010": [
+    [
+     "Michael Turner",
+     334.0
+    ],
+    [
+     "Steven Jackson",
+     330.0
+    ],
+    [
+     "Arian Foster",
+     326.0
+    ],
+    [
+     "Rashard Mendenhall",
+     324.0
+    ],
+    [
+     "Cedric Benson",
+     321.0
+    ],
+    [
+     "Chris Johnson",
+     316.0
+    ],
+    [
+     "Ray Rice",
+     307.0
+    ]
+   ],
+   "2011": [
+    [
+     "Maurice Jones-Drew",
+     343.0
+    ],
+    [
+     "Michael Turner",
+     301.0
+    ]
+   ],
+   "2012": [
+    [
+     "Arian Foster",
+     351.0
+    ],
+    [
+     "Adrian Peterson",
+     348.0
+    ],
+    [
+     "Alfred Morris",
+     335.0
+    ],
+    [
+     "Doug Martin",
+     319.0
+    ],
+    [
+     "Marshawn Lynch",
+     315.0
+    ]
+   ],
+   "2013": [
+    [
+     "LeSean McCoy",
+     314.0
+    ],
+    [
+     "Marshawn Lynch",
+     301.0
+    ]
+   ],
+   "2014": [
+    [
+     "DeMarco Murray",
+     392.0
+    ],
+    [
+     "LeSean McCoy",
+     312.0
+    ]
+   ],
+   "2015": [
+    [
+     "Adrian Peterson",
+     327.0
+    ]
+   ],
+   "2016": [
+    [
+     "Ezekiel Elliott",
+     322.0
+    ]
+   ],
+   "2017": [
+    [
+     "Le'Veon Bell",
+     321.0
+    ]
+   ],
+   "2018": [
+    [
+     "Ezekiel Elliott",
+     304.0
+    ]
+   ],
+   "2019": [
+    [
+     "Derrick Henry",
+     303.0
+    ],
+    [
+     "Ezekiel Elliott",
+     301.0
+    ]
+   ],
+   "2020": [
+    [
+     "Derrick Henry",
+     378.0
+    ],
+    [
+     "Dalvin Cook",
+     312.0
+    ]
+   ],
+   "2021": [
+    [
+     "Jonathan Taylor",
+     332.0
+    ],
+    [
+     "Najee Harris",
+     307.0
+    ]
+   ],
+   "2022": [
+    [
+     "Derrick Henry",
+     349.0
+    ],
+    [
+     "Josh Jacobs",
+     340.0
+    ],
+    [
+     "Nick Chubb",
+     302.0
+    ]
+   ],
+   "2023": [],
+   "2024": [
+    [
+     "Saquon Barkley",
+     345.0
+    ],
+    [
+     "Derrick Henry",
+     325.0
+    ],
+    [
+     "Kyren Williams",
+     316.0
+    ],
+    [
+     "Bijan Robinson",
+     304.0
+    ],
+    [
+     "Jonathan Taylor",
+     303.0
+    ],
+    [
+     "Josh Jacobs",
+     301.0
+    ]
+   ],
+   "2025": [
+    [
+     "Jonathan Taylor",
+     323.0
+    ],
+    [
+     "Christian McCaffrey",
+     311.0
+    ],
+    [
+     "James Cook",
+     309.0
+    ],
+    [
+     "Derrick Henry",
+     307.0
+    ]
+   ]
+  },
+  "int6": {
+   "2009": [
+    [
+     "Asante Samuel",
+     9.0
+    ],
+    [
+     "Charles Woodson",
+     9.0
+    ],
+    [
+     "Darren Sharper",
+     9.0
+    ],
+    [
+     "Jairus Byrd",
+     9.0
+    ],
+    [
+     "Brent Grimes",
+     6.0
+    ],
+    [
+     "Darrelle Revis",
+     6.0
+    ],
+    [
+     "Dominique Rodgers-Cromartie",
+     6.0
+    ],
+    [
+     "Johnathan Joseph",
+     6.0
+    ],
+    [
+     "Leon Hall",
+     6.0
+    ],
+    [
+     "Nick Collins",
+     6.0
+    ],
+    [
+     "Zack Bowman",
+     6.0
+    ]
+   ],
+   "2010": [
+    [
+     "Ed Reed",
+     8.0
+    ],
+    [
+     "Asante Samuel",
+     7.0
+    ],
+    [
+     "Devin McCourty",
+     7.0
+    ],
+    [
+     "Troy Polamalu",
+     7.0
+    ],
+    [
+     "Aqib Talib",
+     6.0
+    ],
+    [
+     "DeAngelo Hall",
+     6.0
+    ],
+    [
+     "Jason Allen",
+     6.0
+    ],
+    [
+     "Joe Haden",
+     6.0
+    ],
+    [
+     "Tramon Williams",
+     6.0
+    ]
+   ],
+   "2011": [
+    [
+     "Charles Woodson",
+     7.0
+    ],
+    [
+     "Eric Weddle",
+     7.0
+    ],
+    [
+     "Kyle Arrington",
+     7.0
+    ],
+    [
+     "Brandon Browner",
+     6.0
+    ],
+    [
+     "Carlos Rogers",
+     6.0
+    ],
+    [
+     "Corey Webster",
+     6.0
+    ],
+    [
+     "Dashon Goldson",
+     6.0
+    ]
+   ],
+   "2012": [
+    [
+     "Tim Jennings",
+     9.0
+    ],
+    [
+     "Richard Sherman",
+     8.0
+    ],
+    [
+     "Stevie Brown",
+     8.0
+    ],
+    [
+     "Patrick Peterson",
+     7.0
+    ],
+    [
+     "Casey Hayward",
+     6.0
+    ],
+    [
+     "Thomas DeCoud",
+     6.0
+    ]
+   ],
+   "2013": [
+    [
+     "Richard Sherman",
+     8.0
+    ],
+    [
+     "Antrel Rolle",
+     6.0
+    ],
+    [
+     "Brandon Boykin",
+     6.0
+    ],
+    [
+     "Deandre Levy",
+     6.0
+    ]
+   ],
+   "2014": [
+    [
+     "Glover Quin",
+     7.0
+    ],
+    [
+     "Tashaun Gipson",
+     6.0
+    ]
+   ],
+   "2015": [
+    [
+     "Marcus Peters",
+     8.0
+    ],
+    [
+     "Reggie Nelson",
+     8.0
+    ],
+    [
+     "Kurt Coleman",
+     7.0
+    ],
+    [
+     "Trumaine Johnson",
+     7.0
+    ],
+    [
+     "Marcus Williams",
+     6.0
+    ]
+   ],
+   "2016": [
+    [
+     "Casey Hayward",
+     7.0
+    ],
+    [
+     "Dominique Rodgers-Cromartie",
+     6.0
+    ],
+    [
+     "Marcus Peters",
+     6.0
+    ],
+    [
+     "Quintin Demps",
+     6.0
+    ]
+   ],
+   "2017": [
+    [
+     "Darius Slay",
+     8.0
+    ],
+    [
+     "Kevin Byard",
+     8.0
+    ],
+    [
+     "A.J. Bouye",
+     6.0
+    ],
+    [
+     "Eric Weddle",
+     6.0
+    ]
+   ],
+   "2018": [
+    [
+     "Damontae Kazee",
+     7.0
+    ],
+    [
+     "Kyle Fuller",
+     7.0
+    ],
+    [
+     "Xavien Howard",
+     7.0
+    ],
+    [
+     "Eddie Jackson",
+     6.0
+    ]
+   ],
+   "2019": [
+    [
+     "Anthony Harris",
+     6.0
+    ],
+    [
+     "Stephon Gilmore",
+     6.0
+    ],
+    [
+     "Tre'Davious White",
+     6.0
+    ]
+   ],
+   "2020": [
+    [
+     "Xavien Howard",
+     10.0
+    ],
+    [
+     "J.C. Jackson",
+     9.0
+    ],
+    [
+     "Tyrann Mathieu",
+     6.0
+    ]
+   ],
+   "2021": [
+    [
+     "Trevon Diggs",
+     11.0
+    ],
+    [
+     "J.C. Jackson",
+     8.0
+    ],
+    [
+     "Amani Oruwariye",
+     6.0
+    ]
+   ],
+   "2022": [
+    [
+     "C.J. Gardner-Johnson",
+     6.0
+    ],
+    [
+     "Justin Simmons",
+     6.0
+    ],
+    [
+     "Minkah Fitzpatrick",
+     6.0
+    ],
+    [
+     "Riq Woolen",
+     6.0
+    ]
+   ],
+   "2023": [
+    [
+     "DaRon Bland",
+     9.0
+    ],
+    [
+     "Geno Stone",
+     7.0
+    ],
+    [
+     "Jessie Bates",
+     6.0
+    ]
+   ],
+   "2024": [
+    [
+     "Kerby Joseph",
+     9.0
+    ],
+    [
+     "Xavier McKinney",
+     8.0
+    ],
+    [
+     "Byron Murphy",
+     6.0
+    ],
+    [
+     "C.J. Gardner-Johnson",
+     6.0
+    ],
+    [
+     "Marlon Humphrey",
+     6.0
+    ]
+   ],
+   "2025": [
+    [
+     "Kevin Byard",
+     7.0
+    ]
+   ]
+  },
+  "pass4000": {
+   "2009": [
+    [
+     "Matt Schaub",
+     4770.0
+    ],
+    [
+     "Peyton Manning",
+     4500.0
+    ],
+    [
+     "Tony Romo",
+     4483.0
+    ],
+    [
+     "Aaron Rodgers",
+     4434.0
+    ],
+    [
+     "Tom Brady",
+     4398.0
+    ],
+    [
+     "Drew Brees",
+     4388.0
+    ],
+    [
+     "Ben Roethlisberger",
+     4328.0
+    ],
+    [
+     "Philip Rivers",
+     4254.0
+    ],
+    [
+     "Brett Favre",
+     4202.0
+    ],
+    [
+     "Eli Manning",
+     4021.0
+    ]
+   ],
+   "2010": [
+    [
+     "Philip Rivers",
+     4710.0
+    ],
+    [
+     "Peyton Manning",
+     4700.0
+    ],
+    [
+     "Drew Brees",
+     4620.0
+    ],
+    [
+     "Matt Schaub",
+     4370.0
+    ],
+    [
+     "Eli Manning",
+     4002.0
+    ]
+   ],
+   "2011": [
+    [
+     "Drew Brees",
+     5535.0
+    ],
+    [
+     "Tom Brady",
+     5235.0
+    ],
+    [
+     "Matthew Stafford",
+     5100.0
+    ],
+    [
+     "Eli Manning",
+     4933.0
+    ],
+    [
+     "Aaron Rodgers",
+     4636.0
+    ],
+    [
+     "Philip Rivers",
+     4624.0
+    ],
+    [
+     "Tony Romo",
+     4184.0
+    ],
+    [
+     "Matt Ryan",
+     4177.0
+    ],
+    [
+     "Ben Roethlisberger",
+     4077.0
+    ],
+    [
+     "Cam Newton",
+     4051.0
+    ]
+   ],
+   "2012": [
+    [
+     "Drew Brees",
+     5177.0
+    ],
+    [
+     "Matthew Stafford",
+     4967.0
+    ],
+    [
+     "Tony Romo",
+     4903.0
+    ],
+    [
+     "Tom Brady",
+     4827.0
+    ],
+    [
+     "Matt Ryan",
+     4719.0
+    ],
+    [
+     "Peyton Manning",
+     4659.0
+    ],
+    [
+     "Andrew Luck",
+     4374.0
+    ],
+    [
+     "Aaron Rodgers",
+     4295.0
+    ],
+    [
+     "Josh Freeman",
+     4065.0
+    ],
+    [
+     "Carson Palmer",
+     4018.0
+    ],
+    [
+     "Matt Schaub",
+     4008.0
+    ]
+   ],
+   "2013": [
+    [
+     "Peyton Manning",
+     5477.0
+    ],
+    [
+     "Drew Brees",
+     5162.0
+    ],
+    [
+     "Matthew Stafford",
+     4650.0
+    ],
+    [
+     "Matt Ryan",
+     4515.0
+    ],
+    [
+     "Philip Rivers",
+     4478.0
+    ],
+    [
+     "Tom Brady",
+     4343.0
+    ],
+    [
+     "Andy Dalton",
+     4293.0
+    ],
+    [
+     "Carson Palmer",
+     4274.0
+    ],
+    [
+     "Ben Roethlisberger",
+     4261.0
+    ]
+   ],
+   "2014": [
+    [
+     "Ben Roethlisberger",
+     4952.0
+    ],
+    [
+     "Drew Brees",
+     4952.0
+    ],
+    [
+     "Andrew Luck",
+     4761.0
+    ],
+    [
+     "Peyton Manning",
+     4727.0
+    ],
+    [
+     "Matt Ryan",
+     4694.0
+    ],
+    [
+     "Eli Manning",
+     4410.0
+    ],
+    [
+     "Aaron Rodgers",
+     4381.0
+    ],
+    [
+     "Philip Rivers",
+     4286.0
+    ],
+    [
+     "Matthew Stafford",
+     4257.0
+    ],
+    [
+     "Tom Brady",
+     4109.0
+    ],
+    [
+     "Ryan Tannehill",
+     4045.0
+    ]
+   ],
+   "2015": [
+    [
+     "Drew Brees",
+     4870.0
+    ],
+    [
+     "Philip Rivers",
+     4792.0
+    ],
+    [
+     "Tom Brady",
+     4770.0
+    ],
+    [
+     "Carson Palmer",
+     4671.0
+    ],
+    [
+     "Matt Ryan",
+     4591.0
+    ],
+    [
+     "Eli Manning",
+     4432.0
+    ],
+    [
+     "Blake Bortles",
+     4428.0
+    ],
+    [
+     "Matthew Stafford",
+     4262.0
+    ],
+    [
+     "Ryan Tannehill",
+     4208.0
+    ],
+    [
+     "Kirk Cousins",
+     4166.0
+    ],
+    [
+     "Jameis Winston",
+     4042.0
+    ],
+    [
+     "Russell Wilson",
+     4024.0
+    ]
+   ],
+   "2016": [
+    [
+     "Drew Brees",
+     5208.0
+    ],
+    [
+     "Matt Ryan",
+     4944.0
+    ],
+    [
+     "Kirk Cousins",
+     4917.0
+    ],
+    [
+     "Aaron Rodgers",
+     4428.0
+    ],
+    [
+     "Philip Rivers",
+     4386.0
+    ],
+    [
+     "Matthew Stafford",
+     4327.0
+    ],
+    [
+     "Joe Flacco",
+     4317.0
+    ],
+    [
+     "Andrew Luck",
+     4240.0
+    ],
+    [
+     "Carson Palmer",
+     4233.0
+    ],
+    [
+     "Russell Wilson",
+     4219.0
+    ],
+    [
+     "Andy Dalton",
+     4206.0
+    ],
+    [
+     "Jameis Winston",
+     4090.0
+    ],
+    [
+     "Eli Manning",
+     4027.0
+    ]
+   ],
+   "2017": [
+    [
+     "Tom Brady",
+     4577.0
+    ],
+    [
+     "Philip Rivers",
+     4515.0
+    ],
+    [
+     "Matthew Stafford",
+     4446.0
+    ],
+    [
+     "Drew Brees",
+     4334.0
+    ],
+    [
+     "Ben Roethlisberger",
+     4259.0
+    ],
+    [
+     "Matt Ryan",
+     4095.0
+    ],
+    [
+     "Kirk Cousins",
+     4093.0
+    ],
+    [
+     "Alex Smith",
+     4042.0
+    ]
+   ],
+   "2018": [
+    [
+     "Ben Roethlisberger",
+     5129.0
+    ],
+    [
+     "Patrick Mahomes",
+     5097.0
+    ],
+    [
+     "Matt Ryan",
+     4924.0
+    ],
+    [
+     "Jared Goff",
+     4688.0
+    ],
+    [
+     "Andrew Luck",
+     4593.0
+    ],
+    [
+     "Aaron Rodgers",
+     4442.0
+    ],
+    [
+     "Tom Brady",
+     4355.0
+    ],
+    [
+     "Philip Rivers",
+     4308.0
+    ],
+    [
+     "Eli Manning",
+     4299.0
+    ],
+    [
+     "Kirk Cousins",
+     4298.0
+    ],
+    [
+     "Deshaun Watson",
+     4165.0
+    ],
+    [
+     "Derek Carr",
+     4049.0
+    ]
+   ],
+   "2019": [
+    [
+     "Jameis Winston",
+     5109.0
+    ],
+    [
+     "Dak Prescott",
+     4902.0
+    ],
+    [
+     "Jared Goff",
+     4638.0
+    ],
+    [
+     "Philip Rivers",
+     4615.0
+    ],
+    [
+     "Matt Ryan",
+     4466.0
+    ],
+    [
+     "Russell Wilson",
+     4110.0
+    ],
+    [
+     "Tom Brady",
+     4057.0
+    ],
+    [
+     "Derek Carr",
+     4054.0
+    ],
+    [
+     "Carson Wentz",
+     4039.0
+    ],
+    [
+     "Patrick Mahomes",
+     4031.0
+    ],
+    [
+     "Aaron Rodgers",
+     4002.0
+    ]
+   ],
+   "2020": [
+    [
+     "Deshaun Watson",
+     4823.0
+    ],
+    [
+     "Patrick Mahomes",
+     4740.0
+    ],
+    [
+     "Tom Brady",
+     4633.0
+    ],
+    [
+     "Matt Ryan",
+     4581.0
+    ],
+    [
+     "Josh Allen",
+     4544.0
+    ],
+    [
+     "Justin Herbert",
+     4336.0
+    ],
+    [
+     "Aaron Rodgers",
+     4299.0
+    ],
+    [
+     "Kirk Cousins",
+     4265.0
+    ],
+    [
+     "Russell Wilson",
+     4212.0
+    ],
+    [
+     "Philip Rivers",
+     4169.0
+    ],
+    [
+     "Derek Carr",
+     4103.0
+    ],
+    [
+     "Matthew Stafford",
+     4084.0
+    ]
+   ],
+   "2021": [
+    [
+     "Tom Brady",
+     5316.0
+    ],
+    [
+     "Justin Herbert",
+     5014.0
+    ],
+    [
+     "Matthew Stafford",
+     4886.0
+    ],
+    [
+     "Patrick Mahomes",
+     4839.0
+    ],
+    [
+     "Derek Carr",
+     4804.0
+    ],
+    [
+     "Joe Burrow",
+     4611.0
+    ],
+    [
+     "Dak Prescott",
+     4449.0
+    ],
+    [
+     "Josh Allen",
+     4407.0
+    ],
+    [
+     "Kirk Cousins",
+     4221.0
+    ],
+    [
+     "Aaron Rodgers",
+     4115.0
+    ]
+   ],
+   "2022": [
+    [
+     "Patrick Mahomes",
+     5250.0
+    ],
+    [
+     "Justin Herbert",
+     4739.0
+    ],
+    [
+     "Tom Brady",
+     4694.0
+    ],
+    [
+     "Kirk Cousins",
+     4547.0
+    ],
+    [
+     "Joe Burrow",
+     4475.0
+    ],
+    [
+     "Jared Goff",
+     4438.0
+    ],
+    [
+     "Josh Allen",
+     4283.0
+    ],
+    [
+     "Geno Smith",
+     4282.0
+    ],
+    [
+     "Trevor Lawrence",
+     4113.0
+    ]
+   ],
+   "2023": [
+    [
+     "Tua Tagovailoa",
+     4624.0
+    ],
+    [
+     "Jared Goff",
+     4575.0
+    ],
+    [
+     "Dak Prescott",
+     4516.0
+    ],
+    [
+     "Josh Allen",
+     4306.0
+    ],
+    [
+     "Brock Purdy",
+     4280.0
+    ],
+    [
+     "Patrick Mahomes",
+     4183.0
+    ],
+    [
+     "Jordan Love",
+     4159.0
+    ],
+    [
+     "C.J. Stroud",
+     4108.0
+    ],
+    [
+     "Baker Mayfield",
+     4044.0
+    ],
+    [
+     "Trevor Lawrence",
+     4016.0
+    ]
+   ],
+   "2024": [
+    [
+     "Joe Burrow",
+     4918.0
+    ],
+    [
+     "Jared Goff",
+     4629.0
+    ],
+    [
+     "Baker Mayfield",
+     4500.0
+    ],
+    [
+     "Geno Smith",
+     4320.0
+    ],
+    [
+     "Sam Darnold",
+     4319.0
+    ],
+    [
+     "Lamar Jackson",
+     4172.0
+    ]
+   ],
+   "2025": [
+    [
+     "Matthew Stafford",
+     4707.0
+    ],
+    [
+     "Jared Goff",
+     4564.0
+    ],
+    [
+     "Dak Prescott",
+     4552.0
+    ],
+    [
+     "Drake Maye",
+     4394.0
+    ],
+    [
+     "Sam Darnold",
+     4048.0
+    ],
+    [
+     "Trevor Lawrence",
+     4007.0
+    ]
+   ]
+  },
+  "rec100": {
+   "2009": [
+    [
+     "Wes Welker",
+     123.0
+    ],
+    [
+     "Steve Smith",
+     107.0
+    ],
+    [
+     "Andre Johnson",
+     101.0
+    ],
+    [
+     "Brandon Marshall",
+     101.0
+    ],
+    [
+     "Dallas Clark",
+     100.0
+    ],
+    [
+     "Reggie Wayne",
+     100.0
+    ]
+   ],
+   "2010": [
+    [
+     "Roddy White",
+     115.0
+    ],
+    [
+     "Reggie Wayne",
+     111.0
+    ]
+   ],
+   "2011": [
+    [
+     "Wes Welker",
+     122.0
+    ],
+    [
+     "Roddy White",
+     100.0
+    ]
+   ],
+   "2012": [
+    [
+     "Calvin Johnson",
+     122.0
+    ],
+    [
+     "Brandon Marshall",
+     118.0
+    ],
+    [
+     "Wes Welker",
+     118.0
+    ],
+    [
+     "Andre Johnson",
+     112.0
+    ],
+    [
+     "Jason Witten",
+     110.0
+    ],
+    [
+     "Reggie Wayne",
+     106.0
+    ]
+   ],
+   "2013": [
+    [
+     "Pierre Garcon",
+     113.0
+    ],
+    [
+     "Antonio Brown",
+     110.0
+    ],
+    [
+     "Andre Johnson",
+     109.0
+    ],
+    [
+     "Julian Edelman",
+     105.0
+    ],
+    [
+     "Brandon Marshall",
+     100.0
+    ]
+   ],
+   "2014": [
+    [
+     "Antonio Brown",
+     129.0
+    ],
+    [
+     "Demaryius Thomas",
+     111.0
+    ],
+    [
+     "Julio Jones",
+     104.0
+    ],
+    [
+     "Matt Forte",
+     102.0
+    ],
+    [
+     "Emmanuel Sanders",
+     101.0
+    ]
+   ],
+   "2015": [
+    [
+     "Antonio Brown",
+     136.0
+    ],
+    [
+     "Julio Jones",
+     136.0
+    ],
+    [
+     "DeAndre Hopkins",
+     111.0
+    ],
+    [
+     "Jarvis Landry",
+     110.0
+    ],
+    [
+     "Brandon Marshall",
+     109.0
+    ],
+    [
+     "Larry Fitzgerald",
+     109.0
+    ],
+    [
+     "Demaryius Thomas",
+     105.0
+    ]
+   ],
+   "2016": [
+    [
+     "Larry Fitzgerald",
+     107.0
+    ],
+    [
+     "Antonio Brown",
+     106.0
+    ],
+    [
+     "Odell Beckham Jr.",
+     101.0
+    ]
+   ],
+   "2017": [
+    [
+     "Jarvis Landry",
+     112.0
+    ],
+    [
+     "Larry Fitzgerald",
+     109.0
+    ],
+    [
+     "Michael Thomas",
+     104.0
+    ],
+    [
+     "Keenan Allen",
+     102.0
+    ],
+    [
+     "Antonio Brown",
+     101.0
+    ]
+   ],
+   "2018": [
+    [
+     "Michael Thomas",
+     125.0
+    ],
+    [
+     "Zach Ertz",
+     116.0
+    ],
+    [
+     "DeAndre Hopkins",
+     115.0
+    ],
+    [
+     "Adam Thielen",
+     113.0
+    ],
+    [
+     "Julio Jones",
+     113.0
+    ],
+    [
+     "Davante Adams",
+     111.0
+    ],
+    [
+     "JuJu Smith-Schuster",
+     111.0
+    ],
+    [
+     "Christian McCaffrey",
+     107.0
+    ],
+    [
+     "Antonio Brown",
+     104.0
+    ],
+    [
+     "Travis Kelce",
+     103.0
+    ],
+    [
+     "Stefon Diggs",
+     102.0
+    ]
+   ],
+   "2019": [
+    [
+     "Michael Thomas",
+     149.0
+    ],
+    [
+     "Christian McCaffrey",
+     116.0
+    ],
+    [
+     "DeAndre Hopkins",
+     104.0
+    ],
+    [
+     "Keenan Allen",
+     104.0
+    ],
+    [
+     "Julian Edelman",
+     100.0
+    ]
+   ],
+   "2020": [
+    [
+     "Stefon Diggs",
+     127.0
+    ],
+    [
+     "Davante Adams",
+     115.0
+    ],
+    [
+     "DeAndre Hopkins",
+     115.0
+    ],
+    [
+     "Darren Waller",
+     107.0
+    ],
+    [
+     "Travis Kelce",
+     105.0
+    ],
+    [
+     "Allen Robinson",
+     102.0
+    ],
+    [
+     "Keenan Allen",
+     100.0
+    ],
+    [
+     "Tyler Lockett",
+     100.0
+    ]
+   ],
+   "2021": [
+    [
+     "Cooper Kupp",
+     145.0
+    ],
+    [
+     "Davante Adams",
+     123.0
+    ],
+    [
+     "Tyreek Hill",
+     111.0
+    ],
+    [
+     "Justin Jefferson",
+     108.0
+    ],
+    [
+     "Diontae Johnson",
+     107.0
+    ],
+    [
+     "Mark Andrews",
+     107.0
+    ],
+    [
+     "Keenan Allen",
+     106.0
+    ],
+    [
+     "Jaylen Waddle",
+     104.0
+    ],
+    [
+     "Hunter Renfrow",
+     103.0
+    ],
+    [
+     "Stefon Diggs",
+     103.0
+    ]
+   ],
+   "2022": [
+    [
+     "Justin Jefferson",
+     128.0
+    ],
+    [
+     "Tyreek Hill",
+     119.0
+    ],
+    [
+     "Travis Kelce",
+     110.0
+    ],
+    [
+     "Stefon Diggs",
+     108.0
+    ],
+    [
+     "Austin Ekeler",
+     107.0
+    ],
+    [
+     "CeeDee Lamb",
+     107.0
+    ],
+    [
+     "Amon-Ra St. Brown",
+     106.0
+    ],
+    [
+     "Chris Godwin Jr.",
+     104.0
+    ],
+    [
+     "Davante Adams",
+     100.0
+    ]
+   ],
+   "2023": [
+    [
+     "CeeDee Lamb",
+     135.0
+    ],
+    [
+     "Amon-Ra St. Brown",
+     119.0
+    ],
+    [
+     "Tyreek Hill",
+     119.0
+    ],
+    [
+     "Evan Engram",
+     114.0
+    ],
+    [
+     "Michael Pittman",
+     109.0
+    ],
+    [
+     "Keenan Allen",
+     108.0
+    ],
+    [
+     "Stefon Diggs",
+     107.0
+    ],
+    [
+     "A.J. Brown",
+     106.0
+    ],
+    [
+     "Puka Nacua",
+     105.0
+    ],
+    [
+     "Adam Thielen",
+     103.0
+    ],
+    [
+     "Davante Adams",
+     103.0
+    ],
+    [
+     "Ja'Marr Chase",
+     100.0
+    ]
+   ],
+   "2024": [
+    [
+     "Ja'Marr Chase",
+     127.0
+    ],
+    [
+     "Amon-Ra St. Brown",
+     115.0
+    ],
+    [
+     "Brock Bowers",
+     112.0
+    ],
+    [
+     "Trey McBride",
+     111.0
+    ],
+    [
+     "Malik Nabers",
+     109.0
+    ],
+    [
+     "Justin Jefferson",
+     103.0
+    ],
+    [
+     "CeeDee Lamb",
+     101.0
+    ],
+    [
+     "Garrett Wilson",
+     101.0
+    ],
+    [
+     "Drake London",
+     100.0
+    ],
+    [
+     "Jaxon Smith-Njigba",
+     100.0
+    ]
+   ],
+   "2025": [
+    [
+     "Puka Nacua",
+     129.0
+    ],
+    [
+     "Trey McBride",
+     126.0
+    ],
+    [
+     "Ja'Marr Chase",
+     125.0
+    ],
+    [
+     "Jaxon Smith-Njigba",
+     119.0
+    ],
+    [
+     "Amon-Ra St. Brown",
+     117.0
+    ],
+    [
+     "Christian McCaffrey",
+     102.0
+    ],
+    [
+     "Chris Olave",
+     100.0
+    ]
+   ]
+  },
+  "rush1000": {
+   "2009": [
+    [
+     "Chris Johnson",
+     2006.0
+    ],
+    [
+     "Steven Jackson",
+     1424.0
+    ],
+    [
+     "Thomas Jones",
+     1402.0
+    ],
+    [
+     "Maurice Jones-Drew",
+     1391.0
+    ],
+    [
+     "Adrian Peterson",
+     1389.0
+    ],
+    [
+     "Ray Rice",
+     1339.0
+    ],
+    [
+     "Ryan Grant",
+     1253.0
+    ],
+    [
+     "Cedric Benson",
+     1251.0
+    ],
+    [
+     "Jonathan Stewart",
+     1133.0
+    ],
+    [
+     "Ricky Williams",
+     1121.0
+    ],
+    [
+     "Frank Gore",
+     1120.0
+    ],
+    [
+     "Jamaal Charles",
+     1120.0
+    ],
+    [
+     "DeAngelo Williams",
+     1117.0
+    ],
+    [
+     "Rashard Mendenhall",
+     1108.0
+    ],
+    [
+     "Fred Jackson",
+     1062.0
+    ]
+   ],
+   "2010": [
+    [
+     "Arian Foster",
+     1614.0
+    ],
+    [
+     "Jamaal Charles",
+     1467.0
+    ],
+    [
+     "Michael Turner",
+     1371.0
+    ],
+    [
+     "Chris Johnson",
+     1364.0
+    ],
+    [
+     "Maurice Jones-Drew",
+     1324.0
+    ],
+    [
+     "Adrian Peterson",
+     1298.0
+    ],
+    [
+     "Rashard Mendenhall",
+     1273.0
+    ],
+    [
+     "Steven Jackson",
+     1241.0
+    ],
+    [
+     "Ahmad Bradshaw",
+     1235.0
+    ],
+    [
+     "Ray Rice",
+     1220.0
+    ],
+    [
+     "Peyton Hillis",
+     1177.0
+    ],
+    [
+     "Darren McFadden",
+     1157.0
+    ],
+    [
+     "Cedric Benson",
+     1111.0
+    ],
+    [
+     "LeSean McCoy",
+     1080.0
+    ],
+    [
+     "Matt Forte",
+     1069.0
+    ],
+    [
+     "BenJarvus Green-Ellis",
+     1008.0
+    ],
+    [
+     "LeGarrette Blount",
+     1007.0
+    ]
+   ],
+   "2011": [
+    [
+     "Maurice Jones-Drew",
+     1606.0
+    ],
+    [
+     "Ray Rice",
+     1364.0
+    ],
+    [
+     "Michael Turner",
+     1340.0
+    ],
+    [
+     "LeSean McCoy",
+     1309.0
+    ],
+    [
+     "Arian Foster",
+     1224.0
+    ],
+    [
+     "Frank Gore",
+     1211.0
+    ],
+    [
+     "Marshawn Lynch",
+     1204.0
+    ],
+    [
+     "Willis McGahee",
+     1199.0
+    ],
+    [
+     "Steven Jackson",
+     1145.0
+    ],
+    [
+     "Ryan Mathews",
+     1091.0
+    ],
+    [
+     "Reggie Bush",
+     1086.0
+    ],
+    [
+     "Cedric Benson",
+     1067.0
+    ],
+    [
+     "Shonn Greene",
+     1054.0
+    ],
+    [
+     "Chris Johnson",
+     1047.0
+    ],
+    [
+     "Chris Wells",
+     1047.0
+    ]
+   ],
+   "2012": [
+    [
+     "Adrian Peterson",
+     2097.0
+    ],
+    [
+     "Alfred Morris",
+     1613.0
+    ],
+    [
+     "Marshawn Lynch",
+     1590.0
+    ],
+    [
+     "Jamaal Charles",
+     1509.0
+    ],
+    [
+     "Doug Martin",
+     1454.0
+    ],
+    [
+     "Arian Foster",
+     1424.0
+    ],
+    [
+     "Stevan Ridley",
+     1263.0
+    ],
+    [
+     "C.J. Spiller",
+     1244.0
+    ],
+    [
+     "Chris Johnson",
+     1243.0
+    ],
+    [
+     "Frank Gore",
+     1214.0
+    ],
+    [
+     "Ray Rice",
+     1143.0
+    ],
+    [
+     "BenJarvus Green-Ellis",
+     1094.0
+    ],
+    [
+     "Matt Forte",
+     1094.0
+    ],
+    [
+     "Shonn Greene",
+     1063.0
+    ],
+    [
+     "Steven Jackson",
+     1045.0
+    ],
+    [
+     "Ahmad Bradshaw",
+     1015.0
+    ]
+   ],
+   "2013": [
+    [
+     "LeSean McCoy",
+     1607.0
+    ],
+    [
+     "Matt Forte",
+     1339.0
+    ],
+    [
+     "Jamaal Charles",
+     1287.0
+    ],
+    [
+     "Alfred Morris",
+     1275.0
+    ],
+    [
+     "Adrian Peterson",
+     1266.0
+    ],
+    [
+     "Marshawn Lynch",
+     1257.0
+    ],
+    [
+     "Ryan Mathews",
+     1255.0
+    ],
+    [
+     "Eddie Lacy",
+     1178.0
+    ],
+    [
+     "Frank Gore",
+     1128.0
+    ],
+    [
+     "DeMarco Murray",
+     1121.0
+    ],
+    [
+     "Chris Johnson",
+     1077.0
+    ],
+    [
+     "Knowshon Moreno",
+     1038.0
+    ],
+    [
+     "Reggie Bush",
+     1006.0
+    ]
+   ],
+   "2014": [
+    [
+     "DeMarco Murray",
+     1845.0
+    ],
+    [
+     "Le'Veon Bell",
+     1361.0
+    ],
+    [
+     "LeSean McCoy",
+     1319.0
+    ],
+    [
+     "Marshawn Lynch",
+     1306.0
+    ],
+    [
+     "Justin Forsett",
+     1266.0
+    ],
+    [
+     "Arian Foster",
+     1246.0
+    ],
+    [
+     "Eddie Lacy",
+     1139.0
+    ],
+    [
+     "Jeremy Hill",
+     1124.0
+    ],
+    [
+     "Frank Gore",
+     1106.0
+    ],
+    [
+     "Lamar Miller",
+     1099.0
+    ],
+    [
+     "Alfred Morris",
+     1074.0
+    ],
+    [
+     "Matt Forte",
+     1038.0
+    ],
+    [
+     "Jamaal Charles",
+     1033.0
+    ]
+   ],
+   "2015": [
+    [
+     "Adrian Peterson",
+     1485.0
+    ],
+    [
+     "Doug Martin",
+     1402.0
+    ],
+    [
+     "Todd Gurley",
+     1106.0
+    ],
+    [
+     "Darren McFadden",
+     1089.0
+    ],
+    [
+     "Chris Ivory",
+     1070.0
+    ],
+    [
+     "Latavius Murray",
+     1066.0
+    ],
+    [
+     "Devonta Freeman",
+     1056.0
+    ]
+   ],
+   "2016": [
+    [
+     "Ezekiel Elliott",
+     1631.0
+    ],
+    [
+     "Jordan Howard",
+     1313.0
+    ],
+    [
+     "DeMarco Murray",
+     1287.0
+    ],
+    [
+     "Jay Ajayi",
+     1272.0
+    ],
+    [
+     "Le'Veon Bell",
+     1268.0
+    ],
+    [
+     "LeSean McCoy",
+     1267.0
+    ],
+    [
+     "David Johnson",
+     1239.0
+    ],
+    [
+     "LeGarrette Blount",
+     1161.0
+    ],
+    [
+     "Devonta Freeman",
+     1079.0
+    ],
+    [
+     "Lamar Miller",
+     1073.0
+    ],
+    [
+     "Mark Ingram",
+     1043.0
+    ],
+    [
+     "Frank Gore",
+     1025.0
+    ]
+   ],
+   "2017": [
+    [
+     "Kareem Hunt",
+     1327.0
+    ],
+    [
+     "Todd Gurley",
+     1305.0
+    ],
+    [
+     "Le'Veon Bell",
+     1291.0
+    ],
+    [
+     "LeSean McCoy",
+     1138.0
+    ],
+    [
+     "Mark Ingram",
+     1124.0
+    ],
+    [
+     "Jordan Howard",
+     1122.0
+    ],
+    [
+     "Melvin Gordon",
+     1105.0
+    ],
+    [
+     "Leonard Fournette",
+     1040.0
+    ],
+    [
+     "C.J. Anderson",
+     1007.0
+    ]
+   ],
+   "2018": [
+    [
+     "Ezekiel Elliott",
+     1434.0
+    ],
+    [
+     "Saquon Barkley",
+     1307.0
+    ],
+    [
+     "Todd Gurley",
+     1251.0
+    ],
+    [
+     "Joe Mixon",
+     1168.0
+    ],
+    [
+     "Chris Carson",
+     1151.0
+    ],
+    [
+     "Christian McCaffrey",
+     1098.0
+    ],
+    [
+     "Derrick Henry",
+     1059.0
+    ],
+    [
+     "Adrian Peterson",
+     1042.0
+    ],
+    [
+     "Phillip Lindsay",
+     1037.0
+    ]
+   ],
+   "2019": [
+    [
+     "Derrick Henry",
+     1540.0
+    ],
+    [
+     "Nick Chubb",
+     1494.0
+    ],
+    [
+     "Christian McCaffrey",
+     1387.0
+    ],
+    [
+     "Ezekiel Elliott",
+     1357.0
+    ],
+    [
+     "Chris Carson",
+     1230.0
+    ],
+    [
+     "Lamar Jackson",
+     1206.0
+    ],
+    [
+     "Leonard Fournette",
+     1152.0
+    ],
+    [
+     "Josh Jacobs",
+     1150.0
+    ],
+    [
+     "Joe Mixon",
+     1137.0
+    ],
+    [
+     "Dalvin Cook",
+     1135.0
+    ],
+    [
+     "Marlon Mack",
+     1091.0
+    ],
+    [
+     "Aaron Jones",
+     1084.0
+    ],
+    [
+     "Carlos Hyde",
+     1070.0
+    ],
+    [
+     "Mark Ingram",
+     1018.0
+    ],
+    [
+     "Phillip Lindsay",
+     1011.0
+    ],
+    [
+     "Saquon Barkley",
+     1003.0
+    ]
+   ],
+   "2020": [
+    [
+     "Derrick Henry",
+     2027.0
+    ],
+    [
+     "Dalvin Cook",
+     1557.0
+    ],
+    [
+     "Jonathan Taylor",
+     1169.0
+    ],
+    [
+     "Aaron Jones",
+     1104.0
+    ],
+    [
+     "David Montgomery",
+     1070.0
+    ],
+    [
+     "James Robinson",
+     1070.0
+    ],
+    [
+     "Nick Chubb",
+     1067.0
+    ],
+    [
+     "Josh Jacobs",
+     1065.0
+    ],
+    [
+     "Lamar Jackson",
+     1005.0
+    ]
+   ],
+   "2021": [
+    [
+     "Jonathan Taylor",
+     1811.0
+    ],
+    [
+     "Nick Chubb",
+     1259.0
+    ],
+    [
+     "Joe Mixon",
+     1205.0
+    ],
+    [
+     "Najee Harris",
+     1200.0
+    ],
+    [
+     "Dalvin Cook",
+     1159.0
+    ],
+    [
+     "Antonio Gibson",
+     1037.0
+    ],
+    [
+     "Ezekiel Elliott",
+     1002.0
+    ]
+   ],
+   "2022": [
+    [
+     "Josh Jacobs",
+     1653.0
+    ],
+    [
+     "Derrick Henry",
+     1538.0
+    ],
+    [
+     "Nick Chubb",
+     1525.0
+    ],
+    [
+     "Saquon Barkley",
+     1312.0
+    ],
+    [
+     "Miles Sanders",
+     1269.0
+    ],
+    [
+     "Dalvin Cook",
+     1173.0
+    ],
+    [
+     "Justin Fields",
+     1143.0
+    ],
+    [
+     "Christian McCaffrey",
+     1139.0
+    ],
+    [
+     "Travis Etienne",
+     1125.0
+    ],
+    [
+     "Aaron Jones",
+     1121.0
+    ],
+    [
+     "Jamaal Williams",
+     1066.0
+    ],
+    [
+     "Kenneth Walker III",
+     1050.0
+    ],
+    [
+     "Rhamondre Stevenson",
+     1040.0
+    ],
+    [
+     "Tyler Allgeier",
+     1035.0
+    ],
+    [
+     "Najee Harris",
+     1034.0
+    ],
+    [
+     "Tony Pollard",
+     1007.0
+    ]
+   ],
+   "2023": [
+    [
+     "Christian McCaffrey",
+     1459.0
+    ],
+    [
+     "Derrick Henry",
+     1167.0
+    ],
+    [
+     "Kyren Williams",
+     1144.0
+    ],
+    [
+     "James Cook",
+     1122.0
+    ],
+    [
+     "D'Andre Swift",
+     1049.0
+    ],
+    [
+     "James Conner",
+     1040.0
+    ],
+    [
+     "Najee Harris",
+     1035.0
+    ],
+    [
+     "Joe Mixon",
+     1034.0
+    ],
+    [
+     "David Montgomery",
+     1015.0
+    ],
+    [
+     "Raheem Mostert",
+     1012.0
+    ],
+    [
+     "Travis Etienne",
+     1008.0
+    ],
+    [
+     "Tony Pollard",
+     1005.0
+    ]
+   ],
+   "2024": [
+    [
+     "Saquon Barkley",
+     2005.0
+    ],
+    [
+     "Derrick Henry",
+     1921.0
+    ],
+    [
+     "Bijan Robinson",
+     1456.0
+    ],
+    [
+     "Jonathan Taylor",
+     1431.0
+    ],
+    [
+     "Jahmyr Gibbs",
+     1412.0
+    ],
+    [
+     "Josh Jacobs",
+     1329.0
+    ],
+    [
+     "Kyren Williams",
+     1299.0
+    ],
+    [
+     "Chuba Hubbard",
+     1195.0
+    ],
+    [
+     "Aaron Jones",
+     1138.0
+    ],
+    [
+     "Bucky Irving",
+     1122.0
+    ],
+    [
+     "James Conner",
+     1094.0
+    ],
+    [
+     "Rico Dowdle",
+     1079.0
+    ],
+    [
+     "Tony Pollard",
+     1079.0
+    ],
+    [
+     "Najee Harris",
+     1043.0
+    ],
+    [
+     "Joe Mixon",
+     1016.0
+    ],
+    [
+     "James Cook",
+     1009.0
+    ]
+   ],
+   "2025": [
+    [
+     "James Cook",
+     1621.0
+    ],
+    [
+     "Derrick Henry",
+     1595.0
+    ],
+    [
+     "Jonathan Taylor",
+     1585.0
+    ],
+    [
+     "Bijan Robinson",
+     1478.0
+    ],
+    [
+     "De'Von Achane",
+     1350.0
+    ],
+    [
+     "Kyren Williams",
+     1252.0
+    ],
+    [
+     "Jahmyr Gibbs",
+     1223.0
+    ],
+    [
+     "Christian McCaffrey",
+     1202.0
+    ],
+    [
+     "Javonte Williams",
+     1201.0
+    ],
+    [
+     "Saquon Barkley",
+     1140.0
+    ],
+    [
+     "Travis Etienne",
+     1107.0
+    ],
+    [
+     "D'Andre Swift",
+     1087.0
+    ],
+    [
+     "Tony Pollard",
+     1082.0
+    ],
+    [
+     "Rico Dowdle",
+     1076.0
+    ],
+    [
+     "Breece Hall",
+     1065.0
+    ],
+    [
+     "Kenneth Walker III",
+     1027.0
+    ],
+    [
+     "Chase Brown",
+     1019.0
+    ]
+   ]
+  }
+ },
  "carries300": {
   "2009": 6.0,
   "2010": 7.0,
@@ -2442,6 +5111,110 @@
   "2023": 112.65992647058823,
   "2024": 119.80514705882354,
   "2025": 116.94485294117646
+ },
+ "sack_leader_parts": {
+  "2009": [
+   [
+    "DEN",
+    16.5
+   ]
+  ],
+  "2010": [
+   [
+    "DAL",
+    15.5
+   ]
+  ],
+  "2011": [
+   [
+    "MIN",
+    22.0
+   ]
+  ],
+  "2012": [
+   [
+    "HOU",
+    20.5
+   ]
+  ],
+  "2013": [
+   [
+    "IND",
+    19.5
+   ]
+  ],
+  "2014": [
+   [
+    "KC",
+    22.0
+   ]
+  ],
+  "2015": [
+   [
+    "HOU",
+    17.5
+   ]
+  ],
+  "2016": [
+   [
+    "ATL",
+    15.5
+   ]
+  ],
+  "2017": [
+   [
+    "ARI",
+    17.0
+   ]
+  ],
+  "2018": [
+   [
+    "LA",
+    20.5
+   ]
+  ],
+  "2019": [
+   [
+    "TB",
+    19.5
+   ]
+  ],
+  "2020": [
+   [
+    "PIT",
+    15.0
+   ]
+  ],
+  "2021": [
+   [
+    "PIT",
+    22.5
+   ]
+  ],
+  "2022": [
+   [
+    "SF",
+    18.5
+   ]
+  ],
+  "2023": [
+   [
+    "PIT",
+    19.0
+   ]
+  ],
+  "2024": [
+   [
+    "CIN",
+    17.5
+   ]
+  ],
+  "2025": [
+   [
+    "CLE",
+    23.0
+   ]
+  ]
  },
  "sack_leaders": {
   "2009": [

@@ -127,6 +127,22 @@ report.epaor_top10_parts.forEach(([name, season, parts]) => {
   check("EPAOR split " + name + " " + season + " teams", row.parts.map((p) => p.team).join("/"), parts.map((p) => p[0]).join("/"));
   parts.forEach(([team, v], k) => check("EPAOR split " + name + " " + season + " " + team, row.parts[k].epaor, v));
 });
+// player blocks on the season-count charts: who reached each threshold in each season matches the dashboard code
+const blockDefs = { pass4000: [M.pass_yds, 4000], rush1000: [M.rush_yds, 1000], carries300: [{ type: "sum", num: ["carries"] }, 300], rec100: [M.receptions, 100], int6: [M.ints_def, 6] };
+for (const [key, [measure, threshold]] of Object.entries(blockDefs)) {
+  for (const [season, listed] of Object.entries(report.blocks[key])) {
+    const js = S.topPlayerSeasons(store, { seasonMin: +season, seasonMax: +season, cats: { season_type: ["REG"] } }, measure, 100000).filter((r) => r.value >= threshold);
+    check("blocks " + key + " " + season + " count", js.length, listed.length);
+    listed.forEach(([name, v], i) => { check("blocks " + key + " " + season + " player " + (i + 1), js[i].name, name); check("blocks " + key + " " + season + " value " + (i + 1), js[i].value, v); });
+    // the blocks' team shares add up to one whole player each
+    check("blocks " + key + " " + season + " team shares", js.every((r) => Math.abs(r.parts.reduce((a, p) => a + p.share, 0) - 1) < 1e-9), true);
+  }
+}
+for (const s of Object.keys(report.sack_leader_parts)) {
+  const top = S.topPlayerSeasons(store, { seasonMin: +s, seasonMax: +s, cats: { season_type: ["REG"] } }, M.sacks, 1)[0];
+  check("sack leader split " + s + " teams", top.parts.map((p) => p.team).join("/"), report.sack_leader_parts[s].map((p) => p[0]).join("/"));
+  report.sack_leader_parts[s].forEach(([team, v], k) => check("sack leader split " + s + " " + team, top.parts[k].value, v));
+}
 for (const id of ["pass_yds", "rush_yds", "rec_yds", "sacks", "qb_hits", "tds", "receptions", "fantasy"]) {
   const all = S.topPlayerSeasons(store, REG, M[id], 100000);
   const bad = all.filter((r) => Math.abs(r.parts.reduce((a, p) => a + p.value, 0) - r.value) > 1e-6 * Math.max(1, Math.abs(r.value))).length;

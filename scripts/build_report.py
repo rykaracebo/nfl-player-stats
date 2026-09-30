@@ -100,8 +100,8 @@ def chart(kind, labels, datasets, fmt, y_title, height=320):
     return {"kind": kind, "labels": [str(x) for x in labels], "datasets": ds, "fmt": fmt, "yTitle": y_title, "height": height}
 
 
-def seg_chart(labels, items, fmt, height=320):
-    """Horizontal bars split into team segments. items: one list of (team, own_value, share) per bar, plus the bar total."""
+def seg_chart(labels, items, fmt, height=320, kind="hbar", names=None):
+    """Bars split into team segments. items: (bar total, [(team, own_value, share), ...]) per bar. names adds the player to the hover."""
     n_seg = max(len(parts) for _, parts in items)
     datasets = []
     for j in range(n_seg):
@@ -110,17 +110,61 @@ def seg_chart(labels, items, fmt, height=320):
             if j < len(parts):
                 team, own, share = parts[j]
                 data.append(round(float(share * total), 4)); teams.append(team)
-                text = f"{team}: {own:,.0f}" if fmt == "int" else f"{team}: {own:,.1f}"
+                who = f"{names[len(data) - 1]}, " if names else ""
+                text = f"{who}{team}: {own:,.0f}" if fmt == "int" else f"{who}{team}: {own:,.1f}"
                 tips.append(text + (f" ({round(share * 100)}% of his workload)" if len(parts) > 1 else ""))
             else:
                 data.append(0); teams.append(None); tips.append(None)
         datasets.append({"label": f"Team {j + 1}", "data": data, "barTeams": teams, "tips": tips})
-    return {"kind": "hbar", "stacked": True, "labels": labels, "datasets": datasets, "fmt": fmt, "yTitle": "", "height": height}
+    return {"kind": kind, "stacked": True, "labels": [str(x) for x in labels], "datasets": datasets, "fmt": fmt, "yTitle": "", "height": height}
+
+
+BLOCKS = {}
+
+
+def player_blocks(key, col, threshold, unit, height=340):
+    """A season-count bar drawn as a stack of blocks, one per player who reached the threshold, colored by his team.
+    A player who changed teams that season gets a block split between the teams by each team's share of the stat."""
+    df = ps[ps[col] >= threshold]
+    tt = reg.groupby(["season", "player_id", "team"], as_index=False).agg(v=(col, "sum"), first=("week", "min"))
+    tt = {k: g.sort_values("first") for k, g in tt.groupby(["season", "player_id"])}
+    per_season, listing = {}, {}
+    for sn in SEASONS:
+        blocks = []
+        for r in df[df["season"] == sn].sort_values([col, "player_name"], ascending=[False, True]).itertuples():
+            g = tt[(sn, r.player_id)]; tot = float(g["v"].sum())
+            blocks.append({"name": r.player_name, "value": float(getattr(r, col)),
+                           "parts": [(t.team, float(t.v), float(t.v) / tot if tot > 0 else 1 / len(g)) for t in g.itertuples()]})
+        per_season[int(sn)] = blocks
+        listing[int(sn)] = "; ".join(f"{b['name']} ({'/'.join(p[0] for p in b['parts'])}) {b['value']:,.0f}" for b in blocks)
+    BLOCKS[key] = {str(sn): [[b["name"], b["value"]] for b in bl] for sn, bl in per_season.items()}
+    n_blocks = max(len(b) for b in per_season.values()); n_parts = max(len(bl["parts"]) for b in per_season.values() for bl in b)
+    datasets = []
+    for j in range(n_blocks):
+        for k in range(n_parts):
+            data, teams, tips = [], [], []
+            for sn in SEASONS:
+                bl = per_season[int(sn)]
+                if j < len(bl) and k < len(bl[j]["parts"]):
+                    b = bl[j]; team, v, share = b["parts"][k]
+                    data.append(round(share, 4)); teams.append(team)
+                    tips.append(f"{b['name']} ({team}): {b['value']:,.0f} {unit}" if len(b["parts"]) == 1
+                                else f"{b['name']}, {team}: {v:,.0f} of his {b['value']:,.0f} {unit}")
+                else:
+                    data.append(0); teams.append(None); tips.append(None)
+            datasets.append({"label": f"Block {j + 1}.{k + 1}", "data": data, "barTeams": teams, "tips": tips})
+    spec = {"kind": "bar", "stacked": True, "labels": [str(x) for x in SEASONS], "datasets": datasets, "fmt": "int", "yTitle": "", "height": height}
+    return spec, listing
 
 
 def add(theme, title, paras, spec, head, rows):
+    if spec.get("stacked") and spec["datasets"] and str(spec["datasets"][0]["label"]).startswith("Block"):
+        paras = paras[:-1] + [paras[-1] + " Each block in the chart is one player, colored by his team; hover a block to see who."]
     sections.append({"theme": theme, "title": title, "paras": paras, "chart": spec, "head": head, "rows": rows})
 
+
+BLK = {key: player_blocks(key, col, thr, unit) for _, _, key, col, thr, unit in [("", "", "pass4000", "passing_yards", 4000, "passing yards"), ("", "", "rush1000", "rushing_yards", 1000, "rushing yards"), ("", "", "carries300", "carries", 300, "carries"), ("", "", "rec100", "receptions", 100, "receptions"), ("", "", "int6", "def_interceptions", 6, "interceptions")]}
+R["blocks"] = BLOCKS
 
 min_rush, max_rush = rush_tg.min(), rush_tg.max()
 add("Passing peaked, then slid",
@@ -141,8 +185,8 @@ add("Passing peaked, then slid",
       else f"It was {int(c4000[LAST - 1])} in {LAST - 1} and {int(c4000[LAST])} in {LAST}."),
      "This counts each player's regular-season total for one season. Seasons were 16 games through 2020 and 17 from 2021, so "
      "counts from 2021 on have a little extra room to reach the threshold."],
-    chart("bar", SEASONS, [("Players with 4,000+ passing yards", c4000)], "int", "Players"),
-    ["Season", "Players with 4,000+ passing yards"], [[int(s), int(c4000[s])] for s in SEASONS])
+    BLK["pass4000"][0],
+    ["Season", "Players with 4,000+ passing yards", "Who (team) and total"], [[int(s), int(c4000[s]), BLK["pass4000"][1][int(s)]] for s in SEASONS])
 
 hi = ps.sort_values("rushing_yards", ascending=False)
 add("The running back roller coaster",
@@ -151,8 +195,8 @@ add("The running back roller coaster",
      f"and {int(c1000[2021])} in 2021, then came back to {int(c1000[LAST - 1])} in {LAST - 1} and {int(c1000[LAST])} in {LAST}.",
      f"There is no steady trend to explain it. The count is lowest in {', '.join(str(int(s)) for s in c1000[c1000 == c1000.min()].index)} "
      f"({int(c1000.min())}) and highest in {', '.join(str(int(s)) for s in c1000[c1000 == c1000.max()].index)} ({int(c1000.max())})."],
-    chart("bar", SEASONS, [("Players with 1,000+ rushing yards", c1000)], "int", "Players"),
-    ["Season", "Players with 1,000+ rushing yards"], [[int(s), int(c1000[s])] for s in SEASONS])
+    BLK["rush1000"][0],
+    ["Season", "Players with 1,000+ rushing yards", "Who (team) and total"], [[int(s), int(c1000[s]), BLK["rush1000"][1][int(s)]] for s in SEASONS])
 
 add("The running back roller coaster",
     f"The workhorse back nearly disappeared, then returned: {int(c300[FIRST])} backs had 300+ carries in {FIRST}, {int(c300[2023])} in 2023, {int(c300[2024])} in 2024",
@@ -160,16 +204,16 @@ add("The running back roller coaster",
      f"the count never passed {int(c300.loc[2013:2022].max())}, and in 2023 it fell to {int(c300[2023])}.",
      f"It came back in 2024 with {int(c300[2024])} players, then {int(c300[LAST])} in {LAST}. The counts are small, so one or two "
      f"bell-cow backs make a visible difference."],
-    chart("bar", SEASONS, [("Players with 300+ carries", c300)], "int", "Players"),
-    ["Season", "Players with 300+ carries"], [[int(s), int(c300[s])] for s in SEASONS])
+    BLK["carries300"][0],
+    ["Season", "Players with 300+ carries", "Who (team) and total"], [[int(s), int(c300[s]), BLK["carries300"][1][int(s)]] for s in SEASONS])
 
 add("Receivers pile up catches",
     f"100-catch seasons climbed from {int(c100rec[2010])} in 2010 to {int(c100rec.max())} at the peak, even though team passing yards were below their {peak_pass} high",
     [f"Only {int(c100rec[2010])} players caught 100 passes in 2010. The count reached {int(c100rec.max())} in "
      f"{', '.join(str(int(s)) for s in c100rec[c100rec == c100rec.max()].index)} and was {int(c100rec[LAST])} in {LAST}.",
      "These are counts of individual players, so a few high-volume receivers can move the number from one season to the next."],
-    chart("bar", SEASONS, [("Players with 100+ receptions", c100rec)], "int", "Players"),
-    ["Season", "Players with 100+ receptions"], [[int(s), int(c100rec[s])] for s in SEASONS])
+    BLK["rec100"][0],
+    ["Season", "Players with 100+ receptions", "Who (team) and total"], [[int(s), int(c100rec[s]), BLK["rec100"][1][int(s)]] for s in SEASONS])
 
 add("Defenses: fewer takeaways, more pressure",
     f"Interceptions are disappearing: {dec(int_tg[FIRST], 2)} per team-game in {FIRST}, {dec(int_tg[LAST], 2)} in {LAST}",
@@ -187,8 +231,8 @@ add("Defenses: fewer takeaways, more pressure",
      f"The season high in the data is {int(ps['def_interceptions'].max())} interceptions, by "
      f"{ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['player_name']} in "
      f"{int(ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['season'])}."],
-    chart("bar", SEASONS, [("Players with 6+ interceptions", c6int)], "int", "Players"),
-    ["Season", "Players with 6+ interceptions"], [[int(s), int(c6int[s])] for s in SEASONS])
+    BLK["int6"][0],
+    ["Season", "Players with 6+ interceptions", "Who (team) and total"], [[int(s), int(c6int[s]), BLK["int6"][1][int(s)]] for s in SEASONS])
 
 add("Defenses: fewer takeaways, more pressure",
     f"Pass rushes get home more often: sacks per pass attempt rose from {pct(sack_rate[FIRST])} in {FIRST} to {pct(sack_rate[LAST])} in {LAST}",
@@ -221,15 +265,24 @@ add("Defenses: fewer takeaways, more pressure",
 
 leaders = pd.DataFrame({"season": SEASONS, "name": [sack_leaders.loc[s, "player_name"] for s in SEASONS],
                         "sacks": [sack_leaders.loc[s, "def_sacks"] for s in SEASONS]})
+team_sacks = reg.groupby(["season", "player_id", "team"], as_index=False).agg(sacks=("def_sacks", "sum"), first=("week", "min"))
+LEADER_PARTS = {}
+for sn in SEASONS:
+    pid = sack_leaders.loc[sn, "player_id"]
+    td = team_sacks[(team_sacks["season"] == sn) & (team_sacks["player_id"] == pid)].sort_values("first")
+    tot = float(td["sacks"].sum())
+    LEADER_PARTS[int(sn)] = [(t.team, float(t.sacks), float(t.sacks) / tot if tot > 0 else 1 / len(td)) for t in td.itertuples()]
+R["sack_leader_parts"] = {str(k): [[t, v] for t, v, _ in parts] for k, parts in LEADER_PARTS.items()}
 watt_led = int((leaders["name"] == "T.J. Watt").sum())
 low, high = leaders.loc[leaders["sacks"].idxmin()], leaders.loc[leaders["sacks"].idxmax()]
 add("Defenses: fewer takeaways, more pressure",
     f"The sack leader each season ranged from {dec(low['sacks'])} ({low['name']}, {int(low['season'])}) to {dec(high['sacks'])} ({high['name']}, {int(high['season'])})",
     [f"Every season has one clear sack leader, with no ties. The lowest leading total was {dec(low['sacks'])} by {low['name']} in "
      f"{int(low['season'])}. The highest was {dec(high['sacks'])} by {high['name']} in {int(high['season'])}.",
-     f"T.J. Watt led the league in {watt_led} of the {len(SEASONS)} seasons. Hover a bar to see who led that season."],
-    chart("bar", SEASONS, [("Sacks by the leader", leaders["sacks"], leaders["name"])], "dec1", "Sacks by that season's leader"),
-    ["Season", "Leader", "Sacks"], [[int(r.season), r.name, dec(r.sacks)] for r in leaders.itertuples()])
+     f"T.J. Watt led the league in {watt_led} of the {len(SEASONS)} seasons. Each bar is colored by the leader's team, and a leader who "
+     f"changed teams that season would show a bar split between them. Hover a bar to see who led."],
+    seg_chart(SEASONS, [(float(r.sacks), LEADER_PARTS[int(r.season)]) for r in leaders.itertuples()], "dec1", 320, kind="bar", names=list(leaders["name"])),
+    ["Season", "Leader", "Team", "Sacks"], [[int(r.season), r.name, "/".join(t for t, _, _ in LEADER_PARTS[int(r.season)]), dec(r.sacks)] for r in leaders.itertuples()])
 
 # ------------------------------------------------------------------ reference values for the advanced dashboard measures
 # Computed here with pandas so scripts/check_numbers.js can confirm the dashboard's own code gets the same answers.
