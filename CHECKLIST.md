@@ -11,7 +11,7 @@ Status: done / partly / not done.
 | 1 | Panel data: time column and group column | `data/seasons/*.csv`: season and week; player and team | done |
 | 2 | At least 5 periods | 17 seasons, 2009 to 2025 | done |
 | 3 | At least 10 groups | 32 teams, 8,093 players | done |
-| 4 | 50,000+ rows, 8+ columns, 2+ categorical, 2+ numeric | 304,515 rows, 46 columns | done |
+| 4 | 50,000+ rows, 8+ columns, 2+ categorical, 2+ numeric | 304,515 rows, 69 columns | done |
 | 5 | Not the HMDA data | nflverse player stats | done |
 
 ## Report page (`index.html`)
@@ -19,7 +19,7 @@ Status: done / partly / not done.
 |---|---|---|---|
 | 6 | Title, name, one-paragraph summary | top of `index.html` | done |
 | 7 | 4+ headline numbers with labels | headline block (6 numbers) | done |
-| 8 | 8+ sections: finding heading, 1-2 paragraphs with numbers, a chart | findings 01 to 10 | done |
+| 8 | 8+ sections: finding heading, 1-2 paragraphs with numbers, a chart | findings 01 to 12 | done |
 | 9 | Closing data section: source, what a row is, dropped rows, how every rate is computed | "About the data" at the bottom of `index.html` | done |
 
 ## Dashboard page (`dashboard.html`)
@@ -37,10 +37,10 @@ Status: done / partly / not done.
 |---|---|---|---|
 | 16 | Shared nav bar, fonts and colors | `assets/css/style.css`, same nav on both pages; football theme with team colors and logos, and an interactive team play board (`assets/js/field.js`) | done |
 | 17 | Own folder under home folder, not inside `~/fda-python` | `~/fda_website_project` | done |
-| 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ | partly (live site not yet verified) |
+| 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ | done, live site verified (both pages, data loading, charts, filters, reset) |
 | 19 | README listing every file and the data source | `README.md` | done |
 | 20 | Data files, scripts and site files in the repo | `data/`, `scripts/`, `assets/`, both pages | done |
-| 21 | Commit history showing the work as it was done | small commits per step | in progress |
+| 21 | Commit history showing the work as it was done | small commits per step (about 30 commits) | done |
 
 ## Grading
 | Component | Points | Plan |
