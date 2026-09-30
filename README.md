@@ -28,7 +28,7 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `assets/js/stats.js` | The calculation module: parses the CSVs, filters, aggregates, defines every measure. One `DEFS` object holds each measure's plain-words label, definition and minimum, and the dropdown, table headers and glossary all read it. Used by the dashboard and by the number checker. |
 | `assets/js/teams.js` | Loads `data/teams.csv` and provides team colors, names and logo badges to both pages. Team colors adapt to the light or dark theme so each stays at least 3:1 against the chart background. |
 | `assets/js/field.js` | The team play board: a football field where the 32 teams run routes and the ball is thrown to a random team. Used on the report and as the dashboard's team picker (collapsed by default). Pauses when off screen, follows the visitor's reduced-motion setting, and on touch screens the first tap shows a team's numbers and the second tap (or the tooltip's button) opens it. |
-| `assets/js/charts.js` | Chart.js helpers and the theme toggle, shared by both pages. Prints each team's code inside blocks and bars that are wide enough. |
+| `assets/js/charts.js` | Chart.js helpers and the theme toggle, shared by both pages.  |
 | `assets/js/report.js` | Draws the report's charts. |
 | `assets/js/dashboard.js` | The dashboard's behavior: loading, filters, player search, charts, table. |
 | `scripts/build_player_data.py` | Downloads the nflverse files, cleans them, and writes everything under `data/`. Also generates the data dictionary and quality summary. |
@@ -77,7 +77,7 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
 - The look is a football theme: NFL-style navy, red and white, a turf-green field, and team colors in the charts. Player bars
   are colored by team, and a player who changed teams in a season gets a bar split into one segment per team (sums split by each
   team's contribution, rates by each team's share of attempts, carries or targets). The checker confirms the segments add up.
-  Many teams share similar colors, so blocks and bars also print the team's code when they are wide enough and every hover shows it. On the report, the season-count charts (4,000-yard passers, 1,000-yard rushers, 300-carry backs, 100-catch receivers, players with
+  Bars use each team's primary color (lightened or darkened only when needed to stay at least 3:1 against the background), and every hover names the team. On the report, the season-count charts (4,000-yard passers, 1,000-yard rushers, 300-carry backs, 100-catch receivers, players with
   6+ interceptions) draw each season's bar as one block per player, colored by his team; the checker confirms who is in each block.
 - **This is an unofficial, non-commercial student project.** The NFL name and shield and the team names and logos belong to the
   NFL and its teams. They appear only to identify the league and teams. Logos (including the league shield printed on the ball

@@ -15,31 +15,6 @@
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const teamFill = (team) => (!team ? "rgba(0,0,0,0)" : NFLTeams.color(team));
 
-  // Prints the team code inside every block or bar segment that is big enough for it, so colour is never the only clue.
-  const teamLabels = {
-    id: "teamLabels",
-    afterDatasetsDraw(chart) {
-      const ctx = chart.ctx;
-      ctx.save();
-      ctx.font = "600 9.5px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      chart.data.datasets.forEach((ds, di) => {
-        if (!ds.barTeams || !chart.isDatasetVisible(di)) return;
-        chart.getDatasetMeta(di).data.forEach((bar, i) => {
-          const team = ds.barTeams[i];
-          if (!team || !(ds.data[i] > 0)) return;
-          const p = bar.getProps(["x", "y", "base", "width", "height"], true);
-          const horizontal = chart.options.indexAxis === "y";
-          const len = horizontal ? Math.abs(p.x - p.base) : Math.abs(p.y - p.base), thick = horizontal ? p.height : p.width;
-          const w = ctx.measureText(team).width;
-          if (horizontal ? len < w + 10 || thick < 12 : thick < w + 4 || len < 12) return;
-          const cx = horizontal ? (p.x + p.base) / 2 : p.x, cy = horizontal ? p.y : (p.y + p.base) / 2;
-          ctx.fillStyle = NFLTeams.inkOn(NFLTeams.color(team));
-          ctx.fillText(team, cx, cy + 0.5);
-        });
-      });
-      ctx.restore();
-    },
-  };
   const reducedMotion = () => !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   const registry = new Map(); // canvas -> {chart, spec}
 
@@ -118,8 +93,7 @@
     };
 
     const chart = new Chart(canvas, {
-      plugins: [teamLabels],
-      type: isLine ? "line" : "bar",
+            type: isLine ? "line" : "bar",
       data: { labels: spec.labels, datasets },
       options: {
         indexAxis: horizontal ? "y" : "x",

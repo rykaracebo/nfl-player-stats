@@ -47,9 +47,8 @@
     const v = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim();
     return /^#[0-9a-f]{6}$/i.test(v) ? v : isLight() ? "#ffffff" : "#0b1730";
   }
-  // A color for charts that stands out from the chart surface by at least 3:1 in the current theme: the team's primary color, or its
-  // second color, or the primary pushed toward white (dark theme) or black (light theme) until it does. Many teams still look alike,
-  // so charts also print the team code inside blocks and bars and in the hover text.
+  // A color for charts that stands out from the chart surface by at least 3:1 in the current theme: the team's primary color, pushed toward
+  // white (dark theme) or black (light theme) only when it is too close to the background. Many teams look alike, so hovers name the team.
   const MIN_CONTRAST = 3;
   const colorCache = {};
   function color(code) {
@@ -57,8 +56,8 @@
     if (!t) return isLight() ? "#5a6b90" : "#8899bb";
     const surf = surface(), key = code + surf;
     if (colorCache[key]) return colorCache[key];
-    let out = null;
-    for (const c of [t.color, t.color2]) if (c && contrast(c, surf) >= MIN_CONTRAST) { out = c; break; }
+    // keep the team's primary color; only if it is too close to the chart surface, push that same color toward white (dark theme) or black (light theme)
+    let out = contrast(t.color, surf) >= MIN_CONTRAST ? t.color : null;
     if (!out) {
       const toward = isLight() ? "#000000" : "#ffffff";
       for (let a = 0.05; a <= 0.95 && !out; a += 0.05) { const c = mix(t.color, toward, a); if (contrast(c, surf) >= MIN_CONTRAST) out = c; }
