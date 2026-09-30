@@ -35,6 +35,24 @@ const all = S.aggregate(store, REG, "all", [M.games]).get(0);
 check("regular-season player-games", all.rows, report.reg_rows);
 check("regular-season players", S.countPlayers(store, REG), report.reg_players);
 
+// dropped and all-zero rows quoted in the report's data section (data/dropped_rows.json, written from the raw files by build_player_data.py)
+const dropped = JSON.parse(fs.readFileSync(path.join(root, "data/dropped_rows.json"), "utf8"));
+check("raw rows = kept rows + dropped rows", dropped.raw_rows, manifestRows + dropped.rows);
+check("dropped rows = one per season-week", dropped.rows, dropped.season_weeks);
+check("dropped rows split into regular season and playoffs", dropped.reg_rows + dropped.post_rows, dropped.rows);
+let zeroRows = 0, zeroReg = 0;
+for (const y of Object.keys(manifest.seasons)) {
+  const lines = fs.readFileSync(path.join(root, manifest.seasons[y].file), "utf8").trim().split("\n");
+  const head = lines[0].split(","), st = head.indexOf("season_type");
+  for (const line of lines.slice(1)) {
+    const cells = line.split(",");  // no quoted commas in the stat columns; player names are before them
+    const tail = cells.slice(cells.length - (head.length - 11));
+    if (tail.every((c) => c === "" || c === "NA")) { zeroRows++; if (cells[cells.length - (head.length - st)] === "REG") zeroReg++; }
+  }
+}
+check("all-zero rows kept", zeroRows, dropped.zero_rows);
+check("all-zero regular-season rows kept", zeroReg, dropped.zero_reg_rows);
+
 // per-season rates (report findings 1, 6)
 function bySeason(measure) {
   const out = {};

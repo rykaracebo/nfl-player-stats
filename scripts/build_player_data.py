@@ -133,6 +133,48 @@ def fmt(series):
     return series.map(one)
 
 
+LOSS_COLS = [("def_sacks", "sacks"), ("def_interceptions", "interceptions"), ("def_tackles_solo", "solo tackles"),
+             ("penalties", "penalties"), ("def_qb_hits", "QB hits"), ("passing_yards", "passing yards"),
+             ("rushing_yards", "rushing yards"), ("receptions", "receptions")]
+
+
+def describe_dropped(bad, kept):
+    """Log what the rows with no player ID, name or position group are, and how much of each regular-season total they hold.
+    Also writes data/dropped_rows.json, which scripts/build_report.py quotes in the report."""
+    per_sw = bad.groupby(["season", "week"]).size()
+    nonzero = int((bad.select_dtypes("number").drop(columns=["season", "week"]).fillna(0) != 0).any(axis=1).sum())
+    short = bad["player_name"]
+    info = {"raw_rows": int(len(bad) + len(kept)), "rows": int(len(bad)), "season_weeks": int(len(per_sw)), "max_per_season_week": int(per_sw.max()),
+            "reg_rows": int((bad["season_type"] == "REG").sum()), "post_rows": int((bad["season_type"] != "REG").sum()),
+            "no_short_name": int(short.isna().sum()), "short_name_team": int((short == "Team").sum()),
+            "short_name_other": int((short.notna() & (short != "Team")).sum()),
+            "with_team_code": int(bad["team"].notna().sum()), "nonzero_rows": nonzero,
+            "seasons_min": int(bad.groupby("season").size().min()), "seasons_max": int(bad.groupby("season").size().max()),
+            "reg_effect": {}}
+    info["penalty_rows"] = int((bad["penalties"].fillna(0) > 0).sum())
+    info["safety_rows"] = int((bad["def_safeties"].fillna(0) > 0).sum())
+    br, kr = bad[bad["season_type"] == "REG"], kept[kept["season_type"] == "REG"]
+    for col, label in LOSS_COLS:
+        b, k = float(br[col].fillna(0).sum()), float(kr[col].fillna(0).sum())
+        info["reg_effect"][label] = {"dropped": b, "kept": k}
+    note(f"Dropped {info['rows']:,} rows with no player ID, name or position group. There is exactly one such row for each of the "
+         f"{info['season_weeks']} season-weeks ({info['seasons_min']} to {info['seasons_max']} per season), each with a team code but no "
+         f"player; {nonzero} of them have non-zero stats (mostly penalties and safeties).")
+    note("Regular-season totals held in those dropped rows (dropped of dropped + kept): " + "; ".join(
+        f"{lab} {v['dropped']:,.0f} of {v['dropped'] + v['kept']:,.0f}" for lab, v in info["reg_effect"].items()))
+    return info
+
+
+def write_dropped_info(info, zero_rows):
+    """Adds the all-zero rows that were kept, then saves data/dropped_rows.json."""
+    info["zero_rows"] = int(len(zero_rows))
+    info["zero_reg_rows"] = int((zero_rows["season_type"] == "REG").sum())
+    info["zero_players_only"] = int(len(set(zero_rows["player_id"]) - set(zero_rows.attrs["others"])))
+    info["zero_by_group"] = {k: int(v) for k, v in zero_rows["position_group"].value_counts().items()}
+    with open("data/dropped_rows.json", "w") as f:
+        json.dump(info, f, indent=1, sort_keys=True)
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     frames = []
@@ -144,9 +186,9 @@ def main():
 
     df = raw.copy()
     n = len(df)
-    df = df[df["player_id"].notna() & df["player_display_name"].notna() & df["position_group"].notna()]
-    note(f"Dropped {n - len(df):,} rows with no player ID, name or position group "
-         f"(about one team-level placeholder row per team per week in the source)")
+    is_player = df["player_id"].notna() & df["player_display_name"].notna() & df["position_group"].notna()
+    dropped_info = describe_dropped(raw[~is_player], raw[is_player])
+    df = df[is_player]
     n = len(df)
     df = df[df["opponent_team"].notna()]
     note(f"Dropped {n - len(df):,} rows with no opponent team")
@@ -175,8 +217,12 @@ def main():
     note(f"sack_yards_lost: {int((df['sack_yards_lost'] > 0).sum())} rows with a positive value "
          f"(expected 0; the column is stored as a negative number)")
     z = (df[STAT_COLS].fillna(0) == 0).all(axis=1)
+    zero_rows = df[z]
+    zero_rows.attrs["others"] = list(df.loc[~z, "player_id"].unique())
+    write_dropped_info(dropped_info, zero_rows)
     note(f"Kept {int(z.sum()):,} rows whose kept stat columns are all zero (player appears in the source game "
-         f"record without a tracked stat here). They count as appearances.")
+         f"record without a tracked stat here). They are real players with an ID, name and position, so they count as "
+         f"appearances; they add nothing to any sum or rate.")
 
     # teams
     teams = pd.DataFrame(TEAMS, columns=["team", "city", "name", "conference", "division"])

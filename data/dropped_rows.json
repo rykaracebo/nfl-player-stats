@@ -1,0 +1,65 @@
+{
+ "max_per_season_week": 1,
+ "no_short_name": 296,
+ "nonzero_rows": 337,
+ "penalty_rows": 330,
+ "post_rows": 68,
+ "raw_rows": 304877,
+ "reg_effect": {
+  "QB hits": {
+   "dropped": 6.0,
+   "kept": 47625.0
+  },
+  "interceptions": {
+   "dropped": 0.0,
+   "kept": 7521.0
+  },
+  "passing yards": {
+   "dropped": 0.0,
+   "kept": 2163026.0
+  },
+  "penalties": {
+   "dropped": 2764.0,
+   "kept": 52894.0
+  },
+  "receptions": {
+   "dropped": 2.0,
+   "kept": 191311.0
+  },
+  "rushing yards": {
+   "dropped": 0.0,
+   "kept": 1016067.0
+  },
+  "sacks": {
+   "dropped": 11.0,
+   "kept": 20697.0
+  },
+  "solo tackles": {
+   "dropped": 163.0,
+   "kept": 353041.0
+  }
+ },
+ "reg_rows": 294,
+ "rows": 362,
+ "safety_rows": 84,
+ "season_weeks": 362,
+ "seasons_max": 22,
+ "seasons_min": 21,
+ "short_name_other": 3,
+ "short_name_team": 63,
+ "with_team_code": 362,
+ "zero_by_group": {
+  "DB": 862,
+  "DL": 1142,
+  "LB": 783,
+  "OL": 927,
+  "QB": 1,
+  "RB": 145,
+  "SPEC": 312,
+  "TE": 86,
+  "WR": 278
+ },
+ "zero_players_only": 26,
+ "zero_reg_rows": 4342,
+ "zero_rows": 4536
+}

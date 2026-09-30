@@ -1,5 +1,6 @@
 Loaded 304,877 player-game rows from 2009 to 2025 (17 seasons)
-Dropped 362 rows with no player ID, name or position group (about one team-level placeholder row per team per week in the source)
+Dropped 362 rows with no player ID, name or position group. There is exactly one such row for each of the 362 season-weeks (21 to 22 per season), each with a team code but no player; 337 of them have non-zero stats (mostly penalties and safeties).
+Regular-season totals held in those dropped rows (dropped of dropped + kept): sacks 11 of 20,708; interceptions 0 of 7,521; solo tackles 163 of 353,204; penalties 2,764 of 55,658; QB hits 6 of 47,631; passing yards 0 of 2,163,026; rushing yards 0 of 1,016,067; receptions 2 of 191,313
 Dropped 0 rows with no opponent team
 Dropped 0 duplicate player-game rows
 Rows with a position group outside the known nine: 0
@@ -7,7 +8,7 @@ Column def_tackles_for_loss has no non-zero value in 2009: written as NA (not re
 Column def_tackles_for_loss has no non-zero value in 2010: written as NA (not recorded that season), not 0
 Column def_tackles_for_loss has no non-zero value in 2011: written as NA (not recorded that season), not 0
 sack_yards_lost: 0 rows with a positive value (expected 0; the column is stored as a negative number)
-Kept 4,536 rows whose kept stat columns are all zero (player appears in the source game record without a tracked stat here). They count as appearances.
+Kept 4,536 rows whose kept stat columns are all zero (player appears in the source game record without a tracked stat here). They are real players with an ID, name and position, so they count as appearances; they add nothing to any sum or rate.
 Conference and division checked against nflverse: 0 differences
 Team codes not in teams.csv: none. The source already uses one code per franchise across relocations (Raiders LV, Chargers LAC, Rams LA), so no renaming was needed.
 Wrote 304,515 rows, 69 columns, 17 files, 46.1 MB total (2.9 MB largest season)
