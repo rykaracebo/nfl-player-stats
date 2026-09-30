@@ -68,7 +68,7 @@
         : ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
       borderWidth: ds.width || (isLine ? (multi ? 1.8 : 2.4) : ds.barTeams ? 1 : stacked ? 1.5 : 0),
       borderDash: ds.dash || [],
-      pointRadius: isLine ? (spec.labels.length === 1 ? 6 : multi ? 0 : 3) : 0,
+      pointRadius: isLine ? (spec.labels.length === 1 ? 6 : (c) => { const d = c.dataset.data, i = c.dataIndex; return d[i - 1] == null && d[i + 1] == null ? 3 : multi ? 0 : 3; }) : 0,
       pointHoverRadius: isLine ? 8 : 0,
       pointBackgroundColor: colors[i % colors.length],
       pointBorderColor: surface,
@@ -119,7 +119,7 @@
             display: multi,
             position: "top",
             align: "start",
-            labels: { color: dim, boxWidth: 8, boxHeight: 8, usePointStyle: true, padding: 14, font: { size: 12 } },
+            labels: { color: dim, usePointStyle: !isLine, boxWidth: isLine ? 34 : 8, boxHeight: isLine ? 2 : 8, padding: 14, font: { size: 12 }, generateLabels: isLine ? (c) => Chart.defaults.plugins.legend.labels.generateLabels(c).map((l) => Object.assign(l, { fillStyle: "rgba(0,0,0,0)" })) : undefined },
           },
           tooltip: {
             backgroundColor: cssVar("--surface2"),

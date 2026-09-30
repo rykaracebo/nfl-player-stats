@@ -218,13 +218,13 @@
     epa_opp_qb: { l: "Points added per play, quarterbacks (EPA per opportunity)", f: "passing", u: "plays (attempts + sacks + carries)", w: "Passing EPA plus rushing EPA divided by attempts + sacks + carries. Meant for quarterbacks." },
     epa_opp_skill: { l: "Points added per play, RB / WR / TE (EPA per opportunity)", f: "receiving", u: "plays (carries + targets)", w: "Rushing EPA plus receiving EPA divided by carries + targets. Meant for running backs, receivers and tight ends." },
     epa_tgt: { l: "Points added per target (receiving EPA per target)", f: "receiving", u: "targets", w: "EPA on targeted plays divided by targets." },
-    racr: { l: "Yards gained per air yard (RACR)", f: "receiving", u: "receiving air yards", w: "Receiving yards divided by the yards the ball traveled in the air to the receiver. Above 1 means he gains more than the ball travels in the air." },
+    racr: { l: "Yards gained per air yard (RACR)", f: "receiving", u: "receiving air yards", w: "Receiving yards divided by the yards the ball traveled in the air to the receiver. Above 1 means the receiver gains more than the ball travels in the air." },
     air_yds_tgt: { l: "Average depth of target (air yards per target)", f: "receiving", u: "targets", w: "How far downfield the average pass to this player travels in the air." },
     yac_rec: { l: "Yards after catch per reception", f: "receiving", u: "receptions", w: "Yards gained after the catch divided by receptions (an unofficial stat)." },
     rec_fd_rate: { l: "First downs per reception", f: "receiving", u: "receptions", w: "Share of catches that gain a first down." },
-    target_share: { l: "Share of team targets (target share)", f: "receiving", u: "games targeted", w: "The player's share of his team's pass targets, averaged over games in which he was targeted." },
-    air_share: { l: "Share of team air yards (air-yards share)", f: "receiving", u: "games targeted", w: "The player's share of his team's air yards, averaged over games in which he was targeted." },
-    wopr: { l: "Receiver opportunity score (WOPR)", f: "receiving", u: "games targeted", w: "1.5 x target share + 0.7 x air-yards share, averaged over games in which he was targeted." },
+    target_share: { l: "Share of team targets (target share)", f: "receiving", u: "games targeted", w: "The player's share of the player's team's pass targets, averaged over games in which the player was targeted." },
+    air_share: { l: "Share of team air yards (air-yards share)", f: "receiving", u: "games targeted", w: "The player's share of the player's team's air yards, averaged over games in which the player was targeted." },
+    wopr: { l: "Receiver opportunity score (WOPR)", f: "receiving", u: "games targeted", w: "1.5 x target share + 0.7 x air-yards share, averaged over games in which the player was targeted." },
     epa_carry: { l: "Points added per carry (rushing EPA per carry)", f: "rushing", u: "carries", w: "Rushing EPA divided by carries. Includes quarterback scrambles." },
     rush_fd_rate: { l: "Rushing first-down rate", f: "rushing", u: "carries", w: "Share of carries that gain a first down." },
     fg_pct_30: { l: "Field goal % from 30 to 39 yards", f: "kicking", u: "attempts from 30 to 39", w: "Made divided by attempted from 30 to 39 yards." },
@@ -586,7 +586,7 @@
     return { rows: out, total };
   }
 
-  // Player list for the search box: id, name, position group and team from the player's last row, plus every team he appeared for and when.
+  // Player list for the search box: id, name, position group and team from the player's last row, plus every team the player appeared for and when.
   function playerIndex(store) {
     const info = new Map();
     for (const chunk of store.chunks) {

@@ -212,11 +212,11 @@
     $("view-players").addEventListener("click", () => setView("players"));
     $("view-teams").addEventListener("click", () => setView("teams"));
 
-    const onFilter = () => {
+    const onFilter = (ev) => {
       state.seasonMin = +$("f-season-min").value; state.seasonMax = +$("f-season-max").value;
-      if (state.seasonMin > state.seasonMax) { state.seasonMax = state.seasonMin; $("f-season-max").value = state.seasonMax; }
+      if (state.seasonMin > state.seasonMax) { if (ev && ev.target && ev.target.id === "f-season-max") { state.seasonMin = state.seasonMax; $("f-season-min").value = state.seasonMin; } else { state.seasonMax = state.seasonMin; $("f-season-max").value = state.seasonMax; } }
       state.weekMin = +$("f-week-min").value; state.weekMax = +$("f-week-max").value;
-      if (state.weekMin > state.weekMax) { state.weekMax = state.weekMin; $("f-week-max").value = state.weekMax; }
+      if (state.weekMin > state.weekMax) { if (ev && ev.target && ev.target.id === "f-week-max") { state.weekMin = state.weekMax; $("f-week-min").value = state.weekMin; } else { state.weekMax = state.weekMin; $("f-week-max").value = state.weekMax; } }
       const t = $("f-team").value;
       if (t !== "__h2h") { if (state.h2h) { state.h2h = null; syncTeamSelect(); } state.team = t; }
       state.opp = $("f-opp").value;
@@ -229,7 +229,7 @@
     $("m-select").addEventListener("change", () => { state.measureId = $("m-select").value; autoMeasureId = null; fillMinimum(); update(); });
     $("min-select").addEventListener("change", () => { state.minimum = $("min-select").value; update(); });
     $("b-select").addEventListener("change", () => { state.breakdownId = $("b-select").value; update(); });
-    $("table-view").addEventListener("change", () => { state.tableView = $("table-view").value; tableSort = null; renderTable(filters()); writeUrl(); });
+    $("table-view").addEventListener("change", () => { state.tableView = $("table-view").value; tableSort = null; renderTable(filters()); writeUrl(); announce("Table: " + $("table-view").selectedOptions[0].textContent.toLowerCase() + ".", true); });
     $("btn-reset").addEventListener("click", resetAll);
     $("btn-link").addEventListener("click", copyLink);
     $("btn-csv").addEventListener("click", downloadCsv);
@@ -268,7 +268,7 @@
   function showResults() { $("summary").scrollIntoView({ behavior: C.reducedMotion() ? "auto" : "smooth", block: "start" }); }
   // with one team or one player chosen, splitting by "Team" gives a single line: start on a split that shows something
   function avoidSingleTeamSplit() {
-    const to = state.team ? "position_group" : state.player ? "opponent_team" : null;
+    const to = state.team ? "position_group" : state.player ? "position" : null;
     if (to && state.breakdownId === "team") { state.breakdownId = to; $("b-select").value = to; }
   }
 
@@ -388,7 +388,10 @@
       list.hidden = false; input.setAttribute("aria-expanded", "true"); setActive(-1);
       announce(hits.length ? hits.length + (hits.length === 1 ? " player found" : " players found") + ". Use the arrow keys to choose." : "No players found.", true);
     };
-    input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(render, 90); });
+    input.addEventListener("input", () => {
+      if (!input.value.trim() && state.player) { state.player = null; update(); }
+      clearTimeout(timer); timer = setTimeout(render, 90);
+    });
     input.addEventListener("keydown", (e) => {
       const open = !list.hidden && items.length;
       if (e.key === "ArrowDown") { e.preventDefault(); if (list.hidden) render(); else if (items.length) setActive((active + 1) % items.length); }
@@ -402,7 +405,7 @@
     input.addEventListener("blur", () => setTimeout(close, 120));
   }
 
-  // the starting measure is a quarterback one; a receiver or a pass rusher needs his own
+  // the starting measure is a quarterback one; a receiver or a pass rusher needs a measure of their own
   const PLAYER_MEASURE = { RB: "rush_yds", WR: "rec_yds", TE: "rec_yds", DL: "sacks", LB: "sacks", DB: "ints_def", OL: "penalties", SPEC: "games" };
   let autoMeasureId = null; // the measure picked for the last player; it keeps following new players until the visitor picks one
   function selectPlayer(p) {
@@ -415,8 +418,8 @@
     const hadTeam = !!(state.team || state.h2h);
     if (hadTeam) {
       state.team = ""; state.h2h = null; syncTeamSelect(); if (fieldApi) fieldApi.setSelected(null);
-      // picking the team moved the split to position group; for one player that is a single bar
-      if (state.breakdownId === "position_group") { state.breakdownId = "opponent_team"; $("b-select").value = "opponent_team"; }
+      // picking the team moved the split to position group, which is the same one line for a single player
+      if (state.breakdownId === "position_group") { state.breakdownId = "position"; $("b-select").value = "position"; }
     }
     $("player-search").value = p.name;
     $("player-results").hidden = true; $("player-search").setAttribute("aria-expanded", "false");
@@ -459,9 +462,10 @@
     if (state.weekMin !== 1 || state.weekMax !== 22) parts.push("weeks " + state.weekMin + " to " + state.weekMax);
     const st = state.chips.season_type;
     parts.push(st.size === 1 ? (st.has("REG") ? "regular season" : "playoffs only") : "regular season and playoffs");
-    if (!state.player) {
-      const pg = state.chips.position_group, un = state.chips.unit;
-      parts.push(pg.size ? [...pg].join(", ") + " only" : un.size ? [...un].map((u) => u.toLowerCase()).join(" and ") + " only" : "all positions");
+    const pg = state.chips.position_group, un = state.chips.unit;
+    if (!state.player || pg.size || un.size) {
+      const pos = pg.size ? [...pg].join(", ") + " only" : "", unit = un.size ? [...un].map((u) => u.toLowerCase()).join(" and ") + " only" : "";
+      parts.push(pos && unit ? pos + " and " + unit : pos || unit || "all positions");
     }
     if (state.h2h) parts.push("games between " + state.h2h.map((t) => NFLTeams.name(t)).join(" and "));
     else {
@@ -525,15 +529,17 @@
     if (yr("from")) d.seasonMin = yr("from");
     if (yr("to")) d.seasonMax = yr("to");
     if (d.seasonMin > d.seasonMax) d.seasonMax = d.seasonMin;
-    const wk = (k, dflt) => { const v = +q.get(k); return v >= 1 && v <= 22 ? v : dflt; };
+    const wk = (k, dflt) => { const v = +q.get(k); return Number.isInteger(v) && v >= 1 && v <= 22 ? v : dflt; };
     d.weekMin = wk("wk0", 1); d.weekMax = wk("wk1", 22);
+    if (d.weekMin > d.weekMax) d.weekMax = d.weekMin;
     for (const col of Object.keys(PARAM_CHIPS)) if (has(PARAM_CHIPS[col])) {
       const raw = q.get(PARAM_CHIPS[col]);
       const allowed = new Set(CHIPS[col].map((c) => c[0]));
-      d.chips[col] = new Set(raw === "all" ? [] : raw.split(",").filter((v) => allowed.has(v)));
+      const keep = raw === "all" ? [] : raw.split(",").filter((v) => allowed.has(v));
+      if (raw === "all" || keep.length) d.chips[col] = new Set(keep);
     }
     const known = (t) => store.dicts.team.map.has(t);
-    if (has("h2h")) { const t = q.get("h2h").split(","); if (t.length === 2 && t.every(known)) d.h2h = t; }
+    if (has("h2h")) { const t = q.get("h2h").split(","); if (t.length === 2 && t[0] !== t[1] && t.every(known)) d.h2h = t; }
     if (!d.h2h) { if (known(q.get("team"))) d.team = q.get("team"); if (known(q.get("opp"))) d.opp = q.get("opp"); }
     if (has("player")) d.player = players.find((p) => p.id === q.get("player")) || null;
     if (S.MEASURE_BY_ID[q.get("m")]) d.measureId = q.get("m");
@@ -572,7 +578,7 @@
         tips: items.map((it) => {
           const p = it.parts[j];
           if (!p) return null;
-          return p.team + ": " + (Number.isNaN(p.value) ? "n/a" : S.format(fmt, p.value)) + (it.parts.length > 1 ? " (" + Math.round(p.share * 100) + "% of his workload)" : "");
+          return p.team + ": " + (Number.isNaN(p.value) ? "n/a" : S.format(fmt, p.value)) + (it.parts.length > 1 ? " (" + Math.round(p.share * 100) + "% of this player's workload)" : "");
         }),
       });
     }
@@ -599,6 +605,7 @@
   function catLabel(col, code) {
     const v = store.dicts[col].list[code];
     if (col === "season_type") return SEASON_TYPE_LABEL[v] || v;
+    if (col === "position_group" && v === "SPEC") return "K / P / LS";
     return v;
   }
   function showEmpty(n, msg) {
@@ -616,7 +623,7 @@
   function labelCharts() {
     for (let n = 1; n <= 4; n++) $("c" + n).setAttribute("aria-label", (($("t" + n).textContent + ". " + $("s" + n).textContent).trim() + " The same numbers are in the table at the bottom of the page.").replace(/\s+/g, " "));
   }
-  const NO_ROWS = "No player-games match these filters. Try widening the season range or clearing a filter.";
+  const NO_ROWS = "No player-games match these filters. Try widening the season range or clearing a filter, a position or a unit.";
   const bLabel = (b) => b.label.split(" (")[0].toLowerCase();
   // an overall line only makes sense next to group lines when the measure is a rate or average (a sum of everything would dwarf them)
   const comparable = (m) => m.type !== "sum" && m.type !== "teamGames";
@@ -637,7 +644,7 @@
     const ms = [m].concat(keys.map((k) => ({ type: "sum", num: CARD[k][1] })));
     const agg = S.aggregate(store, f, "all", ms).get(0);
     const cards = [[agg ? val(m, agg, 0) : NaN, m.fmt, m.label]];
-    const pool = keys.map((k, i) => [agg ? agg.num[i + 1] : 0, CARD[k][2], CARD[k][0]]).concat([[playerCount, "int", "Different players"]]);
+    const pool = keys.map((k, i) => [agg ? agg.num[i + 1] : 0, CARD[k][2], CARD[k][0]]).concat(state.player ? [[S.aggregate(store, f, "season", [S.MEASURE_BY_ID.games]).size, "int", "Seasons"], [S.countDistinct(store, f, "team"), "int", "Teams"]] : [[playerCount, "int", "Different players"]]);
     for (const c of pool) {
       if (cards.length >= 5) break;
       if (state.player && c[0] === 0) continue; // a stat this player never recorded is just noise
@@ -682,7 +689,7 @@
 
     if (!rows) {
       $("summary").innerHTML = cardsHtml([[0, "int", state.view === "teams" ? "Team-games" : "Player-games"]]);
-      const msg = state.view === "teams" ? "No team-games match these filters. Try widening the season range or clearing a filter." : note ? "No games to show. See the note above." : NO_ROWS;
+      const msg = state.team && state.team === state.opp ? "A team cannot play against itself. Pick a different Team or Opponent." : state.view === "teams" ? "No team-games match these filters. Try widening the season range or clearing a filter." : note ? "No games to show. See the note above." : NO_ROWS;
       for (let n = 1; n <= 4; n++) showEmpty(n, msg);
       ["t1", "t2", "t3", "t4"].forEach((id) => ($(id).textContent = m.label)); ["s1", "s2", "s3", "s4"].forEach((id) => ($(id).textContent = ""));
       renderTable(f);
@@ -709,7 +716,7 @@
   function paintMinLine(f, m) {
     const el = $("min-line");
     if (m.type !== "ratio") { el.textContent = ""; return; }
-    if (state.player) { el.textContent = "One player is selected, so the minimum is not applied to his numbers."; return; }
+    if (state.player) { el.textContent = "One player is selected, so the minimum is not applied to this player's numbers."; return; }
     const col = state.view === "teams" ? (state.breakdownId === "opponent_team" ? "opponent_team" : "team") : "player_id";
     const n = S.qualifiedPlayers(store, f, m, minOverride(), col);
     const who = col === "player_id" ? (n === 1 ? "player" : "players") : (n === 1 ? "team" : "teams");
@@ -779,7 +786,7 @@
     };
     let use = b, items = collect(b), note = "";
     if (items.length <= 1) { // one group is nothing to compare: fall back to a split that has several
-      const alts = (state.view === "teams" ? ["unit", "position_group", "season_type"] : ["position_group", "unit", "team", "season_type"]).filter((id) => id !== b.id);
+      const alts = (state.view === "teams" ? ["unit", "position_group", "team", "season_type"] : state.player ? ["opponent_team", "team", "season_type"] : ["position_group", "unit", "team", "season_type"]).filter((id) => id !== b.id);
       for (const id of alts) {
         const alt = S.BREAKDOWNS.find((x) => x.id === id), it = collect(alt);
         if (it.length > 1) { use = alt; items = it; note = "Only one " + bLabel(b) + " in view, so this splits by " + bLabel(alt) + " instead. "; break; }
@@ -855,7 +862,8 @@
       if (colors[0] === "--series-3") colors[0] = "--fg";
     }
     const reg = state.chips.season_type.size === 1 && state.chips.season_type.has("REG");
-    $("s4").textContent = splitNote(b, cats) + " " + (reg ? "Regular-season weeks." : "Playoff weeks continue the count (18 to 22).") + minNote(m);
+    const lost = !single && cats.list.length > 0 && !shown.length;
+    $("s4").textContent = (lost ? "No " + bLabel(b) + " reaches the minimum in a single week here, so only the all-rows line is drawn." : splitNote(b, cats)) + " " + (reg ? "Regular-season weeks." : "Playoff weeks continue the count (18 to 22).") + minNote(m);
     draw(4, { kind: "line", labels: weeks, datasets, colors, fmt: FMT[m.fmt], yTitle: m.label });
   }
 
@@ -934,13 +942,13 @@
       const labels = ["Pass yds", "Rush yds", "Rec yds", "Rec", "Sacks", "Int (def)", "Fantasy pts"];
       const limit = state.player ? 600 : 200;
       const gl = S.gameLog(store, f, cols, limit);
-      head = ["Season", "Wk", "Type", "Player", "Team", "Opp", "Pos"].map((l, i) => ({ label: l, num: i < 2, team: i === 4 || i === 5 })).concat(labels.map((l) => ({ label: l, num: true })));
+      head = ["Season", "Wk", "Type", "Player", "Team", "Opp", "Pos"].map((l, i) => ({ label: l, num: i < 2, team: i === 4 || i === 5, title: { Wk: "Week of the season", Opp: "Opponent", Pos: "Position group" }[l] })).concat(labels.map((l) => ({ label: l, num: true })));
       rows = gl.rows.map((r) => {
         const vals = cols.map((c) => r[c]);
         return { raw: [r.season, r.week, r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals),
-                 cells: [r.season, r.week, r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals.map((v, k) => (Number.isNaN(v) ? "n/a" : cols[k] === "fantasy_points_ppr" ? v.toFixed(1) : (cols[k] === "def_sacks" ? S.format("half", v) : S.format("int", v))))) };
+                 cells: [r.season, r.week, SEASON_TYPE_LABEL[r.season_type] || r.season_type, r.name, r.team, r.opponent_team, r.position_group].concat(vals.map((v, k) => (Number.isNaN(v) ? "n/a" : cols[k] === "fantasy_points_ppr" ? v.toFixed(1) : (cols[k] === "def_sacks" ? S.format("half", v) : S.format("int", v))))) };
       });
-      note = "Showing the first " + rows.length.toLocaleString("en-US") + " of " + gl.total.toLocaleString("en-US") + " player-games" + (gl.total > limit ? ". Pick a player or narrow the filters to see the rest." : ".");
+      note = "Showing the first " + rows.length.toLocaleString("en-US") + " of " + gl.total.toLocaleString("en-US") + " player-games" + (gl.total > limit ? ". Sorting and Download CSV cover only these rows. Pick a player or narrow the filters to see the rest." : ".");
       tableSort = tableSort || null;
     }
     $("table-title").textContent = "The numbers behind this view: " + title.toLowerCase();
@@ -978,9 +986,10 @@
       th.setAttribute("aria-sort", on ? (tableSort.dir > 0 ? "ascending" : "descending") : "none");
       const btn = document.createElement("button");
       btn.type = "button"; btn.className = "sortbtn";
-      btn.textContent = h.label + (on ? (tableSort.dir > 0 ? " ▲" : " ▼") : "");
+      btn.textContent = h.label;
+      if (on) { const arrow = document.createElement("span"); arrow.setAttribute("aria-hidden", "true"); arrow.textContent = tableSort.dir > 0 ? " ▲" : " ▼"; btn.appendChild(arrow); }
       if (h.title) btn.title = h.title;
-      btn.addEventListener("click", () => { tableSort = { col: i, dir: tableSort && tableSort.col === i ? -tableSort.dir : (h.num ? -1 : 1) }; paintTable(); const nb = $("table-box").querySelectorAll("th .sortbtn")[i]; if (nb) nb.focus(); });
+      btn.addEventListener("click", () => { tableSort = { col: i, dir: tableSort && tableSort.col === i ? -tableSort.dir : (h.num ? -1 : 1) }; paintTable(); announce("Sorted by " + h.label + (tableSort.dir > 0 ? ", ascending." : ", descending."), true); const nb = $("table-box").querySelectorAll("th .sortbtn")[i]; if (nb) nb.focus(); });
       th.appendChild(btn);
       tr.appendChild(th);
     });
@@ -998,12 +1007,12 @@
   function downloadCsv() {
     if (!tableData) return;
     const esc = (v) => { const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const lines = [tableData.head.map((h) => esc(h.label)).join(",")].concat(tableData.rows.map((r) => r.raw.map(esc).join(",")));
+    const lines = [tableData.head.map((h) => esc(h.label)).join(",")].concat(tableData.rows.map((r) => r.raw.map((v) => esc(typeof v === "number" && Number.isNaN(v) ? "" : v)).join(",")));
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
     a.download = "nfl-dashboard-table.csv";
     a.click();
-    URL.revokeObjectURL(a.href);
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
   // ------------------------------------------------------------------ start
