@@ -302,7 +302,7 @@
         if (!patch) return;
         state = Object.assign(fresh(), patch);
         syncControls();
-        toggleMore(!!state.h2h);
+        toggleMore(activeFilters().more.length > 0);
         update();
         if (p.after) p.after(); else showResults();
         announce("Showing: " + p.label + ". " + describe() + ".", true);
@@ -404,12 +404,19 @@
 
   function selectPlayer(p) {
     state.player = p;
+    // a team left over from picking on the field would quietly cut this player's numbers down to that team
+    const hadTeam = !!(state.team || state.h2h);
+    if (hadTeam) {
+      state.team = ""; state.h2h = null; syncTeamSelect(); if (fieldApi) fieldApi.setSelected(null);
+      // picking the team moved the split to position group; for one player that is a single bar
+      if (state.breakdownId === "position_group") { state.breakdownId = "opponent_team"; $("b-select").value = "opponent_team"; }
+    }
     $("player-search").value = p.name;
     $("player-results").hidden = true; $("player-search").setAttribute("aria-expanded", "false");
     if (state.tableView === "breakdown") { state.tableView = "season"; $("table-view").value = "season"; tableSort = null; }
     avoidSingleTeamSplit();
     update();
-    announce("Showing " + p.name + ".", true);
+    announce("Showing " + p.name + (hadTeam ? ", all teams." : "."), true);
     $("player-search").focus();
   }
 
@@ -428,9 +435,9 @@
     if (state.seasonMin !== d.seasonMin || state.seasonMax !== d.seasonMax) out.push("seasons");
     const more = [];
     if (state.weekMin !== 1 || state.weekMax !== 22) more.push("weeks");
-    if (state.team) more.push("team");
+    if (state.team) out.push("team");
+    if (state.h2h) out.push("head-to-head");
     if (state.opp) more.push("opponent");
-    if (state.h2h) more.push("head-to-head");
     const same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
     if (!same(state.chips.season_type, d.chips.season_type)) more.push("season type");
     if (!same(state.chips.unit, d.chips.unit)) more.push("unit");
@@ -849,7 +856,7 @@
     table.className = "data";
     table.innerHTML = "<caption class='sr'>Top 25 " + pos + " players in " + season + " by EPA over replacement</caption><thead><tr>" + head.map((h, i) => "<th scope='col' style='text-align:" + (i === 1 || i === 2 ? "left" : "right") + "'>" + h + "</th>").join("") + "</tr></thead>";
     const tb = document.createElement("tbody");
-    body.forEach((r) => { const tr = document.createElement("tr"); r.forEach((c, i) => { const td = document.createElement("td"); if (i === 2 && allTeams(c)) td.innerHTML = badges(c); else td.textContent = c; if (i === 1 || i === 2) td.style.textAlign = "left"; tr.appendChild(td); }); tb.appendChild(tr); });
+    body.forEach((r) => { const tr = document.createElement("tr"); r.forEach((c, i) => { const td = document.createElement("td"); if (i === 2 && allTeams(c)) td.innerHTML = badges(c); else td.textContent = c; td.style.textAlign = i === 1 || i === 2 ? "left" : "right"; tr.appendChild(td); }); tb.appendChild(tr); });
     table.appendChild(tb);
     $("d-table").innerHTML = ""; $("d-table").appendChild(table);
   }
@@ -957,7 +964,7 @@
     const tbody = document.createElement("tbody");
     sorted.slice(0, 1000).forEach((r) => {
       const row = document.createElement("tr");
-      r.cells.forEach((c, i) => { const td = document.createElement("td"); if (head[i].team && allTeams(c)) td.innerHTML = badges(c); else td.textContent = c; if (!head[i].num) td.style.textAlign = "left"; row.appendChild(td); });
+      r.cells.forEach((c, i) => { const td = document.createElement("td"); if (head[i].team && allTeams(c)) td.innerHTML = badges(c); else td.textContent = c; td.style.textAlign = head[i].num ? "right" : "left"; row.appendChild(td); });
       tbody.appendChild(row);
     });
     table.appendChild(tbody);

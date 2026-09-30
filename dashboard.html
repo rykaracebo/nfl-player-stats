@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Stats Dashboard, 2009 to 2025</title>
 <meta name="description" content="Explore 300,000 NFL player-games by season, team, position and player. Switch between player and team views and between basic and advanced stats.">
-<link rel="stylesheet" href="assets/css/style.css?v=20260930l">
+<link rel="stylesheet" href="assets/css/style.css?v=20260930m">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}catch(e){}</script>
 </head>
@@ -71,20 +71,20 @@
           <ul class="results" id="player-results" hidden role="listbox" aria-label="Matching players"></ul>
           <span class="sr" id="player-help">Type at least two letters, then use the arrow keys to choose a player and Enter to select.</span>
         </div>
-        <div class="field wide4">
+        <div class="field wide3">
           <span class="lbl" id="lbl-pos">Position group</span>
           <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
-        </div>
-      </div>
-      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters (week, team, opponent, season type, unit) <span id="more-count"></span></button>
-      <div class="filter-grid more-grid" id="more-filters" hidden>
-        <div class="field">
-          <label for="f-week-min">Week from</label>
-          <div class="pair"><select id="f-week-min"></select><span>to</span><select id="f-week-max" aria-label="Week to"></select></div>
         </div>
         <div class="field">
           <label for="f-team">Team</label>
           <select id="f-team"></select>
+        </div>
+      </div>
+      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters (week, opponent, season type, unit) <span id="more-count"></span></button>
+      <div class="filter-grid more-grid" id="more-filters" hidden>
+        <div class="field">
+          <label for="f-week-min">Week from</label>
+          <div class="pair"><select id="f-week-min"></select><span>to</span><select id="f-week-max" aria-label="Week to"></select></div>
         </div>
         <div class="field">
           <label for="f-opp">Opponent</label>
@@ -194,10 +194,10 @@
 </main>
 
 <script src="assets/js/chart.umd.min.js"></script>
-<script src="assets/js/stats.js?v=20260930l"></script>
-<script src="assets/js/charts.js?v=20260930l"></script>
-<script src="assets/js/teams.js?v=20260930l"></script>
-<script src="assets/js/field.js?v=20260930l"></script>
-<script src="assets/js/dashboard.js?v=20260930l"></script>
+<script src="assets/js/stats.js?v=20260930m"></script>
+<script src="assets/js/charts.js?v=20260930m"></script>
+<script src="assets/js/teams.js?v=20260930m"></script>
+<script src="assets/js/field.js?v=20260930m"></script>
+<script src="assets/js/dashboard.js?v=20260930m"></script>
 </body>
 </html>

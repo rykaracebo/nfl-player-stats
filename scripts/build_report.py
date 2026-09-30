@@ -9,7 +9,7 @@ import json
 
 import pandas as pd
 
-ASSET_V = "20260930l"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20260930m"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -153,7 +153,7 @@ def player_blocks(key, col, threshold, unit, height=340):
             blocks.append({"name": r.player_name, "value": float(getattr(r, col)),
                            "parts": [(t.team, float(t.v), float(t.v) / tot if tot > 0 else 1 / len(g)) for t in g.itertuples()]})
         per_season[int(sn)] = blocks
-        listing[int(sn)] = "; ".join(f"{b['name']} ({'/'.join(p[0] for p in b['parts'])}) {b['value']:,.0f}" for b in reversed(blocks))  # listed top block first, the way the bar is read
+        listing[int(sn)] = "; ".join(f"{b['name']} ({'/'.join(p[0] for p in b['parts'])}) {b['value']:,.0f}" for b in blocks)  # listed top block first, the way the bar is read
     BLOCKS[key] = {str(sn): [[b["name"], b["value"]] for b in bl] for sn, bl in per_season.items()}
     n_blocks = max(len(b) for b in per_season.values()); n_parts = max(len(bl["parts"]) for b in per_season.values() for bl in b)
     datasets = []
@@ -161,7 +161,7 @@ def player_blocks(key, col, threshold, unit, height=340):
         for k in range(n_parts):
             data, teams, tips = [], [], []
             for sn in SEASONS:
-                bl = per_season[int(sn)]
+                bl = per_season[int(sn)][::-1]  # first dataset is drawn at the bottom, so stack lowest first and the biggest player ends on top
                 if j < len(bl) and k < len(bl[j]["parts"]):
                     b = bl[j]; team, v, share = b["parts"][k]
                     data.append(round(share, 4)); teams.append(team)
