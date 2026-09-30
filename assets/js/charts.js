@@ -88,7 +88,12 @@
       pointBorderColor: surface,
       pointBorderWidth: 2,
       tension: 0,
-      borderRadius: isLine ? 0 : stacked && !horizontal ? 2 : 3,
+      // bars start flat at zero: only the far end is rounded (the near end when a value is negative); stacked blocks are square so the bottom one sits flat on zero
+      borderRadius: isLine ? 0 : stacked ? 0 : (c) => {
+        const v = typeof c.raw === "number" ? c.raw : 0, r = 3, neg = v < 0;
+        return horizontal ? { topLeft: neg ? r : 0, bottomLeft: neg ? r : 0, topRight: neg ? 0 : r, bottomRight: neg ? 0 : r }
+                          : { topLeft: neg ? 0 : r, topRight: neg ? 0 : r, bottomLeft: neg ? r : 0, bottomRight: neg ? r : 0 };
+      },
       borderSkipped: false,
       maxBarThickness: horizontal ? 16 : stacked ? 60 : 44,
       categoryPercentage: stacked && !horizontal ? 0.94 : 0.78,
