@@ -110,8 +110,9 @@ def seg_chart(labels, items, fmt, height=320, kind="hbar", names=None):
             if j < len(parts):
                 team, own, share = parts[j]
                 data.append(round(float(share * total), 4)); teams.append(team)
-                who = f"{names[len(data) - 1]}, " if names else ""
-                text = f"{who}{team}: {own:,.0f}" if fmt == "int" else f"{who}{team}: {own:,.1f}"
+                who = names[len(data) - 1] if names else None
+                label = f"{who} ({team})" if who else team  # always "Name (TEAM)", never "Name, TEAM"
+                text = f"{label}: {own:,.0f}" if fmt == "int" else f"{label}: {own:,.1f}"
                 tips.append(text + (f" ({round(share * 100)}% of his workload)" if len(parts) > 1 else ""))
             else:
                 data.append(0); teams.append(None); tips.append(None)
@@ -149,7 +150,7 @@ def player_blocks(key, col, threshold, unit, height=340):
                     b = bl[j]; team, v, share = b["parts"][k]
                     data.append(round(share, 4)); teams.append(team)
                     tips.append(f"{b['name']} ({team}): {b['value']:,.0f} {unit}" if len(b["parts"]) == 1
-                                else f"{b['name']}, {team}: {v:,.0f} of his {b['value']:,.0f} {unit}")
+                                else f"{b['name']} ({team}): {v:,.0f} of his {b['value']:,.0f} {unit}")
                 else:
                     data.append(0); teams.append(None); tips.append(None)
             datasets.append({"label": f"Block {j + 1}.{k + 1}", "data": data, "barTeams": teams, "tips": tips})
