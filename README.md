@@ -6,12 +6,13 @@ interactive dashboard, both built from NFL player game logs. Live site: https://
 ## Data
 
 - **Source:** [nflverse](https://github.com/nflverse/nflverse-data), release `stats_player`, weekly player stats
-  (`stats_player_week_YYYY.csv.gz`).
-- **License:** CC-BY-4.0. Credit: the nflverse project and its contributors.
+  (`stats_player_week_YYYY.csv.gz`). The data here is adapted (cleaned and aggregated) from nflverse: rows without a player
+  are dropped, a subset of columns is kept, and blanks and `NA` are rewritten as described in the data dictionary.
+- **License:** CC-BY-4.0. Credit: the nflverse project and its contributors. Changes were made (see above).
 - **Scope:** seasons 2009 to 2025, all position groups (offense, defense, special teams), regular season and playoffs.
 - **One row:** one player in one game. 304,515 rows, 69 columns, 8,093 players, 32 teams, 4,630 games.
-- **Why 2009:** nflverse has the same files back to 1999, but 2009 is where the course scope starts, and it keeps the
-  browser download smaller.
+- **Why 2009:** nflverse has the same files back to 1999. Starting at 2009 is my own scope choice (it is not from the assignment PDF); it
+  gives 17 seasons and keeps the browser download smaller.
 
 Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.md) and coverage, gaps and checks are in
 [`data/DATA_QUALITY.md`](data/DATA_QUALITY.md).
@@ -41,6 +42,9 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `data/player_build_log.txt` | Every row dropped or changed during cleaning, and why. |
 | `data/DATA_DICTIONARY.md` | Definition of every column. |
 | `data/DATA_QUALITY.md` | Row counts, coverage by season, missing values, known gaps. |
+| `data/dropped_rows.json` | What the 362 dropped rows are and how much of each regular-season total they held; written by `build_player_data.py`, quoted by the report. |
+| `.gitignore` | Keeps the virtual environment, Python cache, macOS files, the downloaded raw files (`data/raw/`) and `submission.txt` out of the repository. |
+| `LICENSE` | MIT license for the code; the data is CC-BY-4.0 from nflverse. |
 | `CHECKLIST.md` | The assignment requirements and where each one is met. |
 
 ## Rebuilding the data
@@ -79,5 +83,18 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
   in the play board) are loaded by the visitor's browser from the links in the nflverse teams file (`team_logo_espn`,
   `team_league_logo`) and are not stored in this repository; if one cannot load, a color badge or a plain crest is shown instead.
   The rest of the ball's printing ("PLAYER STATS", "2009-2025") is this project's own.
-- Fonts: Geist and Instrument Serif (copied from the author's other project) and Bebas Neue for the field lettering
-  (SIL Open Font License 1.1, by Dharma Type, self-hosted in `assets/fonts/`).
+- Charts are drawn with [Chart.js](https://www.chartjs.org/) 4.4.1 (MIT license), loaded from cdnjs.
+- Fonts, self-hosted in `assets/fonts/`: Geist and Geist Mono (SIL Open Font License 1.1, Vercel), Instrument Serif (SIL Open Font
+  License 1.1, Instrument) and Bebas Neue for the field lettering (SIL Open Font License 1.1, Dharma Type).
+
+## License
+
+The code is MIT-licensed (see `LICENSE`). The data is adapted from nflverse, which is CC-BY-4.0: credit the nflverse project and its
+contributors. The NFL name, shield, team names and logos belong to the NFL and its teams and are not covered by this license.
+
+## How AI tools were used
+
+As the assignment expects, I built the site with Claude Code (Anthropic's AI coding assistant). I chose the data set, the questions and the
+design direction and reviewed the results. Claude Code wrote most of the code and the text, and I did not write every line myself. Every
+number on the report is computed by `scripts/build_report.py` from the CSVs and independently recomputed in JavaScript by
+`scripts/check_numbers.js`, so a wrong figure would be caught by a mismatch, but I am responsible for any error that remains.
