@@ -26,11 +26,11 @@ Status: done / partly / not done.
 | # | Requirement | Where | Status |
 |---|---|---|---|
 | 10 | Loads data and calculates in the browser | `assets/js/dashboard.js` fetches the CSVs; `assets/js/stats.js` calculates | done, verified in Chrome |
-| 11 | Filters for 4+ variables incl. time and group | season range, week range, team, opponent, season type, unit, position group, player | done, verified in Chrome |
-| 12 | 4+ summary numbers that change with filters | 8 summary cards plus 5 milestone counts | done, verified in Chrome |
+| 11 | Filters for 4+ variables incl. time and group | season range, position group, player (always visible); week range, team, opponent, season type, unit (under "More filters") | done, verified in Chrome |
+| 12 | 4+ summary numbers that change with filters | 4 to 5 summary cards (the first is the selected measure) plus 5 milestone counts under Advanced | done, verified in Chrome |
 | 13 | 4+ charts with a measure switch and a breakdown switch | 4 charts, measure select and breakdown select | done, verified in Chrome |
 | 14 | Table of the numbers behind the view | table panel, 4 views, CSV download | done, verified in Chrome |
-| 15 | Reset-filters button | "Reset filters" in the filter panel | done, verified in Chrome |
+| 15 | Reset-filters button | "Reset all" in the bar under the filters (sticks to the top while scrolling); restores filters, player, team, measure, breakdown, table view, Players/Teams and the field's selection | done, verified in Chrome |
 
 ## Site and repository
 | # | Requirement | Where | Status |
@@ -40,7 +40,7 @@ Status: done / partly / not done.
 | 18 | Public repo, GitHub Pages from `main` | repo: https://github.com/rykaracebo/nfl-player-stats, site: https://rykaracebo.github.io/nfl-player-stats/ | done, live site verified (both pages, data loading, charts, filters, reset) |
 | 19 | README listing every file and the data source | `README.md` | done |
 | 20 | Data files, scripts and site files in the repo | `data/`, `scripts/`, `assets/`, both pages | done |
-| 21 | Commit history showing the work as it was done | small commits per step (about 30 commits) | done |
+| 21 | Commit history showing the work as it was done | small commits per step (over 40 commits) | done |
 
 ## Grading
 | Component | Points | Plan |
