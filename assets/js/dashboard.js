@@ -226,7 +226,7 @@
       update();
     };
     ["f-season-min", "f-season-max", "f-week-min", "f-week-max", "f-team", "f-opp"].forEach((id) => $(id).addEventListener("change", onFilter));
-    $("m-select").addEventListener("change", () => { state.measureId = $("m-select").value; fillMinimum(); update(); });
+    $("m-select").addEventListener("change", () => { state.measureId = $("m-select").value; autoMeasureId = null; fillMinimum(); update(); });
     $("min-select").addEventListener("change", () => { state.minimum = $("min-select").value; update(); });
     $("b-select").addEventListener("change", () => { state.breakdownId = $("b-select").value; update(); });
     $("table-view").addEventListener("change", () => { state.tableView = $("table-view").value; tableSort = null; renderTable(filters()); writeUrl(); });
@@ -402,8 +402,15 @@
     input.addEventListener("blur", () => setTimeout(close, 120));
   }
 
+  // the starting measure is a quarterback one; a receiver or a pass rusher needs his own
+  const PLAYER_MEASURE = { RB: "rush_yds", WR: "rec_yds", TE: "rec_yds", DL: "sacks", LB: "sacks", DB: "ints_def", OL: "penalties", SPEC: "games" };
+  let autoMeasureId = null; // the measure picked for the last player; it keeps following new players until the visitor picks one
   function selectPlayer(p) {
     state.player = p;
+    const want = PLAYER_MEASURE[p.position_group];
+    if ((state.measureId === fresh().measureId || state.measureId === autoMeasureId) && want && S.MEASURE_BY_ID[want]) {
+      state.measureId = want; autoMeasureId = want; $("m-select").value = want; fillMinimum();
+    }
     // a team left over from picking on the field would quietly cut this player's numbers down to that team
     const hadTeam = !!(state.team || state.h2h);
     if (hadTeam) {
@@ -787,7 +794,7 @@
       return;
     }
     $("t2").textContent = m.label + " by " + bLabel(use);
-    $("s2").textContent = note + (items.length > LIMIT ? "Top " + LIMIT + " of " + items.length + " (the table lists all of them)" : items.length + (items.length === 1 ? " group" : " groups")) + "." + minNote(m);
+    $("s2").textContent = note + (items.length > LIMIT ? "Top " + LIMIT + " of " + items.length + " " + bLabel(use) + "s (the table lists all of them)" : items.length + (items.length === 1 ? " group" : " groups")) + "." + minNote(m);
     if (!top.length) { showEmpty(2, "No value can be computed for this measure with these filters."); return; }
     // the trend chart beside it takes the same height, so the two cards fill evenly
     const boxH = Math.max(300, top.length * 26 + 70) + "px";
