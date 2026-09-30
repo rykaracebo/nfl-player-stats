@@ -51,7 +51,7 @@
     view: "players", seasonMin: seasonsAll[0], seasonMax: seasonsAll[seasonsAll.length - 1], weekMin: 1, weekMax: 22,
     chips: { season_type: new Set(["REG"]), unit: new Set(), position_group: new Set() },
     team: "", opp: "", h2h: null, player: null,
-    measureId: "pass_yds_tg", breakdownId: "team", tableView: "breakdown", minimum: "qualified",
+    measureId: "pass_yds_tg", breakdownId: "team", tableView: "season", minimum: "qualified",
   });
 
   // ------------------------------------------------------------------ loading
@@ -101,11 +101,11 @@
       const cur = S.MEASURE_BY_ID[state.measureId];
       if (!cur || cur.group === "Per player-game") state.measureId = "pass_yds_tg";
       if (!TEAM_BREAKDOWN.some((x) => x[0] === state.breakdownId)) state.breakdownId = "team";
-      if (!TEAM_TABLE_VIEWS.some((x) => x[0] === state.tableView)) state.tableView = "breakdown";
+      if (!TEAM_TABLE_VIEWS.some((x) => x[0] === state.tableView)) state.tableView = "season";
     } else {
       if (!S.MEASURE_BY_ID[state.measureId]) state.measureId = "pass_yds_tg";
       if (!S.BREAKDOWNS.some((x) => x.id === state.breakdownId)) state.breakdownId = "team";
-      if (!PLAYER_TABLE_VIEWS.some((x) => x[0] === state.tableView)) state.tableView = "breakdown";
+      if (!PLAYER_TABLE_VIEWS.some((x) => x[0] === state.tableView)) state.tableView = "season";
     }
   }
 
@@ -221,6 +221,7 @@
       state.opp = $("f-opp").value;
       if (state.h2h && state.opp) { state.h2h = null; state.team = ""; syncTeamSelect(); }
       if (fieldApi) fieldApi.setSelected(state.team || null);
+      if (t !== "__h2h" && state.team) avoidSingleTeamSplit();
       update();
     };
     ["f-season-min", "f-season-max", "f-week-min", "f-week-max", "f-team", "f-opp"].forEach((id) => $(id).addEventListener("change", onFilter));
@@ -247,7 +248,7 @@
   function setView(v) {
     state.view = v;
     if (v === "teams") state.breakdownId = TEAM_BREAKDOWN.some((x) => x[0] === state.breakdownId) ? state.breakdownId : "team";
-    state.tableView = "breakdown";
+    state.tableView = "season";
     syncControls();
     update();
   }
@@ -256,8 +257,18 @@
     state = fresh();
     syncControls();
     toggleMore(false);
+    $("advanced").open = false;
+    $("field-panel").open = false;
     update();
     announce("Everything is back to the starting view.", true);
+  }
+
+  // a preset or a click on the field changes the numbers below the fold: bring them into view (the sticky bars are cleared by scroll-padding)
+  function showResults() { $("summary").scrollIntoView({ behavior: C.reducedMotion() ? "auto" : "smooth", block: "start" }); }
+  // with one team or one player chosen, splitting by "Team" gives a single line: start on a split that shows something
+  function avoidSingleTeamSplit() {
+    const to = state.team ? "position_group" : state.player ? "opponent_team" : null;
+    if (to && state.breakdownId === "team") { state.breakdownId = to; $("b-select").value = to; }
   }
 
   // ------------------------------------------------------------------ presets
@@ -278,7 +289,7 @@
       { label: "Who led the league in sacks in 2021", make: () => ({ seasonMin: 2021, seasonMax: 2021, measureId: "sacks", breakdownId: "position_group", tableView: "players" }) },
       { label: "Best QB seasons by EPA over replacement", make: () => ({ chips: { season_type: new Set(["REG"]), unit: new Set(), position_group: new Set(["QB"]) }, measureId: "epa_opp_qb", breakdownId: "team", tableView: "players" }),
         after: () => { const b = bestQbSeason(); $("advanced").open = true; $("d-pos").value = "QB"; if (b) $("d-season").value = b.season; renderDeep(); $("advanced").scrollIntoView({ behavior: C.reducedMotion() ? "auto" : "smooth", block: "start" }); } },
-      { label: "Chiefs vs Bills", make: () => (store.dicts.team.map.has("KC") && store.dicts.team.map.has("BUF") ? { view: "teams", h2h: ["KC", "BUF"], measureId: "pass_yds_tg", breakdownId: "team", tableView: "breakdown" } : null) },
+      { label: "Chiefs vs Bills: their games against each other", make: () => (store.dicts.team.map.has("KC") && store.dicts.team.map.has("BUF") ? { view: "teams", h2h: ["KC", "BUF"], measureId: "pass_yds_tg", breakdownId: "team", tableView: "breakdown" } : null) },
     ];
     const box = $("presets");
     box.innerHTML = "";
@@ -292,7 +303,7 @@
         syncControls();
         toggleMore(!!state.h2h);
         update();
-        if (p.after) p.after();
+        if (p.after) p.after(); else showResults();
         announce("Showing: " + p.label + ". " + describe() + ".", true);
       });
       box.appendChild(b);
@@ -321,7 +332,10 @@
   function selectTeam(code) {
     state.team = code; state.h2h = null; syncTeamSelect();
     if (fieldApi) fieldApi.setSelected(code);
+    avoidSingleTeamSplit();
+    $("field-panel").open = false;
     update();
+    showResults();
     announce("Filtered to " + NFLTeams.name(code) + ".", true);
   }
   function clearTeam() {
@@ -392,6 +406,7 @@
     $("player-search").value = p.name;
     $("player-results").hidden = true; $("player-search").setAttribute("aria-expanded", "false");
     if (state.tableView === "breakdown") { state.tableView = "season"; $("table-view").value = "season"; tableSort = null; }
+    avoidSingleTeamSplit();
     update();
     announce("Showing " + p.name + ".", true);
     $("player-search").focus();
@@ -662,21 +677,23 @@
       (col === "player_id" ? " across the seasons in view. The top-10 chart applies it to each single season." : " in total.");
   }
 
-  // the categories a breakdown draws as lines (trend, week charts): players view = most player-games, teams view = highest value
+  // the categories a breakdown draws as lines (trend, week charts): the highest values, at most MAX_CATS
   function pickCats(f, m, b) {
     const g = S.aggregate(store, f, b.id, [m]);
     const arr = [];
     for (const [key, v] of g) {
       const x = val(m, v, 0);
-      if (state.view === "teams" && Number.isNaN(x)) continue;
-      arr.push([key, state.view === "teams" ? x : v.rows, v.rows]);
+      if (Number.isNaN(x)) continue;
+      arr.push([key, x, v.rows]);
     }
     arr.sort((a, c) => c[1] - a[1]);
-    return { list: arr.slice(0, MAX_CATS).map((e) => e[0]), total: arr.length };
+    const nonzero = arr.filter((e) => e[1] !== 0); // a group with no value at all (for example defensive linemen for passing yards) is not a line worth drawing
+    const ranked = nonzero.length ? nonzero : arr;
+    return { list: ranked.slice(0, MAX_CATS).map((e) => e[0]), total: ranked.length };
   }
   function splitNote(b, cats) {
     if (cats.total <= 1) return "One " + bLabel(b) + " in view, so there is nothing to split.";
-    return "Split by " + bLabel(b) + (cats.total > MAX_CATS ? " (" + (state.view === "teams" ? "highest " : "top ") + MAX_CATS + " of " + cats.total + (state.view === "teams" ? " by value" : " by player-games") + ")" : "") + ".";
+    return "Split by " + bLabel(b) + (cats.total > MAX_CATS ? " (" + "highest " + MAX_CATS + " of " + cats.total + " by value)" : "") + ".";
   }
 
   function chartTrend(f, m, b, cats) {

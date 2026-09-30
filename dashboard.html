@@ -76,7 +76,7 @@
           <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
         </div>
       </div>
-      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters <span id="more-count"></span></button>
+      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters (week, team, opponent, season type, unit) <span id="more-count"></span></button>
       <div class="filter-grid more-grid" id="more-filters" hidden>
         <div class="field">
           <label for="f-week-min">Week from</label>
@@ -133,6 +133,8 @@
     </section>
 
     <section class="summary" id="summary" aria-label="Summary numbers"></section>
+
+    <p class="filter-note" id="report-note">With the starting filters, the "By season" table at the bottom of the page lists the same season values the report uses.</p>
 
     <section class="charts" aria-label="Charts">
       <div class="card panel"><h3 id="t1"></h3><p class="sub" id="s1"></p><div class="chart-box"><canvas id="c1" role="img" aria-label="Trend by season"></canvas></div><p class="empty" id="e1" hidden></p></div>
