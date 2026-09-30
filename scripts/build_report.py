@@ -323,6 +323,15 @@ qb = qb[qb["a"] + qb["s"] >= 200]
 qb["v"] = qb["pe"] / (qb["a"] + qb["s"])
 adv["top_epa_db"] = [[r.player_name, int(r.season), float(r.v)] for r in qb.sort_values(["v", "player_name"], ascending=[False, True]).head(10).itertuples()]
 R["advanced"] = adv
+# players whose regular-season total (all seasons) reaches a rate measure's minimum: the dashboard's "Showing N players who meet the minimum" line
+tot = reg.groupby("player_id")[["attempts", "sacks_suffered", "carries", "targets", "receptions"]].sum()
+dbk = tot["attempts"] + tot["sacks_suffered"]
+R["qualified"] = {
+    "epa_db|0": int((dbk >= 200).sum()), "epa_db|50": int((dbk >= 50).sum()), "epa_db|100": int((dbk >= 100).sum()),
+    "ypc|0": int((tot["carries"] >= 100).sum()), "ypc|25": int((tot["carries"] >= 25).sum()),
+    "catch_pct|0": int((tot["targets"] >= 50).sum()), "catch_pct|10": int((tot["targets"] >= 10).sum()),
+    "ypr|0": int((tot["receptions"] >= 30).sum()), "ypr|100": int((tot["receptions"] >= 100).sum()),
+}
 
 # ------------------------------------------------------------------ EPA over replacement (this site's version)
 # Rule (same as assets/js/stats.js): regular season, one position group at a time, rows filtered by position_group.

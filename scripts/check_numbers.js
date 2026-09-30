@@ -102,6 +102,12 @@ report.advanced.top_epa_db.forEach(([name, season, v], i) => {
   check("top EPA per dropback rank " + (i + 1) + " value", topEpa[i].value, v);
 });
 
+// "Showing N players who meet the minimum": dashboard code vs pandas (Qualified = the measure's own minimum, or an override)
+for (const [key, want] of Object.entries(report.qualified)) {
+  const [id, mn] = key.split("|");
+  check("qualified players " + key, S.qualifiedPlayers(store, REG, M[id], +mn), want);
+}
+
 // EPA over replacement: dashboard code vs pandas, every position and season (replacement rate, starter rate, pool size, top 5)
 for (const pos of Object.keys(report.epaor)) {
   const js = S.epaOverReplacement(store, pos, null, null);
