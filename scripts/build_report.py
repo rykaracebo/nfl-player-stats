@@ -9,7 +9,7 @@ import json
 
 import pandas as pd
 
-ASSET_V = "20260930i"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20260930l"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -97,6 +97,8 @@ assert [int(s) for s in range(2013, 2021) if pass_tg[s] <= 250] == [2017], "pass
 assert pass_tg.loc[2021:].max() < 250 and pass_tg[LAST] == pass_tg.min()
 assert c100rec.idxmax() == 2023 and c100rec[2009] == 6, "100-catch narrative (6 in 2009, peak 2023) no longer holds"
 assert 1 <= c6int.loc[2019:].min() and c6int.loc[2019:].max() <= 5 and c6int[FIRST] == c6int.max(), "6+ interception narrative no longer holds"
+assert c6int.loc[2013:].max() <= 5 and c100rec.loc[:2017].max() <= 7 and c100rec.loc[2020:].min() >= 7, "interception and 100-catch headings no longer hold"
+assert c300[2023] == 0, "300-carry: no one reached it in 2023"
 assert c300.loc[2013:2023].max() <= 3 and c300[2024] > c300[2023], "300-carry narrative no longer holds"
 
 # ------------------------------------------------------------------ sections
@@ -172,10 +174,11 @@ def player_blocks(key, col, threshold, unit, height=340):
     return spec, listing
 
 
-def add(theme, title, paras, spec, head, rows):
+def add(theme, title, paras, spec, head, rows, cap=None):
     if spec.get("stacked") and spec["datasets"] and str(spec["datasets"][0]["label"]).startswith("Block"):
         paras = paras[:-1] + [paras[-1] + " Each block in the chart is one player, colored by his team; hover a block to see who."]
-    sections.append({"theme": theme, "title": title, "paras": paras, "chart": spec, "head": head, "rows": rows})
+    cap = cap or spec.get("yTitle") or head[1]
+    sections.append({"theme": theme, "title": title, "paras": paras, "chart": spec, "head": head, "rows": rows, "cap": cap})
 
 
 BLK = {key: player_blocks(key, col, thr, unit) for _, _, key, col, thr, unit in [("", "", "pass4000", "passing_yards", 4000, "passing yards"), ("", "", "rush1000", "rushing_yards", 1000, "rushing yards"), ("", "", "carries300", "carries", 300, "carries"), ("", "", "rec100", "receptions", 100, "receptions"), ("", "", "int6", "def_interceptions", 6, "interceptions")]}
@@ -183,11 +186,11 @@ R["blocks"] = BLOCKS
 
 min_rush, max_rush = rush_tg.min(), rush_tg.max()
 add("Passing peaked, then slid",
-    f"Passing yards per team-game peaked at {dec(pass_tg[peak_pass])} in {peak_pass}, topped 250 in {len(above250)} of the 8 seasons from 2013 to 2020 (all but 2017), then fell to {dec(pass_tg[LAST])} in {LAST}; rushing stayed within {dec(min_rush, 0)} to {dec(max_rush, 0)}",
+    f"Passing yards per team-game peaked at {dec(pass_tg[peak_pass])} in {peak_pass} and fell to {dec(pass_tg[LAST])} in {LAST}, while rushing stayed between {dec(min_rush, 0)} and {dec(max_rush, 0)}",
     [f"Adding up every player's passing yards and dividing by team-games, offenses averaged {dec(pass_tg[FIRST])} passing yards in "
      f"{FIRST}, climbed to {dec(pass_tg[peak_pass])} in {peak_pass}, and fell to {dec(pass_tg[LAST])} in {LAST}, the lowest of the "
-     f"{len(SEASONS)} seasons. That is {pct(1 - pass_tg[LAST] / pass_tg[peak_pass])} below the peak. The path is not a smooth arc: 2017 dipped to "
-     f"{dec(pass_tg[2017])}, and every season from 2021 on was below 250.",
+     f"{len(SEASONS)} seasons. That is {pct(1 - pass_tg[LAST] / pass_tg[peak_pass])} below the peak. Passing topped 250 in {len(above250)} of the {len(range(2013, 2021))} seasons from 2013 to 2020, "
+     f"all but {', '.join(str(s) for s in range(2013, 2021) if s not in above250)}, when it dipped to {dec(pass_tg[2017])}, and every season from 2021 on was below 250.",
      f"Rushing barely moved. Rushing yards per team-game stayed between {dec(min_rush)} and {dec(max_rush)} every season, "
      f"and finished {LAST} at {dec(rush_tg[LAST])}. In these numbers the drop is in passing; rushing did not move with it."],
     chart("line", SEASONS, [("Passing yards per team-game", pass_tg), ("Rushing yards per team-game", rush_tg)], "yds", "Yards per team-game", 340),
@@ -223,40 +226,41 @@ add("The running back roller coaster",
     BLK["carries300"][0],
     ["Season", "Players with 300+ carries", "Who (team) and total, top block first"], [[int(s), int(c300[s]), BLK["carries300"][1][int(s)]] for s in SEASONS])
 
-add("Receivers pile up catches",
-    f"100-catch seasons rose from {int(c100rec[FIRST])} in {FIRST} to {int(c100rec.max())} in 2023, though team passing yards per game were {dec(pass_tg[2023], 0)} in 2023 against {dec(pass_tg[peak_pass], 0)} at the {peak_pass} peak",
+add("Receivers: more 100-catch seasons",
+    f"100-catch seasons got more common: never more than {int(c100rec.loc[:2017].max())} a year through 2017, at least {int(c100rec.loc[2020:].min())} a year from 2020, and {int(c100rec.max())} in 2023",
     [f"The count was {int(c100rec[FIRST])} in {FIRST} and only {int(c100rec[2010])} in 2010 and 2011. It reached {int(c100rec.max())} in "
      f"{', '.join(str(int(s)) for s in c100rec[c100rec == c100rec.max()].index)} and was {int(c100rec[LAST])} in {LAST}, so the rise is uneven.",
      f"The count of 100-catch players and team passing yards per game did not move together: {int(c100rec.max())} players in 2023 with "
      f"{dec(pass_tg[2023])} yards per team-game, against {int(c100rec[peak_pass])} players in {peak_pass} with {dec(pass_tg[peak_pass])}. "
-     "These are counts of individual players, so a few high-volume receivers can move the number from one season to the next. The data do not say why."],
+     "These are counts of individual players, so a few high-volume receivers can move the number from one season to the next. "
+     "Seasons were 16 games through 2020 and 17 from 2021. The data do not say why."],
     BLK["rec100"][0],
     ["Season", "Players with 100+ receptions", "Who (team) and total, top block first"], [[int(s), int(c100rec[s]), BLK["rec100"][1][int(s)]] for s in SEASONS])
 
-add("Defenses: fewer takeaways, more pressure",
-    f"Interceptions per team-game fell from {dec(int_tg[FIRST], 2)} in {FIRST} to {dec(int_tg[LAST], 2)} in {LAST}",
+add("Defenses: fewer interceptions, more sacks",
+    f"Interceptions per team-game fell from {dec(int_tg[FIRST], 3)} in {FIRST} to {dec(int_tg[LAST], 3)} in {LAST}",
     [f"Defenses came up with {dec(int_tg[FIRST], 3)} interceptions per team-game in {FIRST}. By {LAST} that had fallen to "
      f"{dec(int_tg[LAST], 3)}, a drop of {pct(1 - int_tg[LAST] / int_tg[FIRST], 0)}.",
-     "The decline is gradual, with no single-season cliff. The data show that it happened, not why."],
+     "The decline is gradual, with small year-to-year bumps and no single-season cliff. The data show that it happened, not why."],
     chart("line", SEASONS, [("Interceptions per team-game", int_tg)], "dec3", "Interceptions per team-game"),
     ["Season", "Interceptions", "Interceptions per team-game"],
     [[int(s), num(by_season.loc[s, "def_interceptions"]), dec(int_tg[s], 3)] for s in SEASONS])
 
-add("Defenses: fewer takeaways, more pressure",
-    f"Players with 6+ interceptions fell from {int(c6int[FIRST])} in {FIRST} to between {int(c6int.loc[2019:].min())} and {int(c6int.loc[2019:].max())} a year since 2019",
+add("Defenses: fewer interceptions, more sacks",
+    f"Players with 6+ interceptions fell from {int(c6int[FIRST])} in {FIRST} to {int(c6int.loc[2013:].max())} or fewer in every season since 2013, and {int(c6int[LAST])} in {LAST}",
     [f"In {FIRST}, {int(c6int[FIRST])} defenders had six or more interceptions. By 2013 it was {int(c6int[2013])}, and in {LAST} only "
-     f"{int(c6int[LAST])} player did it. Every season from 2019 to {LAST} had between {int(c6int.loc[2019:].min())} and {int(c6int.loc[2019:].max())}.",
+     f"{int(c6int[LAST])} player did it. Every season from 2013 to {LAST} had between {int(c6int.loc[2013:].min())} and {int(c6int.loc[2013:].max())}.",
      f"The season high in the data is {int(ps['def_interceptions'].max())} interceptions, by "
      f"{ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['player_name']} in "
      f"{int(ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['season'])}."],
     BLK["int6"][0],
     ["Season", "Players with 6+ interceptions", "Who (team) and total, top block first"], [[int(s), int(c6int[s]), BLK["int6"][1][int(s)]] for s in SEASONS])
 
-add("Defenses: fewer takeaways, more pressure",
+add("Defenses: fewer interceptions, more sacks",
     f"Sacks per pass attempt rose from {pct(sack_rate[FIRST])} in {FIRST} to {pct(sack_rate[LAST])} in {LAST}",
     [f"Dividing sacks by pass attempts, the sack rate was {pct(sack_rate[FIRST], 2)} in {FIRST} and {pct(sack_rate[LAST], 2)} in {LAST}. "
      f"It peaked at {pct(sack_rate.max(), 2)} in {int(sack_rate.idxmax())}.",
-     "Sacks are not counted in pass attempts, so this rate is sacks per attempt, not per dropback (a dropback is a pass attempt or a sack). "
+     "Sacks are not counted in pass attempts, so this rate is sacks per attempt. "
      "Over the same seasons interceptions per team-game fell while sacks per attempt rose. The data show what changed, not why."],
     chart("line", SEASONS, [("Sacks per pass attempt", sack_rate)], "pct", "Sacks per pass attempt"),
     ["Season", "Sacks", "Pass attempts", "Sacks per pass attempt"],
@@ -270,7 +274,7 @@ for r in hits.itertuples():
 R["qb_hits_top_parts"] = [[r.player_name, int(r.season), [[t, v] for t, v, _ in HIT_PARTS[(r.season, r.player_id)][1]]] for r in hits.itertuples()]
 
 watt = hits[hits["player_name"] == "J.J. Watt"]
-add("Defenses: fewer takeaways, more pressure",
+add("Pass rushers",
     f"J.J. Watt owns {len(watt)} of the {len(hits)} biggest QB-hit seasons, led by {dec(watt['def_qb_hits'].max(), 0)} in {int(watt.sort_values('def_qb_hits', ascending=False).iloc[0]['season'])}",
     [f"The top 10 single seasons for quarterback hits include {len(watt)} by J.J. Watt, in " +
      ", ".join(f"{int(r.season)} ({int(r.def_qb_hits)})" for r in watt.sort_values("season").itertuples()) +
@@ -279,7 +283,8 @@ add("Defenses: fewer takeaways, more pressure",
      "not a full count of pressure."],
     seg_chart([f"{r.player_name} {int(r.season)} ({'/'.join(HIT_PARTS[(r.season, r.player_id)][0])})" for r in hits.itertuples()],
               [(float(r.def_qb_hits), HIT_PARTS[(r.season, r.player_id)][1]) for r in hits.itertuples()], "int", 400),
-    ["Player", "Season", "Team", "QB hits"], [[r.player_name, int(r.season), "/".join(HIT_PARTS[(r.season, r.player_id)][0]), int(r.def_qb_hits)] for r in hits.itertuples()])
+    ["Player", "Season", "Team", "QB hits"], [[r.player_name, int(r.season), "/".join(HIT_PARTS[(r.season, r.player_id)][0]), int(r.def_qb_hits)] for r in hits.itertuples()],
+    cap="QB hits in a season, top 10 player-seasons")
 
 leaders = pd.DataFrame({"season": SEASONS, "name": [sack_leaders.loc[s, "player_name"] for s in SEASONS],
                         "sacks": [sack_leaders.loc[s, "def_sacks"] for s in SEASONS]})
@@ -293,14 +298,15 @@ for sn in SEASONS:
 R["sack_leader_parts"] = {str(k): [[t, v] for t, v, _ in parts] for k, parts in LEADER_PARTS.items()}
 watt_led = int((leaders["name"] == "T.J. Watt").sum())
 low, high = leaders.loc[leaders["sacks"].idxmin()], leaders.loc[leaders["sacks"].idxmax()]
-add("Defenses: fewer takeaways, more pressure",
+add("Pass rushers",
     f"The sack leader each season ranged from {nd(low['sacks'])} ({low['name']}, {int(low['season'])}) to {nd(high['sacks'])} ({high['name']}, {int(high['season'])})",
     [f"Every season has one clear sack leader, with no ties. The lowest leading total was {nd(low['sacks'])} by {low['name']} in "
      f"{int(low['season'])}. The highest was {nd(high['sacks'])} by {high['name']} in {int(high['season'])}.",
      f"T.J. Watt led the league in {watt_led} of the {len(SEASONS)} seasons. Each bar is colored by the leader's team, and a leader who "
      f"changed teams that season would show a bar split between them. Hover a bar to see who led."],
     seg_chart(SEASONS, [(float(r.sacks), LEADER_PARTS[int(r.season)]) for r in leaders.itertuples()], "half", 320, kind="bar", names=list(leaders["name"])),
-    ["Season", "Leader", "Team", "Sacks"], [[int(r.season), r.name, "/".join(t for t, _, _ in LEADER_PARTS[int(r.season)]), nd(r.sacks)] for r in leaders.itertuples()])
+    ["Season", "Leader", "Team", "Sacks"], [[int(r.season), r.name, "/".join(t for t, _, _ in LEADER_PARTS[int(r.season)]), nd(r.sacks)] for r in leaders.itertuples()],
+    cap="Sacks by each season's league leader")
 
 # ------------------------------------------------------------------ reference values for the advanced dashboard measures
 # Computed here with pandas so scripts/check_numbers.js can confirm the dashboard's own code gets the same answers.
@@ -385,12 +391,11 @@ for r in top_epaor.itertuples():
 R["epaor_top10_parts"] = [[r.name, int(r.season), [[t, v] for t, v, _ in EPA_PARTS[(int(r.season), r.player_id)][1]]] for r in top_epaor.itertuples()]
 R["epaor_overlap"] = overlap
 add("Value over replacement",
-    f"By expected points over replacement, {best['name']} in {int(best['season'])} was the best quarterback season, and only {overlap} of the top 10 also top the passing-yards list",
-    [f"EPA (expected points added) says how many points a play was worth compared with the average play in the same situation. "
-     f"Made-up round numbers as an example: if a drive is worth 1.0 expected points before a pass and 2.0 after a 20-yard completion, "
-     f"that pass has an EPA of +1.0; an interception that drops the drive's value to -1.0 has an EPA of -2.0. "
-     f"EPA over replacement (EPAOR) is a quarterback's total EPA minus what a replacement-level passer (a typical backup, defined in "
-     f"finding 12) would have added on the same number of opportunities (his pass attempts, sacks and carries). "
+    f"{best['name']} in {int(best['season'])} was the best quarterback season by EPA over replacement, and only {overlap} of the top 10 are also in the top 10 for passing yards",
+    [f"EPA (expected points added) says how many points a play was worth compared with the average play in the same situation; "
+     f"an example is in \"Terms in plain words\" below. "
+     f"EPA over replacement (EPAOR) is a quarterback's total EPA minus what a replacement-level passer (the quarterbacks ranked below the top 32 by "
+     f"plays, described in finding 12) would have added on the same number of opportunities (his pass attempts, sacks and carries). "
      f"The top season in {FIRST} to {LAST} is {best['name']} in {int(best['season'])} with {dec(best['epaor'])} points, "
      f"ranked {int(best['yards_rank'])} in passing yards across all {len(SEASONS)} seasons.",
      f"Ranking all quarterback seasons by EPAOR and by passing yards, {overlap} of the top 10 seasons appear on both lists. Passing yards "
@@ -399,7 +404,8 @@ add("Value over replacement",
     seg_chart([f"{r.name} {int(r.season)} ({'/'.join(EPA_PARTS[(int(r.season), r.player_id)][0])})" for r in top_epaor.itertuples()],
               [(float(r.epaor), EPA_PARTS[(int(r.season), r.player_id)][1]) for r in top_epaor.itertuples()], "dec1", 420),
     ["Rank", "Player-season", "Team", "EPAOR", "Total EPA", "Opportunities", f"Passing-yards rank (of all QB seasons, {FIRST} to {LAST})"],
-    [[i + 1, f"{r.name} {int(r.season)}", "/".join(EPA_PARTS[(int(r.season), r.player_id)][0]), dec(r.epaor), dec(r.epa), num(r.opp), int(r.yards_rank)] for i, r in enumerate(top_epaor.itertuples())])
+    [[i + 1, f"{r.name} {int(r.season)}", "/".join(EPA_PARTS[(int(r.season), r.player_id)][0]), dec(r.epaor), dec(r.epa), num(r.opp), int(r.yards_rank)] for i, r in enumerate(top_epaor.itertuples())],
+    cap="EPA over replacement, top 10 quarterback seasons")
 
 qb_r = pd.Series({s: v["r"] for s, v in EPAOR["QB"].items()})
 qb_st = pd.Series({s: v["starter"] for s, v in EPAOR["QB"].items()})
@@ -414,10 +420,10 @@ add("Value over replacement",
      f"Read these figures with care. The pool is biased low by construction: it holds the players who ended up with the fewest plays, "
      f"which includes benched and injured players, so it is a low bar and not a typical backup. The {dec(qb_r.mean(), 3)} is a simple mean "
      f"of {len(qb_r)} season rates, not one rate pooled over every play, and the range from {dec(qb_r.min(), 3)} to {dec(qb_r.max(), 3)} is "
-     f"just the lowest and highest season, not a trend. The rate is noisy because the pool is made of players with few plays.",
+     f"just the lowest and highest season, not a trend. "
      f"For wide receivers the same rule gives a replacement level that averaged {dec(wr_r.mean(), 3)} EPA per opportunity (carries plus "
      f"targets), from {dec(wr_r.min(), 3)} ({int(wr_r.idxmin())}) to {dec(wr_r.max(), 3)} ({int(wr_r.idxmax())}), against "
-     f"{dec(wr_st.mean(), 3)} for the top 64. The last two columns of the table show it by season. The bar differs by position, so "
+     f"{dec(wr_st.mean(), 3)} for the top 64. The bar differs by position, so "
      f"EPAOR scores should only be compared within a position."],
     chart("line", SEASONS, [("Top 32 quarterbacks", qb_st), ("Replacement pool", qb_r)], "dec3", "EPA per play (attempts, sacks, carries)", 340),
     ["Season", "QB pool size", "QB replacement EPA per play", "Top 32 QB EPA per play", "WR replacement EPA per opportunity", "Top 64 WR EPA per opportunity"],
@@ -472,7 +478,7 @@ for i, s in enumerate(sections, 1):
       {paras}
     </div>
     <figure class="card chart-card">
-      <figcaption class="chart-caption">Chart for finding {i}: {esc(s['theme'])}. The numbers behind it are in the table under the chart.</figcaption>
+      <figcaption class="chart-caption">Chart for finding {i}: {esc(s['cap'])}. The numbers behind it are in the table under the chart.</figcaption>
       <div class="chart-box" style="height:{s['chart']['height']}px"><canvas data-chart='{esc(spec)}' role="img" aria-label="{esc(s['title'])}"></canvas></div>
       <details class="numbers"><summary>View the numbers</summary>{table_html(s['head'], s['rows'], s['title'])}</details>
     </figure>
@@ -480,7 +486,7 @@ for i, s in enumerate(sections, 1):
 
 kpis = [
     (num(R["reg_rows"]), "Regular-season player-games analyzed"),
-    (num(R["reg_players"]), "Different players"),
+    (num(R["reg_players"]), "Different players (regular season)"),
     (f"{dec(pass_tg[peak_pass])}", f"Peak passing yards per team-game ({peak_pass})"),
     (f"{dec(pass_tg[LAST])}", f"Passing yards per team-game in {LAST}"),
     (f"{int(c1000.min())} to {int(c1000.max())}", "Range of 1,000-yard rushers per season"),
@@ -488,9 +494,13 @@ kpis = [
 ]
 kpi_html = "".join(f'<div class="kpi card"><div class="kpi-value">{esc(v)}</div><div class="kpi-label">{esc(l)}</div></div>' for v, l in kpis)
 
-log_lines = [l for l in open("data/player_build_log.txt").read().strip().splitlines()
-             if l.startswith(("Dropped", "Loaded", "Column")) and "no player ID" not in l]
-log_html = "".join(f"<li>{esc(l)}</li>" for l in log_lines)
+import re
+_log = open("data/player_build_log.txt").read()
+no_opp = int(re.search(r"Dropped (\d+) rows with no opponent team", _log).group(1))
+dupes = int(re.search(r"Dropped (\d+) duplicate player-game rows", _log).group(1))
+assert DROPPED["raw_rows"] - DROPPED["rows"] - no_opp - dupes == len(d), "the row counts in the data section do not add up"
+row_flow = (f"The source files hold {DROPPED['raw_rows']:,} rows. {DROPPED['rows']:,} were dropped for having no player (below), "
+            f"{no_opp} for having no opponent and {dupes} as duplicates, which leaves {len(d):,} rows.")
 eff = DROPPED["reg_effect"]
 
 
@@ -530,12 +540,12 @@ page = f"""<!doctype html>
   <span class="eyebrow">Financial Data Analytics &middot; Data Website Project</span>
   <h1>NFL player stats, {FIRST} to {LAST}: passing <em>peaked</em>, defenses changed</h1>
   <p class="byline">By Rykar Acebo</p>
-  <p class="lede">This report covers {num(R['reg_rows'])} regular-season player-games from the {FIRST} through {LAST} NFL seasons, taken from
+  <p class="lede">This report covers {num(R['reg_rows'])} regular-season player-games (one player in one game) from the {FIRST} through {LAST} NFL seasons, taken from
   the nflverse weekly player stats. It looks at seasons and games rather than careers, so the start of the data never cuts a
-  player off. Passing yards per team-game peaked in {peak_pass} at {dec(pass_tg[peak_pass])} and fell to {dec(pass_tg[LAST])} by
+  player off. Passing yards per team-game (one team in one game) peaked in {peak_pass} at {dec(pass_tg[peak_pass])} and fell to {dec(pass_tg[LAST])} by
   {LAST}, while rushing stayed within {dec(min_rush, 0)} to {dec(max_rush, 0)}. Over the same {len(SEASONS)} seasons, interceptions per team-game fell {pct(1 - int_tg[LAST] / int_tg[FIRST], 0)}
   and sacks per pass attempt rose from {pct(sack_rate[FIRST])} to {pct(sack_rate[LAST])}. The data show what changed, not why. A last pair of findings
-  compares quarterbacks with a typical backup, using a stat built for this site. The dashboard lets you filter the same data, switch between player and team views, and try more advanced stats.</p>
+  compares quarterbacks with a replacement-level passer, a stand-in built for this site. The dashboard lets you filter the same data, switch between player and team views, and try more advanced stats.</p>
   <a class="btn" href="dashboard.html">Open the dashboard &rarr;</a>
 </header>
 
@@ -553,11 +563,11 @@ page = f"""<!doctype html>
       <code>stats_player</code> release</a>: weekly player stats, one file per season, licensed CC-BY-4.0. Credit to the nflverse
       project and its contributors. Definitions of the advanced columns come from the nflverse player stats data dictionary.</p>
       <p><strong>What one row is.</strong> One row is one player in one game. The cleaned data has {num(len(d))} rows and
-      {len(d.columns)} columns for {len(SEASONS)} seasons ({FIRST} to {LAST}), {d['player_id'].nunique():,} players and
+      {len(d.columns)} columns for {len(SEASONS)} seasons ({FIRST} to {LAST}), {d['player_id'].nunique():,} players ({num(R['reg_players'])} in the regular season) and
       {d['team'].nunique()} teams. The time column is season (and week) and the group columns are player and team. This report and
       the dashboard's starting view use regular-season rows only, which is {num(R['reg_rows'])} of them; playoffs can be added
       with the dashboard's season-type filter.</p>
-      <p><strong>Rows dropped and other cleaning.</strong></p>
+      <p><strong>Rows dropped and other cleaning.</strong> {row_flow}</p>
       <ul>
         <li><strong>{DROPPED['rows']:,} rows dropped for having no player.</strong> These rows have no player ID, no player name and no position, so
         they cannot be a player-game. There is exactly one such row for each of the {DROPPED['season_weeks']} season-weeks in the source
@@ -569,13 +579,12 @@ page = f"""<!doctype html>
         rushing yards {lost('rushing yards')}, receptions {lost('receptions')}. Penalties are the one number that is visibly affected:
         {lost('penalties')} ({pct(pen_share)}) sit in dropped rows, so penalty rates on the dashboard and the team field are about {pct(pen_share, 0)} lower than the source's total.
         Nothing in the findings above uses penalties.</li>
-        <li><strong>{DROPPED['zero_rows']:,} all-zero rows kept.</strong> {DROPPED['zero_rows']:,} rows have a player ID, name, position and team but no
+        <li><strong>{DROPPED['zero_rows']:,} all-zero rows kept.</strong> {DROPPED['zero_rows']:,} rows ({DROPPED['zero_reg_rows']:,} of them in the regular season) have a player ID, name, position and team but no
         tracked stat in the columns kept here (mostly linemen, defensive backs and linebackers who played without recording a stat). They are real players who appeared in the game
         ({pct(zero_share)} of regular-season rows), so dropping them would understate who played. They add nothing to any sum, and they do
         count as player-games in the "Player-games" measure and in per-player-game averages.</li>
         <li><strong>Team codes.</strong> The source uses one code per franchise across moves: the Raiders are LV, the Chargers LAC and the
         Rams LA in every season, so there are 32 teams in all {len(SEASONS)} seasons and no renaming was needed.</li>
-        {log_html}
       </ul>
       <p>Tackles for loss are not recorded in 2009 to 2011 and are marked NA (not zero) there. More generally, NA means the source has no value for that player in that game (for example, no pass attempts means no passing EPA); sums skip NA. Player names are not unique,
       so players are identified by <code>player_id</code>. Full details are in <code>data/DATA_QUALITY.md</code> and
@@ -585,10 +594,14 @@ page = f"""<!doctype html>
         <dt>EPA (expected points added)</dt><dd>How many points a play was worth compared with the average play in the same situation. Example
         with made-up round numbers: a drive worth 1.0 expected points before a pass and 2.0 after a 20-yard catch gives that pass an EPA of +1.0.
         The values come from nflverse's model, not from this project.</dd>
+        <dt>Team-game</dt><dd>One team in one game. A season of 17 games is 17 team-games for that team.</dd>
+        <dt>Sack</dt><dd>A tackle of the quarterback behind the line of scrimmage before he throws. Defenders can share one (each gets half).</dd>
+        <dt>QB hit</dt><dd>A defender hits the quarterback as or just after he throws, without a sack.</dd>
+        <dt>Carry</dt><dd>One running play: a player runs with the ball (a rush attempt).</dd>
         <dt>Dropback</dt><dd>A pass attempt or a sack: every time the quarterback drops back to pass. EPA per dropback is passing EPA divided by attempts plus sacks.</dd>
         <dt>CPOE (completion percentage over expected)</dt><dd>How much more or less often a passer completes passes than nflverse's model expects given how hard each throw was,
         in percentage points. +2 means two points better than expected.</dd>
-        <dt>Opportunities</dt><dd>The plays a player was directly involved in: pass attempts + sacks + carries for a quarterback, carries + targets for a running back, receiver or tight end.</dd>
+        <dt>Opportunities</dt><dd>The plays a player was directly involved in: pass attempts + sacks + carries for a quarterback, carries + targets for a running back, receiver or tight end. For quarterbacks, "EPA per play" in finding 12 means EPA per opportunity.</dd>
         <dt>Replacement level</dt><dd>What the players just below the starters produced: this site's rule puts everyone ranked below the top 32 quarterbacks (64 receivers) by opportunities in the replacement pool. The
         pool includes benched and injured players, so it is a low bar.</dd>
         <dt>EPA over replacement (EPAOR)</dt><dd>A player's total EPA minus what the replacement rate would have produced on the same number of opportunities.</dd>
@@ -607,6 +620,14 @@ page = f"""<!doctype html>
         attempts.</li>
         <li><strong>QB hits and sack leaders</strong> are single-season player totals. Ranking ties are broken by player name.
         No two players tied for the sack lead in any season.</li>
+        <li><strong>Sack rates (two different ones):</strong> finding 8's "sacks per pass attempt" is defenders' sacks (halves count) divided by pass
+        attempts, for the whole league. The dashboard's "Sack rate (sacks taken per dropback)" is sacks suffered by quarterbacks divided by attempts plus sacks, so the two
+        are not the same number and are not expected to match.</li>
+        <li><strong>Percent change:</strong> 1 minus the later value divided by the earlier value (for example 2025 against the peak, or against 2009).</li>
+        <li><strong>Top 32 and top 64 "starter" rate:</strong> the starters' total EPA divided by the starters' total opportunities in that season, one pooled rate, like the replacement rate.
+        The "averaged" figures in finding 12 are simple means of the 17 season rates, not one rate pooled over every play.</li>
+        <li><strong>Players who changed teams:</strong> a player's season total is one number across teams. In the charts his block is split by team in proportion to each
+        team's share of the stat (for EPAOR, each team's share of his opportunities).</li>
         <li><strong>Advanced stats on the dashboard:</strong> EPA per dropback is passing EPA divided by attempts plus sacks. ANY/A is
         (passing yards + 20 x touchdowns - 45 x interceptions + sack yards lost) divided by (attempts + sacks), with sack yards
         stored as negatives. CPOE is each game's CPOE weighted by that game's attempts. RACR is receiving yards divided by receiving
@@ -620,7 +641,7 @@ page = f"""<!doctype html>
         The cutoffs are a judgment call, not nflWAR's. Scores are in expected points, not wins, and are only comparable within a position.
         A pass's EPA appears under both the passer and the receiver, so EPA must not be added across players.</li>
       </ul>
-      <p><strong>Limits.</strong> Stats are only as good as the source; tackles depend on stat-crew scoring and are not used here.
+      <p><strong>Limits.</strong> Totals are nflverse's numbers and can differ slightly from official league totals. Stats are only as good as the source; tackles depend on stat-crew scoring and are not used here.
       Metrics that need play-by-play, Next Gen Stats or Pro Football Reference data (EPA allowed, pressure rate, time to throw,
       missed tackles) are not in this dataset. Reasons for the trends, such as rule changes, are outside the data and are not tested here.</p>
       <p>Every number on this page is computed by <code>scripts/build_report.py</code> from <code>data/seasons/</code>, and
