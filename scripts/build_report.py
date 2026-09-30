@@ -9,6 +9,7 @@ import json
 
 import pandas as pd
 
+ASSET_V = "20260930a"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -508,7 +509,7 @@ page = f"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Player Stats Report, {FIRST} to {LAST}</title>
 <meta name="description" content="What {num(R['reg_rows'])} NFL player-games say about passing, rushing, receiving and defense from {FIRST} to {LAST}.">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v={ASSET_V}">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}}catch(e){{}}</script>
 </head>
@@ -630,10 +631,10 @@ page = f"""<!doctype html>
 
 <footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a><br>This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams. They appear here only to identify the league and teams, are loaded from links in the nflverse teams file, and are not stored in this repository.</footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="assets/js/charts.js"></script>
-<script src="assets/js/teams.js"></script>
-<script src="assets/js/field.js"></script>
-<script src="assets/js/report.js"></script>
+<script src="assets/js/charts.js?v={ASSET_V}"></script>
+<script src="assets/js/teams.js?v={ASSET_V}"></script>
+<script src="assets/js/field.js?v={ASSET_V}"></script>
+<script src="assets/js/report.js?v={ASSET_V}"></script>
 </body>
 </html>
 """
