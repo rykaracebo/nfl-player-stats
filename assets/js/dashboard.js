@@ -680,9 +680,6 @@
   }
 
   function chartTrend(f, m, b, cats) {
-    // With one season picked there is no trend to draw, so the chart shows every season for context and marks the picked one.
-    const oneSeason = f.seasonMin === f.seasonMax && seasonsAll.length > 1;
-    if (oneSeason) f = Object.assign({}, f, { seasonMin: seasonsAll[0], seasonMax: seasonsAll[seasonsAll.length - 1] });
     const overall = S.aggregate(store, f, "season", [m]);
     const g = S.aggregate(store, f, b.id + "|season", [m]);
     const byCat = new Map(), seasonSet = new Set();
@@ -709,10 +706,12 @@
       shown.forEach((c) => datasets.push({ label: catLabel(b.id, c), data: seasons.map((s) => nn(byCat.get(c).get(s))) }));
       catColors(b, shown).forEach((c) => colors.push(c));
     }
-    const mark = oneSeason ? seasons.indexOf(state.seasonMin) : null;
-    $("s1").textContent = (oneSeason ? state.seasonMin + " is selected, so every season is drawn for context and " + state.seasonMin + " is shaded; the week chart shows movement within it. " : "") +
+    // One season has no trend to draw, so it becomes a group of bars centered under that year
+    const oneSeason = seasons.length === 1;
+    if (oneSeason && colors[0] === "--fg") colors[0] = "--dim";
+    $("s1").textContent = (oneSeason ? "Only " + seasons[0] + " is selected, so the bars show that season; widen the season range to see a trend. " : "") +
       splitNote(b, cats) + (comparable(m) && !single ? " The thick line is all rows in view." : "") + minNote(m);
-    draw(1, { kind: "line", labels: seasons, datasets, colors, fmt: FMT[m.fmt], yTitle: m.label, mark });
+    draw(1, { kind: oneSeason ? "bar" : "line", labels: seasons, datasets, colors, fmt: FMT[m.fmt], yTitle: m.label });
   }
 
   function chartCategory(f, m, b) {
