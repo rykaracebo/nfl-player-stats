@@ -55,6 +55,7 @@
   }
 
   T.load = load; T.color = color; T.badge = badge; T.luminance = luminance;
+  T.leagueLogo = () => (T.list[0] && T.list[0].league_logo) || null;
   T.name = (code) => (T.byCode[code] ? T.byCode[code].full_name : code);
   window.NFLTeams = T;
 })();

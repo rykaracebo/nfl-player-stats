@@ -198,6 +198,7 @@ def main():
         teams.loc[i, "color"] = sr["team_color"]
         teams.loc[i, "color2"] = sr["team_color2"]
         teams.loc[i, "logo"] = sr["team_logo_espn"]
+        teams.loc[i, "league_logo"] = sr["team_league_logo"]
     note(f"Conference and division checked against nflverse: {len(diffs)} differences" + (" (" + "; ".join(diffs) + ") - nflverse values used" if diffs else ""))
     known = set(teams["team"])
     bad = (set(df["team"]) | set(df["opponent_team"])) - known
@@ -241,7 +242,7 @@ def write_dictionary():
              "| Column | Type | Source field | Meaning | Allowed values / notes |", "|---|---|---|---|---|"]
     for name, src, typ, meaning, allowed in COLUMNS:
         lines.append(f"| `{name}` | {typ} | `{src}` | {meaning} | {allowed} |")
-    lines += ["", "`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`, `color` and `color2` (team colors), `logo` (link to the team logo image, loaded by the site at view time and not stored here)."]
+    lines += ["", "`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`, `color` and `color2` (team colors), `logo` (link to the team logo image) and `league_logo` (link to the league logo image); both are loaded by the site at view time and are not stored here."]
     with open("data/DATA_DICTIONARY.md", "w") as f:
         f.write("\n".join(lines) + "\n")
 

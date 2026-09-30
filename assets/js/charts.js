@@ -35,6 +35,10 @@
     const grid = cssVar("--grid");
     const multi = spec.datasets.length > 1;
     const surface = cssVar("--surface");
+    // year and week axes get fewer labels so they never crowd; named categories keep every label
+    const yearish = spec.labels.length > 0 && spec.labels.every((l) => /^(19|20)\d\d$/.test(String(l)));
+    const numericAxis = spec.labels.length > 0 && spec.labels.every((l) => /^\d+$/.test(String(l)));
+    const thin = !horizontal && (yearish || numericAxis);
 
     const datasets = spec.datasets.map((ds, i) => ({
       label: ds.label,
@@ -42,31 +46,31 @@
       data: ds.data,
       borderColor: colors[i % colors.length],
       backgroundColor: ds.barColors ? ds.barColors.map(resolve) : colors[i % colors.length],
-      borderWidth: isLine ? 2 : 0,
-      pointRadius: isLine ? 4 : 0,
-      pointHoverRadius: isLine ? 6 : 0,
+      borderWidth: isLine ? (multi ? 1.8 : 2.4) : 0,
+      pointRadius: isLine ? (multi ? 0 : 3) : 0,
+      pointHoverRadius: isLine ? 5 : 0,
       pointBackgroundColor: colors[i % colors.length],
       pointBorderColor: surface,
       pointBorderWidth: 2,
       tension: 0,
-      borderRadius: isLine ? 0 : 4,
+      borderRadius: isLine ? 0 : 3,
       borderSkipped: false,
-      maxBarThickness: horizontal ? 18 : 64,
-      categoryPercentage: 0.8,
-      barPercentage: 0.9,
+      maxBarThickness: horizontal ? 16 : 44,
+      categoryPercentage: 0.78,
+      barPercentage: 0.86,
     }));
 
+    // no rotated axis titles: the chart heading already names the measure
     const valueAxis = {
-      title: { display: !!spec.yTitle, text: spec.yTitle, color: dim, font: { size: 11 } },
-      grid: { color: grid },
+      grid: { color: grid, drawTicks: false },
       border: { display: false },
-      ticks: { color: dim, font: { family: "Geist Mono", size: 11 }, callback: (v) => fmt(v) },
+      ticks: { color: dim, font: { family: "Geist Mono", size: 11 }, callback: (v) => fmt(v), maxTicksLimit: 6, padding: 8 },
       beginAtZero: !isLine,
     };
     const labelAxis = {
       grid: { display: false },
       border: { color: grid },
-      ticks: { color: dim, font: { size: 11 }, autoSkip: false, maxRotation: 0 },
+      ticks: { color: dim, font: { size: 12 }, autoSkip: horizontal ? false : thin, maxTicksLimit: yearish ? 9 : 12, maxRotation: 0, padding: 6 },
     };
 
     const chart = new Chart(canvas, {
@@ -77,13 +81,15 @@
         responsive: true,
         maintainAspectRatio: false,
         animation: { duration: 350 },
+        layout: { padding: { top: 6, right: 10, bottom: 2, left: 2 } },
         interaction: { mode: isLine ? "index" : "nearest", intersect: !isLine && false, axis: horizontal ? "y" : "x" },
         scales: horizontal ? { x: valueAxis, y: labelAxis } : { x: labelAxis, y: valueAxis },
         plugins: {
           legend: {
             display: multi,
-            position: "bottom",
-            labels: { color: dim, boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 12 } },
+            position: "top",
+            align: "start",
+            labels: { color: dim, boxWidth: 8, boxHeight: 8, usePointStyle: true, padding: 14, font: { size: 12 } },
           },
           tooltip: {
             backgroundColor: cssVar("--surface2"),

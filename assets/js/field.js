@@ -150,60 +150,105 @@
       ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 3; ctx.strokeRect(1.5, 1.5, W - 3, H - 3);
     }
 
-    // An NFL-style game ball, drawn once in detail (leather grain, shading, seams, stitching, raised laces) and then reused.
+    // A leather game ball in the style of a pro ball: warm red-brown leather with fine grain, laces along the top edge over a seam,
+    // a curved lower seam, and printed marks on the belly. The crest and text are this site's own (not the NFL shield or any
+    // manufacturer's branding). Drawn once in detail, then reused.
     let ballSprite = null;
-    const SPR_W = 500, SPR_H = 280, SPR_A = 236;
+    const SPR_W = 600, SPR_H = 340, SPR_A = 280;
+    // the league logo is loaded from the link in the nflverse teams file; until it loads (or if it fails) the ball shows a plain crest
+    let leagueImg = null;
+    if (NFLTeams.leagueLogo && NFLTeams.leagueLogo()) {
+      const im = new Image(); im.referrerPolicy = "no-referrer";
+      im.onload = () => { leagueImg = im; ballSprite = null; redrawIfPaused(); };
+      im.src = NFLTeams.leagueLogo();
+    }
     function makeBallSprite() {
       const c = document.createElement("canvas"); c.width = SPR_W; c.height = SPR_H;
-      const g = c.getContext("2d"), cx0 = SPR_W / 2, cy0 = SPR_H / 2, a = SPR_A, b = a * 0.55;
-      let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-      g.translate(cx0, cy0);
-      const outline = () => { g.beginPath(); g.moveTo(-a, 0); g.bezierCurveTo(-a * 0.6, -b * 1.3, a * 0.6, -b * 1.3, a, 0); g.bezierCurveTo(a * 0.6, b * 1.3, -a * 0.6, b * 1.3, -a, 0); g.closePath(); };
-      // soft contact shadow baked under the ball edge
-      g.save(); g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = 14; g.shadowOffsetY = 6; outline(); g.fillStyle = "#6b2a0a"; g.fill(); g.restore();
+      const g = c.getContext("2d"), a = SPR_A, b = a * 0.55;
+      let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      g.translate(SPR_W / 2, SPR_H / 2 + 6);
+      const outline = () => {
+        g.beginPath(); g.moveTo(-a, 0);
+        g.bezierCurveTo(-a * 0.99, -b * 0.6, -a * 0.55, -b, 0, -b); g.bezierCurveTo(a * 0.55, -b, a * 0.99, -b * 0.6, a, 0);
+        g.bezierCurveTo(a * 0.99, b * 0.6, a * 0.55, b, 0, b); g.bezierCurveTo(-a * 0.55, b, -a * 0.99, b * 0.6, -a, 0); g.closePath();
+      };
+      g.save(); g.shadowColor = "rgba(0,0,0,.5)"; g.shadowBlur = 16; g.shadowOffsetY = 7; outline(); g.fillStyle = "#6a2a18"; g.fill(); g.restore();
       outline(); g.save(); g.clip();
-      // leather base: warm light on top, deep brown underneath
+      // red-brown leather: lighter across the middle, deeper at the edges
       let lg = g.createLinearGradient(0, -b, 0, b);
-      lg.addColorStop(0, "#c9773a"); lg.addColorStop(0.35, "#a04a15"); lg.addColorStop(0.7, "#6e2c0a"); lg.addColorStop(1, "#3a1404");
-      g.fillStyle = lg; g.fillRect(-a, -b * 1.4, a * 2, b * 2.8);
-      // darker toward the pointed ends, like a curved surface
-      let eg = g.createLinearGradient(-a, 0, a, 0);
-      eg.addColorStop(0, "rgba(20,6,0,.65)"); eg.addColorStop(0.2, "rgba(20,6,0,0)"); eg.addColorStop(0.8, "rgba(20,6,0,0)"); eg.addColorStop(1, "rgba(20,6,0,.65)");
-      g.fillStyle = eg; g.fillRect(-a, -b * 1.4, a * 2, b * 2.8);
-      // pebbled grain
-      for (let i = 0; i < 5200; i++) {
-        const x = (rnd() * 2 - 1) * a, y = (rnd() * 2 - 1) * b * 1.15, r = 0.7 + rnd() * 1.4;
-        g.fillStyle = rnd() < 0.55 ? "rgba(0,0,0,.14)" : "rgba(255,205,150,.10)";
+      lg.addColorStop(0, "#8f3f26"); lg.addColorStop(0.3, "#a44e2e"); lg.addColorStop(0.62, "#8a3a22"); lg.addColorStop(1, "#5e2414");
+      g.fillStyle = lg; g.fillRect(-a, -b * 1.2, a * 2, b * 2.4);
+      const vg = g.createRadialGradient(0, -b * 0.05, a * 0.2, 0, 0, a * 1.02);
+      vg.addColorStop(0, "rgba(40,10,4,0)"); vg.addColorStop(0.72, "rgba(40,10,4,.10)"); vg.addColorStop(1, "rgba(30,6,2,.62)");
+      g.fillStyle = vg; g.fillRect(-a, -b * 1.2, a * 2, b * 2.4);
+      // fine pebbled grain
+      for (let i = 0; i < 9000; i++) {
+        const x = (rnd() * 2 - 1) * a, y = (rnd() * 2 - 1) * b, r = 0.6 + rnd() * 1.2;
+        g.fillStyle = rnd() < 0.5 ? "rgba(40,10,4,.16)" : "rgba(255,190,150,.11)";
         g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
       }
-      // panel seams running tip to tip (top and bottom), with a lighter edge and stitching
-      [-1, 1].forEach((sgn) => {
-        const seam = () => { g.beginPath(); g.moveTo(-a * 0.96, 0); g.bezierCurveTo(-a * 0.55, sgn * b * 0.98, a * 0.55, sgn * b * 0.98, a * 0.96, 0); };
-        seam(); g.strokeStyle = "rgba(25,8,1,.7)"; g.lineWidth = 3.2; g.stroke();
-        g.save(); g.translate(0, -sgn * 1.6); seam(); g.strokeStyle = "rgba(255,200,150,.18)"; g.lineWidth = 1.4; g.stroke(); g.restore();
-        seam(); g.setLineDash([5, 7]); g.strokeStyle = "rgba(240,220,190,.55)"; g.lineWidth = 1.3; g.stroke(); g.setLineDash([]);
-      });
-      // end panel seams near each tip
-      [-1, 1].forEach((sgn) => { g.beginPath(); g.moveTo(sgn * a * 0.7, -b * 0.82); g.quadraticCurveTo(sgn * a * 0.8, 0, sgn * a * 0.7, b * 0.82); g.strokeStyle = "rgba(25,8,1,.6)"; g.lineWidth = 2.4; g.stroke(); });
-      // broad soft highlight and a thin rim light along the underside
-      const hi = g.createRadialGradient(-a * 0.12, -b * 0.55, 4, -a * 0.12, -b * 0.55, a * 0.72);
-      hi.addColorStop(0, "rgba(255,232,205,.62)"); hi.addColorStop(0.5, "rgba(255,225,190,.16)"); hi.addColorStop(1, "rgba(255,225,190,0)");
-      g.fillStyle = hi; g.fillRect(-a, -b * 1.4, a * 2, b * 2.8);
-      const rim = g.createLinearGradient(0, b * 0.55, 0, b); rim.addColorStop(0, "rgba(255,170,110,0)"); rim.addColorStop(1, "rgba(255,170,110,.22)");
-      g.fillStyle = rim; g.fillRect(-a, b * 0.3, a * 2, b);
+      // top seam (runs tip to tip, hidden under the laces) and a softer curved seam low on the body
+      const topSeam = () => { g.beginPath(); g.moveTo(-a * 0.97, -b * 0.06); g.bezierCurveTo(-a * 0.62, -b * 0.86, a * 0.62, -b * 0.86, a * 0.97, -b * 0.06); };
+      topSeam(); g.strokeStyle = "rgba(25,7,2,.78)"; g.lineWidth = 3.4; g.stroke();
+      g.save(); g.translate(0, 2.4); topSeam(); g.strokeStyle = "rgba(255,200,160,.16)"; g.lineWidth = 1.6; g.stroke(); g.restore();
+      const lowSeam = () => { g.beginPath(); g.moveTo(-a * 0.96, b * 0.05); g.bezierCurveTo(-a * 0.6, b * 0.72, a * 0.6, b * 0.72, a * 0.96, b * 0.05); };
+      lowSeam(); g.strokeStyle = "rgba(30,8,3,.55)"; g.lineWidth = 3; g.stroke();
+      g.save(); g.translate(0, -2.2); lowSeam(); g.strokeStyle = "rgba(255,200,160,.14)"; g.lineWidth = 1.4; g.stroke(); g.restore();
+      // broad soft highlight on the upper middle
+      const hi = g.createRadialGradient(-a * 0.05, -b * 0.3, 6, -a * 0.05, -b * 0.3, a * 0.75);
+      hi.addColorStop(0, "rgba(255,215,180,.34)"); hi.addColorStop(0.55, "rgba(255,205,165,.10)"); hi.addColorStop(1, "rgba(255,205,165,0)");
+      g.fillStyle = hi; g.fillRect(-a, -b * 1.2, a * 2, b * 2.4);
+
+      // printed marks: a small crest in the middle, text on either side (like a stamped game ball)
+      const ink = "rgba(18,6,2,.86)", edge = "rgba(255,190,150,.16)";
+      const text = (str, x, y, size, weight) => {
+        g.font = weight + " " + size + "px 'Geist', 'Helvetica Neue', Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+        if ("letterSpacing" in g) g.letterSpacing = Math.round(size * 0.12) + "px";
+        g.fillStyle = edge; g.fillText(str, x + 1, y + 1.3); g.fillStyle = ink; g.fillText(str, x, y);
+        if ("letterSpacing" in g) g.letterSpacing = "0px";
+      };
+      text("PLAYER", -a * 0.55, -b * 0.06, 25, 700); text("STATS", -a * 0.55, b * 0.18, 17, 600);
+      text("2009\u20132025", a * 0.55, -b * 0.06, 21, 700); text("REGULAR SEASON", a * 0.55, b * 0.18, 11.5, 600);
+      const sw = a * 0.2, sh = a * 0.27, sy = b * 0.02;
+      if (leagueImg) {
+        // logo printed on the ball with a slight ink-on-leather look
+        const lw = a * 0.44, lh = lw * (leagueImg.naturalHeight / leagueImg.naturalWidth);
+        g.save(); g.translate(0, sy); g.globalAlpha = 0.96; g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = 4; g.shadowOffsetY = 1.5;
+        g.drawImage(leagueImg, -lw / 2, -lh / 2, lw, lh); g.restore();
+      } else {
+      g.save(); g.translate(0, sy);
+      const shield = () => { g.beginPath(); g.moveTo(-sw, -sh); g.lineTo(sw, -sh); g.lineTo(sw, sh * 0.2); g.quadraticCurveTo(sw, sh * 0.72, 0, sh); g.quadraticCurveTo(-sw, sh * 0.72, -sw, sh * 0.2); g.closePath(); };
+      shield(); g.fillStyle = "#f3efe8"; g.fill();
+      g.save(); shield(); g.clip();
+      g.fillStyle = "#0d2c62"; g.fillRect(-sw, -sh, sw * 2, sh * 1.02);
+      g.fillStyle = "#c8102e"; g.fillRect(-sw, sh * 0.16, sw * 2, sh * 0.4);
+      g.fillStyle = "#fff"; g.font = "700 15px 'Geist', Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; if ("letterSpacing" in g) g.letterSpacing = "2px"; g.fillText("STATS", 0, sh * 0.36); if ("letterSpacing" in g) g.letterSpacing = "0px";
+      // stars and a small football
+      for (let k = -2; k <= 2; k++) { g.save(); g.translate(k * sw * 0.36, -sh * 0.72); g.beginPath(); for (let p = 0; p < 10; p++) { const rr = p % 2 ? 3 : 7, an = -Math.PI / 2 + p * Math.PI / 5; g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); } g.closePath(); g.fillStyle = "#fff"; g.fill(); g.restore(); }
+      g.save(); g.translate(0, -sh * 0.28); g.rotate(-0.5); g.beginPath(); g.ellipse(0, 0, sw * 0.42, sw * 0.2, 0, 0, TAU); g.fillStyle = "#f3efe8"; g.fill(); g.strokeStyle = "#0d2c62"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(-sw * 0.16, 0); g.lineTo(sw * 0.16, 0); g.stroke(); g.restore();
       g.restore();
-      outline(); g.lineWidth = 3; g.strokeStyle = "#241002"; g.stroke();
-      // raised laces: a shadow underneath, the cord, and cross laces with rounded ends and eyelets
-      const ly = -b * 0.36;
-      g.lineCap = "round";
-      g.strokeStyle = "rgba(20,6,0,.55)"; g.lineWidth = 9; g.beginPath(); g.moveTo(-a * 0.3, ly + 5); g.lineTo(a * 0.3, ly + 5); g.stroke();
-      for (let k = -3; k <= 3; k++) { g.beginPath(); g.moveTo(k * a * 0.085, ly - b * 0.24 + 5); g.lineTo(k * a * 0.085, ly + b * 0.24 + 5); g.lineWidth = 9; g.stroke(); }
-      const cord = (x1, y1, x2, y2, w) => { const gr = g.createLinearGradient(x1, y1 - w, x1, y1 + w); gr.addColorStop(0, "#ffffff"); gr.addColorStop(1, "#cfc6b6"); g.strokeStyle = gr; g.lineWidth = w; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); };
-      cord(-a * 0.3, ly, a * 0.3, ly, 7);
-      for (let k = -3; k <= 3; k++) cord(k * a * 0.085, ly - b * 0.24, k * a * 0.085, ly + b * 0.24, 7);
-      g.fillStyle = "rgba(20,6,0,.85)"; [-1, 1].forEach((sgn) => { g.beginPath(); g.ellipse(sgn * a * 0.36, ly, 4, 3, 0, 0, TAU); g.fill(); });
+      shield(); g.lineWidth = 3; g.strokeStyle = "rgba(20,8,4,.5)"; g.stroke();
+      g.restore();
+      }
+      g.restore();
+
+      outline(); g.lineWidth = 3.2; g.strokeStyle = "#2a0f06"; g.stroke();
+      // laces along the top edge: white cross laces with shadows, over a dark lace slit
+      const ly = -b * 0.7, laceH = b * 0.26;
+      g.save(); g.lineCap = "round";
+      g.beginPath(); g.moveTo(-a * 0.38, ly + laceH * 0.62); g.quadraticCurveTo(0, ly + laceH * 0.95, a * 0.38, ly + laceH * 0.62); g.strokeStyle = "rgba(15,4,1,.88)"; g.lineWidth = 4; g.stroke();
+      for (let k = -3; k <= 3; k++) {
+        const x = k * a * 0.108, tilt = k * 0.028, y0 = ly - laceH * 0.5 + Math.abs(k) * 0.7;
+        g.save(); g.translate(x, y0 + laceH * 0.5); g.rotate(tilt); g.translate(-x, -(y0 + laceH * 0.5));
+        g.strokeStyle = "rgba(20,6,2,.6)"; g.lineWidth = 17; g.beginPath(); g.moveTo(x, y0 + 4); g.lineTo(x, y0 + laceH + 4); g.stroke();
+        const gr = g.createLinearGradient(x - 8, 0, x + 8, 0); gr.addColorStop(0, "#d9d2c6"); gr.addColorStop(0.5, "#ffffff"); gr.addColorStop(1, "#d0c8ba");
+        g.strokeStyle = gr; g.lineWidth = 15.5; g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y0 + laceH); g.stroke();
+        g.restore();
+      }
+      g.restore();
       return c;
     }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { ballSprite = null; redrawIfPaused(); });
 
     function football(x, y, len, angle, alpha) {
       if (!ballSprite) ballSprite = makeBallSprite();
@@ -234,7 +279,7 @@
 
       // ball at rest on the 50-yard line before the throw
       const center = px([60, 26.65]);
-      if (tm < THROW_AT) { ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(center[0] + 3, center[1] + 8, W * 0.02, H * 0.014, 0, 0, TAU); ctx.fill(); football(center[0], center[1], Math.max(34, W * 0.068), 0); }
+      if (tm < THROW_AT) { ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(center[0] + 3, center[1] + 8, W * 0.02, H * 0.014, 0, 0, TAU); ctx.fill(); football(center[0], center[1], Math.max(52, W * 0.105), 0); }
 
       // teams
       dots = [];
@@ -266,7 +311,7 @@
       // the pass: arc from the 50-yard line to the target, then carried by the catcher, then back to the line
       let caught = null;
       if (target && tm >= THROW_AT) {
-        const s = slotOf[target.team], arrive = px(yardsAt(s, CATCH_AT)), ballLen = Math.max(34, W * 0.068);
+        const s = slotOf[target.team], arrive = px(yardsAt(s, CATCH_AT)), ballLen = Math.max(52, W * 0.105);
         if (tm < CATCH_AT) {
           const u = clamp01((tm - THROW_AT) / (CATCH_AT - THROW_AT)), lift = Math.sin(u * Math.PI);
           const x = center[0] + (arrive[0] - center[0]) * u, y = center[1] + (arrive[1] - center[1]) * u - lift * H * 0.22;

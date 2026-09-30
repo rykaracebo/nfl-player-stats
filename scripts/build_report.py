@@ -455,7 +455,7 @@ page = f"""<!doctype html>
   </section>
 </main>
 
-<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a><br>NFL team names and logos belong to the NFL and its teams. They appear here only to identify teams, are loaded from links in the nflverse teams file, and are not stored in this repository.</footer>
+<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a><br>This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams. They appear here only to identify the league and teams, are loaded from links in the nflverse teams file, and are not stored in this repository.</footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="assets/js/charts.js"></script>
 <script src="assets/js/teams.js"></script>

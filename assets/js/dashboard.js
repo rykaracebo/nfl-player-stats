@@ -366,12 +366,14 @@
     const items = [];
     for (const [key, v] of g) { const x = val(m, v); if (!Number.isNaN(x)) items.push([catLabel(b.id, key), x]); }
     items.sort((a, c) => c[1] - a[1]);
-    const LIMIT = view === "teams" ? 32 : 15;
+    const LIMIT = 16;
     const top = items.slice(0, LIMIT);
     $("t2").textContent = m.label + " by " + b.label.split(" (")[0].toLowerCase();
-    $("s2").textContent = (items.length > LIMIT ? "Top " + LIMIT + " of " + items.length : items.length + (items.length === 1 ? " group" : " groups")) + "." + minNote(m);
+    $("s2").textContent = (items.length > LIMIT ? "Top " + LIMIT + " of " + items.length + " (the table below lists all of them)" : items.length + (items.length === 1 ? " group" : " groups")) + "." + minNote(m);
     if (!top.length) { showEmpty(2, "No value can be computed for this measure with these filters."); return; }
-    $("box2").style.height = Math.max(300, top.length * 26 + 70) + "px";
+    // the trend chart beside it takes the same height, so the two cards fill evenly
+    const boxH = Math.max(300, top.length * 26 + 70) + "px";
+    $("box2").style.height = boxH; $("c1").parentElement.style.height = boxH;
     draw(2, { kind: "hbar", labels: top.map((x) => x[0]), datasets: [{ label: m.label, data: top.map((x) => x[1]), barColors: isTeamCol(b.id) ? top.map((x) => NFLTeams.color(x[0])) : null }], colors: ["--accent"], fmt: FMT[m.fmt], yTitle: m.label });
   }
 

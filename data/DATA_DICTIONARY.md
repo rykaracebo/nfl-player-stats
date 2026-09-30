@@ -74,4 +74,4 @@ Files: `data/seasons/player_games_YYYY.csv`, one per season, one row per player 
 | `fg_missed_50_59` | number | `fg_missed_50_59` | Field goals missed from 50 to 59 yards. | blank = 0, NA = source has no value (no such play or role, or not recorded) |
 | `fg_missed_60_` | number | `fg_missed_60_` | Field goals missed from 60 yards or more. | blank = 0, NA = source has no value (no such play or role, or not recorded) |
 
-`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`, `color` and `color2` (team colors), `logo` (link to the team logo image, loaded by the site at view time and not stored here).
+`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`, `color` and `color2` (team colors), `logo` (link to the team logo image) and `league_logo` (link to the league logo image); both are loaded by the site at view time and are not stored here.

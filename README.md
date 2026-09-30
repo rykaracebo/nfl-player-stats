@@ -70,7 +70,9 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
 ## Design and credits
 
 - The look is a football theme: NFL-style navy, red and white, a turf-green field, and team colors in the charts.
-- **NFL team names and logos belong to the NFL and its teams.** They appear only to identify teams. Logos are loaded by the
-  visitor's browser from the links in the nflverse teams file (`team_logo_espn`) and are not stored in this repository; if a
-  logo cannot load, a color badge is shown instead.
+- **This is an unofficial, non-commercial student project.** The NFL name and shield and the team names and logos belong to the
+  NFL and its teams. They appear only to identify the league and teams. Logos (including the league shield printed on the ball
+  in the play board) are loaded by the visitor's browser from the links in the nflverse teams file (`team_logo_espn`,
+  `team_league_logo`) and are not stored in this repository; if one cannot load, a color badge or a plain crest is shown instead.
+  The rest of the ball's printing ("PLAYER STATS", "2009-2025") is this project's own.
 - Fonts: Geist and Instrument Serif (copied from the author's other project).
