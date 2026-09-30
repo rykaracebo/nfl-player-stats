@@ -161,6 +161,11 @@ table.data th, table.data td { padding: 7px 10px; text-align: right; border-bott
 table.data th:first-child, table.data td:first-child { text-align: left; }
 table.data th { position: sticky; top: 0; background: var(--surface2); color: var(--dim); font-weight: 500; font-family: var(--mono); font-size: 12px; }
 table.data td { font-family: var(--mono); }
+table.data th.t, table.data td.t { text-align: left; }
+table.data th { white-space: normal; vertical-align: bottom; }
+table.data td { vertical-align: top; }
+table.data td.w { white-space: normal; min-width: 14em; }
+.chart-card { min-width: 0; }
 .footer { text-align: center; color: var(--faint); font-size: 13px; padding: 40px 24px 60px; border-top: 1px solid var(--line); }
 
 /* dashboard */

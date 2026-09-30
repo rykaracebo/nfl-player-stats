@@ -6,10 +6,11 @@ Run from the project root:  .venv/bin/python scripts/build_report.py
 import glob
 import html
 import json
+import re
 
 import pandas as pd
 
-ASSET_V = "20260930o"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20260930p"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -458,9 +459,28 @@ def esc(x):
     return html.escape(str(x))
 
 
+NUMBER_CELL = re.compile(r"^[\u2212+-]?[\d,]*\.?\d+%?$")
+
+
+def column_classes(n_cols, rows):
+    """Text columns (names, teams, the long who-lists) read left to right; number columns stay right-aligned.
+    A column of long text also wraps, so its start is on screen instead of far off to the side."""
+    classes = []
+    for k in range(n_cols):
+        cells = [str(r[k]) for r in rows if k < len(r)]
+        if k == 0 or all(NUMBER_CELL.match(c.strip()) for c in cells):
+            classes.append("")
+        elif max((len(c) for c in cells), default=0) > 40:
+            classes.append(' class="t w"')
+        else:
+            classes.append(' class="t"')
+    return classes
+
+
 def table_html(head, rows, title=""):
-    th = "".join(f'<th scope="col">{esc(h)}</th>' for h in head)
-    body = "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>" for r in rows)
+    cls = column_classes(len(head), rows)
+    th = "".join(f'<th scope="col"{cls[k]}>{esc(h)}</th>' for k, h in enumerate(head))
+    body = "".join("<tr>" + "".join(f"<td{cls[k]}>{esc(c)}</td>" for k, c in enumerate(r)) + "</tr>" for r in rows)
     cap = f"<caption>{esc(title)}</caption>" if title else ""
     return (f'<div class="tablewrap" tabindex="0" role="region" aria-label="{esc("The numbers behind: " + title)} (scrollable)">'
             f'<table class="data">{cap}<thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div>')
