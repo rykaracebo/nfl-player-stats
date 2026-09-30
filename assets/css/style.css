@@ -169,7 +169,8 @@ table.data td { font-family: var(--mono); }
 .dash-head h1 { font-size: clamp(32px, 5vw, 48px); margin: 6px 0 0; }
 .status { font-family: var(--mono); font-size: 12px; color: var(--dim); }
 .filters { padding: 18px 20px; margin-bottom: 18px; }
-.filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 20px; }
+.filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 20px; align-items: start; }
+.filters .seg { margin-top: 0; }
 .field label, .field .lbl { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
 select {
   width: 100%; background: var(--surface2); color: var(--fg); border: 1px solid var(--line); border-radius: 10px;
@@ -185,7 +186,7 @@ select:focus-visible, input:focus-visible { outline-offset: 1px; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
 .filter-actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
 .filter-actions .btn { margin: 0; padding: 8px 16px; font-size: 14px; }
-.controls { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 18px; padding: 14px 20px; align-items: center; }
+.controls { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 18px; padding: 14px 20px; align-items: flex-start; }
 .controls .field { flex: 1 1 260px; }
 .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
 .summary .kpi-value { font-size: clamp(20px, 2.3vw, 28px); overflow-wrap: anywhere; }
@@ -224,6 +225,7 @@ table.data th.sortable:hover { color: var(--accent-text); }
 .pair { display: flex; align-items: center; gap: 8px; }
 .pair span { color: var(--faint); font-size: 13px; }
 .field.wide2 { grid-column: span 2; }
+.field.wide4 { grid-column: 1 / -1; }
 .field.search { position: relative; }
 input[type="search"] {
   width: 100%; background: var(--surface2); color: var(--fg); border: 1px solid var(--line); border-radius: 10px;
@@ -248,7 +250,7 @@ input[type="search"] {
 .btn.small { padding: 6px 12px; font-size: 13px; margin: 0; }
 .filter-note { color: var(--faint); font-size: 12px; }
 .panel .empty { padding: 60px 10px; }
-@media (max-width: 860px) { .field.wide2 { grid-column: auto; } .banner { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 860px) { .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .banner { flex-direction: column; align-items: flex-start; } }
 
 /* players / teams switch and deep dive */
 .viewbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 14px 20px; margin-bottom: 18px; }
@@ -352,6 +354,8 @@ table.data caption { caption-side: top; text-align: left; color: var(--dim); fon
 
 /* phones */
 @media (max-width: 600px) {
+  .filter-grid { grid-template-columns: minmax(0, 1fr); }
+  .field.wide2 { grid-column: auto; }
   select, input[type="search"] { font-size: 16px; min-height: 44px; }
   .chip, .seg button, .preset, .more-toggle, .btn.small, .btn, .field-tools select, .sortbtn { min-height: 44px; }
   .chip { padding: 4px 14px; display: inline-flex; align-items: center; }

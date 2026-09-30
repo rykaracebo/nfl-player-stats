@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Stats Dashboard, 2009 to 2025</title>
 <meta name="description" content="Explore 300,000 NFL player-games by season, team, position and player. Switch between player and team views and between basic and advanced stats.">
-<link rel="stylesheet" href="assets/css/style.css?v=20260930i">
+<link rel="stylesheet" href="assets/css/style.css?v=20260930k">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}catch(e){}</script>
 </head>
@@ -65,15 +65,15 @@
           <label for="f-season-min">Season from</label>
           <div class="pair"><select id="f-season-min"></select><span>to</span><select id="f-season-max" aria-label="Season to"></select></div>
         </div>
-        <div class="field wide2">
-          <span class="lbl" id="lbl-pos">Position group</span>
-          <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
-        </div>
         <div class="field wide2 search" id="player-field">
           <label for="player-search">Player search</label>
           <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="player-results" aria-describedby="player-help">
           <ul class="results" id="player-results" hidden role="listbox" aria-label="Matching players"></ul>
           <span class="sr" id="player-help">Type at least two letters, then use the arrow keys to choose a player and Enter to select.</span>
+        </div>
+        <div class="field wide4">
+          <span class="lbl" id="lbl-pos">Position group</span>
+          <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
         </div>
       </div>
       <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters <span id="more-count"></span></button>
