@@ -44,7 +44,7 @@
       (sized ? "<label class='sr' for='field-measure'>Dot size shows</label><select id='field-measure'></select>" : "") +
       "<button type='button' class='btn ghost small' id='field-pause'></button></div></div>" +
       "<div class='field-wrap'><canvas role='img'></canvas><div class='field-tip' hidden></div></div>" +
-      "<p class='field-caption' aria-live='polite'></p>" +
+      "<p class='field-caption'></p>" +
       "<details class='teamlist'><summary>All 32 teams as a list</summary><ul></ul></details>";
     container.querySelector("h2").textContent = opts.title || "The league on the field";
     container.querySelector("p").textContent = opts.blurb || "";
@@ -358,9 +358,10 @@
       }
 
       const focus = hover || (caught && caught.team);
-      caption.textContent = focus
+      const capText = focus
         ? (hover ? "" : "Completed pass to ") + focus + " · " + NFLTeams.name(focus) + (sized ? " · " + m.label + " " + fmt(m, summary.teams[focus][measureId]) + " (rank " + rankOf(focus, measureId) + " of 32)" : "")
         : "AFC teams run right, NFC teams run left. The ball goes to a random team every few seconds. " + summary.scope + ". Hover a team to freeze the play.";
+      if (caption.textContent !== capText) caption.textContent = capText;
       if (!hover) { if (caught) showTip(dots.find((d) => d.t.team === caught.team)); else { tip.hidden = true; tipKey = null; } }
       if (flash) { // keep redrawing while the click ring plays, even when the play is paused or frozen
         if (performance.now() - flash.start > 1100) flash = null;

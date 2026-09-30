@@ -18,6 +18,7 @@
   const PLAYER_TABLE_VIEWS = [["breakdown", "By the breakdown above"], ["season", "By season"], ["players", "Top player-seasons"], ["gamelog", "Player game log"]];
   const TEAM_TABLE_VIEWS = [["breakdown", "By the breakdown above"], ["season", "By season"], ["teamseasons", "Every team-season"]];
   const MENU_ORDER = ["Totals", "Per player-game", "Per team-game", "Rates", "Advanced"];
+  const LINE_DASHES = [[], [7, 4], [2, 3], [10, 3, 2, 3], [1, 5]]; // solid, dashed, dotted, dash-dot, sparse dots: grouped lines differ by more than color
   const MAX_CATS = 5; // lines and bars shown per breakdown in the trend and week charts
   // Summary cards next to the selected measure: [label, columns to add up (null = player-games), format]
   const CARD = {
@@ -582,6 +583,12 @@
     $("e" + n).textContent = msg || "";
   }
   function draw(n, spec) { showEmpty(n, null); C.buildChart($("c" + n), spec); }
+  // a phone has room for "P. Mahomes", not "Patrick Mahomes", beside the bars
+  const shortName = (n) => (window.innerWidth <= 600 ? n.replace(/^([A-Za-z])[a-z]{2,}\s+(?=\S)/, "$1. ") : n);
+  // the screen-reader label of each chart follows what it shows (title, then the line under it)
+  function labelCharts() {
+    for (let n = 1; n <= 4; n++) $("c" + n).setAttribute("aria-label", (($("t" + n).textContent + ". " + $("s" + n).textContent).trim() + " The same numbers are in the table at the bottom of the page.").replace(/\s+/g, " "));
+  }
   const NO_ROWS = "No player-games match these filters. Try widening the season range or clearing a filter.";
   const bLabel = (b) => b.label.split(" (")[0].toLowerCase();
   // an overall line only makes sense next to group lines when the measure is a rate or average (a sum of everything would dwarf them)
@@ -649,6 +656,7 @@
       ["t1", "t2", "t3", "t4"].forEach((id) => ($(id).textContent = m.label)); ["s1", "s2", "s3", "s4"].forEach((id) => ($(id).textContent = ""));
       renderTable(f);
       $("milestones").innerHTML = "";
+      labelCharts();
       return;
     }
     $("summary").innerHTML = cardsHtml(summaryCards(f, m, sum, rows, playerCount));
@@ -663,6 +671,7 @@
       $("milestones").innerHTML = S.MILESTONES.map((x) => "<div class='kpi card'><div class='kpi-value'>" + ms[x.id].toLocaleString("en-US") +
         "</div><div class='kpi-label'>" + x.label + " (player-seasons)</div></div>").join("");
     }
+    labelCharts();
   }
 
   // "Showing N players who meet the minimum": for rate measures only
@@ -720,7 +729,7 @@
       colors.push(single && isTeamCol(b.id) && shown.length ? NFLTeams.color(store.dicts[b.id].list[shown[0]]) : "--fg");
     }
     if (!single) {
-      shown.forEach((c) => datasets.push({ label: catLabel(b.id, c), data: seasons.map((s) => nn(byCat.get(c).get(s))) }));
+      shown.forEach((c, i) => datasets.push({ label: catLabel(b.id, c), data: seasons.map((s) => nn(byCat.get(c).get(s))), dash: LINE_DASHES[i % LINE_DASHES.length] }));
       catColors(b, shown).forEach((c) => colors.push(c));
     }
     const oneSeason = seasons.length === 1; // one x value: the dots sit in the middle of the chart
@@ -786,7 +795,7 @@
     $("s3").textContent = "Ranking players, so this is not split by " + bLabel(b) + ". Each bar is one player's season, colored by team" + (m !== m0 ? " (team-game rates do not apply to players, so this ranks the total)" : "") +
       (m.type === "ratio" && !state.player ? " (minimum " + minText(m).trim() + ")" : "") + ".";
     if (!top.length) { showEmpty(3, "No player-seasons qualify with these filters."); return; }
-    draw(3, { kind: "hbar", stacked: true, labels: top.map((x) => x.name + " " + x.season + " (" + x.teams.join("/") + ")"),
+    draw(3, { kind: "hbar", stacked: true, labels: top.map((x) => shortName(x.name) + " " + x.season + " (" + x.teams.join("/") + ")"),
       datasets: segmentDatasets(top.map((x) => ({ total: x.value, parts: x.parts })), m.fmt), colors: ["--series-1"], fmt: FMT[m.fmt], yTitle: m.label });
   }
 
@@ -827,7 +836,7 @@
     const K = S.REPLACEMENT_K[pos];
     const rows = res.rows.slice().sort((a, b) => b.epaor - a.epaor || a.name.localeCompare(b.name));
     const top = rows.slice(0, 15);
-    draw(5, { kind: "hbar", stacked: true, labels: top.map((x) => x.name + " (" + x.teams.join("/") + ")"),
+    draw(5, { kind: "hbar", stacked: true, labels: top.map((x) => shortName(x.name) + " (" + x.teams.join("/") + ")"),
       datasets: segmentDatasets(top.map((x) => ({ total: x.epaor, parts: x.parts.map((p) => ({ team: p.team, value: p.epaor, share: p.share })) })), "dec1"),
       colors: ["--series-3"], fmt: "dec1", yTitle: "Expected points over replacement" });
     const opp = pos === "QB" ? "attempts + sacks + carries" : "carries + targets";

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Stats Dashboard, 2009 to 2025</title>
 <meta name="description" content="Explore 300,000 NFL player-games by season, team, position and player. Switch between player and team views and between basic and advanced stats.">
-<link rel="stylesheet" href="assets/css/style.css?v=20260930k">
+<link rel="stylesheet" href="assets/css/style.css?v=20260930l">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}catch(e){}</script>
 </head>
@@ -34,7 +34,7 @@
 
   <div class="loading card" id="loading">
     <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
-    <p id="loading-text">Loading 17 seasons of player-games&hellip;</p>
+    <p id="loading-text">Loading 17 seasons of player-games. The first visit downloads all the data, so it takes a few seconds&hellip;</p>
   </div>
   <noscript><p class="card loading">This dashboard needs JavaScript to load and filter the data. The <a href="index.html">report</a> works without it.</p></noscript>
 
@@ -137,15 +137,15 @@
     <p class="filter-note" id="report-note">With the starting filters, the "By season" table at the bottom of the page lists the same season values the report uses.</p>
 
     <section class="charts" aria-label="Charts">
-      <div class="card panel"><h3 id="t1"></h3><p class="sub" id="s1"></p><div class="chart-box"><canvas id="c1" role="img" aria-label="Trend by season"></canvas></div><p class="empty" id="e1" hidden></p></div>
-      <div class="card panel"><h3 id="t2"></h3><p class="sub" id="s2"></p><div class="chart-box" id="box2"><canvas id="c2" role="img" aria-label="Measure by category"></canvas></div><p class="empty" id="e2" hidden></p></div>
-      <div class="card panel"><h3 id="t3"></h3><p class="sub" id="s3"></p><div class="chart-box"><canvas id="c3" role="img" aria-label="Top player-seasons"></canvas></div><p class="empty" id="e3" hidden></p></div>
-      <div class="card panel"><h3 id="t4"></h3><p class="sub" id="s4"></p><div class="chart-box"><canvas id="c4" role="img" aria-label="Measure by week"></canvas></div><p class="empty" id="e4" hidden></p></div>
+      <div class="card panel"><h2 id="t1"></h2><p class="sub" id="s1"></p><div class="chart-box"><canvas id="c1" role="img" aria-label="Trend by season"></canvas></div><p class="empty" id="e1" hidden></p></div>
+      <div class="card panel"><h2 id="t2"></h2><p class="sub" id="s2"></p><div class="chart-box" id="box2"><canvas id="c2" role="img" aria-label="Measure by category"></canvas></div><p class="empty" id="e2" hidden></p></div>
+      <div class="card panel"><h2 id="t3"></h2><p class="sub" id="s3"></p><div class="chart-box"><canvas id="c3" role="img" aria-label="Top player-seasons"></canvas></div><p class="empty" id="e3" hidden></p></div>
+      <div class="card panel"><h2 id="t4"></h2><p class="sub" id="s4"></p><div class="chart-box"><canvas id="c4" role="img" aria-label="Measure by week"></canvas></div><p class="empty" id="e4" hidden></p></div>
     </section>
 
     <section class="card table-panel" aria-label="Table">
       <div class="table-head">
-        <h3 id="table-title">The numbers behind this view</h3>
+        <h2 id="table-title">The numbers behind this view</h2>
         <div class="table-tools">
           <label class="sr" for="table-view">Table view</label>
           <select id="table-view"></select>
@@ -159,14 +159,14 @@
     <details class="card advanced" id="advanced">
       <summary><span class="fp-title">Advanced</span><span class="fp-current">Milestone seasons and EPA over replacement</span></summary>
       <div class="adv-body">
-        <h3>Milestone seasons in view</h3>
+        <h2>Milestone seasons in view</h2>
         <p class="sub">Player-seasons that reached each mark. These follow the filters above.</p>
         <section class="summary small" id="milestones" aria-label="Milestone seasons in view"></section>
 
         <section class="deep" id="deep" aria-label="EPA over replacement">
           <div class="table-head">
             <div>
-              <h3>Deep dive: EPA over replacement</h3>
+              <h2>Deep dive: EPA over replacement</h2>
               <p class="sub"><strong>This panel ignores the filters above</strong>; it always uses the regular season, for the season and position you pick here.
               Expected points a player added beyond a replacement-level player on the same workload. How it is computed: findings
               <a href="index.html#f11">11</a> and <a href="index.html#f12">12</a> of the report.</p>
@@ -193,11 +193,11 @@
   </div>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="assets/js/stats.js?v=20260930i"></script>
-<script src="assets/js/charts.js?v=20260930i"></script>
-<script src="assets/js/teams.js?v=20260930i"></script>
-<script src="assets/js/field.js?v=20260930i"></script>
-<script src="assets/js/dashboard.js?v=20260930i"></script>
+<script src="assets/js/chart.umd.min.js"></script>
+<script src="assets/js/stats.js?v=20260930l"></script>
+<script src="assets/js/charts.js?v=20260930l"></script>
+<script src="assets/js/teams.js?v=20260930l"></script>
+<script src="assets/js/field.js?v=20260930l"></script>
+<script src="assets/js/dashboard.js?v=20260930l"></script>
 </body>
 </html>

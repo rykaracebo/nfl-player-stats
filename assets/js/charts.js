@@ -27,6 +27,17 @@
 
   // spec: {kind: "bar"|"hbar"|"line", labels, datasets:[{label,data}], fmt, yTitle}
   function buildChart(canvas, spec) {
+    if (typeof Chart === "undefined") { // the library file did not load: say so, the table under the chart still has every number
+      const box = canvas.parentElement;
+      if (box && !box.querySelector(".chart-fallback")) {
+        const p = document.createElement("p");
+        p.className = "empty chart-fallback";
+        p.textContent = "This chart could not load. The same numbers are in the table.";
+        box.appendChild(p);
+      }
+      canvas.hidden = true;
+      return;
+    }
     const prev = registry.get(canvas);
     if (prev) prev.chart.destroy();
     const fmt = FORMATS[spec.fmt] || FORMATS.num;

@@ -192,7 +192,7 @@ select:focus-visible, input:focus-visible { outline-offset: 1px; }
 .summary .kpi-value { font-size: clamp(20px, 2.3vw, 28px); overflow-wrap: anywhere; }
 .charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 18px; }
 .panel { padding: 18px 20px 14px; }
-.panel h3 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+.panel h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
 .panel .sub { color: var(--faint); font-size: 12px; margin: 0 0 10px; font-family: var(--mono); }
 .panel .chart-box { height: 300px; }
 .panel.tall .chart-box { height: 560px; }
@@ -200,7 +200,7 @@ select:focus-visible, input:focus-visible { outline-offset: 1px; }
 .table-panel { padding: 18px 20px; }
 .table-panel .tablewrap { max-height: 420px; }
 .table-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
-.table-head h3 { margin: 0; font-size: 15px; }
+.table-head h2 { margin: 0; font-size: 15px; }
 .table-head select { width: auto; }
 table.data th.sortable { cursor: pointer; }
 table.data th.sortable:hover { color: var(--accent-text); }
@@ -314,7 +314,7 @@ input[type="search"] {
 .fp-title { font-weight: 600; font-size: 15px; }
 .fp-current { margin-left: auto; color: var(--dim); font-family: var(--mono); font-size: 12px; text-align: right; }
 .fp-body, .adv-body { padding: 0 18px 16px; }
-.adv-body h3 { margin: 0; font-size: 15px; }
+.adv-body h2 { margin: 0; font-size: 15px; }
 .adv-body .sub { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
 .field-status { margin: 0 0 10px; font-size: 14px; color: var(--fg); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .field-status .btn { margin: 0; }
@@ -352,6 +352,10 @@ input[type="search"] {
 figcaption.chart-caption { font-size: 13px; color: var(--dim); margin: 0 0 10px; }
 table.data caption { caption-side: top; text-align: left; color: var(--dim); font-size: 12px; padding: 4px 0 8px; }
 
+/* headings and focus targets must not hide under the sticky nav (and, on the dashboard, the sticky bar under it) */
+html { scroll-padding-top: 80px; }
+html:has(.actionbar) { scroll-padding-top: 150px; }
+
 /* phones */
 @media (max-width: 600px) {
   .filter-grid { grid-template-columns: minmax(0, 1fr); }
@@ -365,8 +369,11 @@ table.data caption { caption-side: top; text-align: left; color: var(--dim); fon
   .table-tools select { min-height: 44px; }
   .numbers summary, .teamlist summary, .glossary-box summary { min-height: 44px; display: flex; align-items: center; }
   .fp-current { display: none; }
-  .actionbar { gap: 8px; }
+  .actionbar { gap: 8px; position: static; }
   .filter-count { flex: 1 1 100%; }
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .summary .kpi { padding: 12px 14px; }
+  html:has(.actionbar) { scroll-padding-top: 80px; }
 }
 @media (max-width: 480px) {
   :root { --nav-h: 56px; }
