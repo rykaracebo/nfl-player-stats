@@ -105,6 +105,7 @@
     { id: "ints_def", group: "Totals", type: "sum", num: ["def_interceptions"], fmt: "int" },
     { id: "qb_hits", group: "Totals", type: "sum", num: ["def_qb_hits"], fmt: "int" },
     { id: "pass_def", group: "Totals", type: "sum", num: ["def_pass_defended"], fmt: "int" },
+    { id: "penalties", group: "Totals", type: "sum", num: ["penalties"], fmt: "int" },
     { id: "tfl", group: "Totals", type: "sum", num: ["def_tackles_for_loss"], fmt: "int" },
     { id: "fantasy", group: "Totals", type: "sum", num: ["fantasy_points_ppr"], fmt: "int" },
     { id: "pass_epa_total", group: "Totals", type: "sum", num: ["passing_epa"], fmt: "dec1" },
@@ -174,7 +175,8 @@
     rush_yds: { l: "Rushing yards", f: "rushing", w: "Yards gained on running plays, including quarterback runs. A 100-yard game adds 100." },
     rec_yds: { l: "Receiving yards", f: "receiving", w: "Yards gained on catches, credited to the receiver." },
     receptions: { l: "Receptions (catches)", f: "receiving", w: "Passes caught. A receiver with 8 catches in a game adds 8." },
-    tds: { l: "Touchdowns (pass, rush, receive)", f: "general", w: "Touchdown passes, rushing touchdowns and receiving touchdowns added together. A touchdown pass counts for the passer and again for the receiver." },
+    penalties: { l: "Penalties", f: "general", w: "Penalties charged to players, counted. About 5% of the source's penalties are not tied to a player and are missing here." },
+    tds: { l: "Touchdown credits (pass, rush, receive)", f: "general", w: "Touchdown passes, rushing touchdowns and receiving touchdowns added together. A touchdown pass counts for the passer and again for the receiver." },
     sacks: { l: "Sacks (defense)", f: "defense", w: "Times a defender took down the quarterback behind the line. A shared sack counts as half (0.5)." },
     ints_def: { l: "Interceptions (defense)", f: "defense", w: "Passes a defender caught. Same plays as interceptions thrown, seen from the defense." },
     qb_hits: { l: "QB hits (defense)", f: "defense", w: "Times a defender hit the quarterback on a pass play. A sack is a hit but a hit is not always a sack." },
@@ -237,7 +239,7 @@
     m.menuGroup = m.advanced ? "Advanced" : m.group;
   });
   // Team-game rates cannot rank one player's season; these are the player totals they are built from.
-  const PLAYER_TOTAL = { pass_yds_tg: "pass_yds", rush_yds_tg: "rush_yds", ints_tg: "ints_def", sacks_tg: "sacks", qb_hits_tg: "qb_hits", pass_def_tg: "pass_def" };
+  const PLAYER_TOTAL = { pass_yds_tg: "pass_yds", rush_yds_tg: "rush_yds", ints_tg: "ints_def", sacks_tg: "sacks", qb_hits_tg: "qb_hits", pass_def_tg: "pass_def", pen_tg: "penalties" };
   MEASURES.forEach((m) => { if (PLAYER_TOTAL[m.id]) m.playerMeasure = PLAYER_TOTAL[m.id]; });
   const MEASURE_BY_ID = {};
   MEASURES.forEach((m) => (MEASURE_BY_ID[m.id] = m));

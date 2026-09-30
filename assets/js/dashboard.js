@@ -28,7 +28,7 @@
     rec_td: ["Receiving touchdowns", ["receiving_tds"], "int"], sacks: ["Sacks (defense)", ["def_sacks"], "half"],
     ints: ["Interceptions (defense)", ["def_interceptions"], "int"], hits: ["QB hits (defense)", ["def_qb_hits"], "int"], pd: ["Passes defended", ["def_pass_defended"], "int"],
     fgm: ["Field goals made", ["fg_made"], "int"], fga: ["Field goals attempted", ["fg_att"], "int"], punts: ["Punts", ["pt_att"], "int"],
-    tds: ["Touchdowns (pass, rush, receive)", ["passing_tds", "rushing_tds", "receiving_tds"], "int"], fantasy: ["Fantasy points (PPR)", ["fantasy_points_ppr"], "int"],
+    tds: ["Touchdown credits (pass, rush, receive)", ["passing_tds", "rushing_tds", "receiving_tds"], "int"], fantasy: ["Fantasy points (PPR)", ["fantasy_points_ppr"], "int"],
     games: ["Player-games", null, "int"],
   };
   const FAMILY_CARDS = {

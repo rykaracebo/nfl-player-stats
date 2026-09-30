@@ -124,6 +124,10 @@ for (const pos of Object.keys(report.epaor)) {
   }
 }
 
+// the dashboard's Players view needs a player-level total behind every per-team-game measure (a missing one crashed the page)
+S.MEASURES.filter((m) => m.type === "perTeamGame").forEach((m) =>
+  check("per-team-game measure " + m.id + " has a player-level measure", !!S.MEASURE_BY_ID[m.playerMeasure], true));
+
 // team-level views use the same code: team-games and per-team-game rates summed over teams must equal the league totals
 const perTeam = S.aggregate(store, REG, "team", [M.pass_yds_tg, M.team_games]);
 let tgSum = 0;
