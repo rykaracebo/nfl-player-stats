@@ -10,7 +10,7 @@ import re
 
 import pandas as pd
 
-ASSET_V = "20260930q"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20260930r"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -540,6 +540,7 @@ page = f"""<!doctype html>
 <title>NFL Player Stats Report, {FIRST} to {LAST}</title>
 <meta name="description" content="What {num(R['reg_rows'])} NFL player-games say about passing, rushing, receiving and defense from {FIRST} to {LAST}.">
 <link rel="stylesheet" href="assets/css/style.css?v={ASSET_V}">
+<link rel="stylesheet" href="assets/css/polish.css?v={ASSET_V}">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}}catch(e){{}}</script>
 </head>
@@ -676,6 +677,7 @@ page = f"""<!doctype html>
 <script src="assets/js/teams.js?v={ASSET_V}"></script>
 <script src="assets/js/field.js?v={ASSET_V}"></script>
 <script src="assets/js/report.js?v={ASSET_V}"></script>
+<script src="assets/js/polish.js?v={ASSET_V}" defer></script>
 </body>
 </html>
 """

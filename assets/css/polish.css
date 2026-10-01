@@ -1,0 +1,161 @@
+/* Visual and motion polish for both pages, loaded after style.css.
+   Everything here is decoration: it changes no number, filter or layout.
+   To turn it off, delete the <link> to this file and the <script> for polish.js. */
+
+/* slide-in movement near the edges must never cause sideways scrolling (clip, unlike hidden, keeps the sticky nav working) */
+body { overflow-x: clip; }
+
+:root {
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lift: 0 20px 40px -22px rgba(2, 8, 24, 0.8);
+}
+:root[data-theme="light"] { --lift: 0 20px 36px -24px rgba(10, 26, 51, 0.4); }
+
+/* ---- depth ---- */
+.card { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(2, 8, 24, 0.18), 0 18px 38px -28px rgba(2, 8, 24, 0.75); }
+:root[data-theme="light"] .card { box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(10, 26, 51, 0.08), 0 18px 34px -28px rgba(10, 26, 51, 0.32); }
+
+/* stat cards, chart panels and tables get a glow that follows the pointer (polish.js sets --mx and --my) */
+:is(.kpi, .panel, .table-panel, .chart-card) { position: relative; isolation: isolate; }
+:is(.kpi, .panel, .table-panel, .chart-card)::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; opacity: 0;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--accent) 15%, transparent), transparent 62%);
+  transition: opacity 0.35s var(--ease);
+}
+:is(.kpi, .panel, .table-panel, .chart-card):hover::before { opacity: 1; }
+:is(.panel, .table-panel, .chart-card) { transition: border-color 0.3s var(--ease), box-shadow 0.35s var(--ease); }
+:is(.panel, .table-panel, .chart-card):hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--line)); }
+.kpi { transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.3s var(--ease); }
+.kpi:hover { transform: translateY(-3px); box-shadow: var(--lift), inset 0 1px 0 rgba(255, 255, 255, 0.06); border-color: color-mix(in srgb, var(--accent) 38%, var(--line)); border-top-color: var(--accent); }
+
+/* gradient hairline border: a bright edge top-left that fades to the accent color bottom-right */
+:is(.kpi, .panel, .table-panel, .chart-card)::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(140deg, color-mix(in srgb, #fff 24%, transparent), transparent 34%, transparent 66%, color-mix(in srgb, var(--accent) 38%, transparent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+:root[data-theme="light"] :is(.kpi, .panel, .table-panel, .chart-card)::after {
+  background: linear-gradient(140deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 34%, transparent 66%, color-mix(in srgb, var(--accent) 30%, transparent));
+}
+/* big numbers catch the light */
+.kpi-value { background: linear-gradient(180deg, var(--fg) 30%, color-mix(in srgb, var(--fg) 62%, var(--accent))); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+@media (forced-colors: active) { .kpi-value { background: none; color: inherit; } }
+/* an accent tick in front of each panel and table title */
+:is(.panel, .table-panel) :is(h2, h3) { position: relative; padding-left: 14px; }
+:is(.panel, .table-panel) :is(h2, h3)::before {
+  content: ""; position: absolute; left: 0; top: 0.22em; bottom: 0.22em; width: 3px; border-radius: 3px; background: linear-gradient(var(--accent), var(--gold));
+}
+/* the "live" dot on the page label */
+.eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 9px; border-radius: 50%; background: var(--accent); vertical-align: 1px; }
+
+/* colored light drifting slowly behind the page */
+.ambient::before, .ambient::after { content: ""; position: absolute; border-radius: 50%; will-change: transform; }
+.ambient::before { width: 48vw; height: 48vw; left: -12vw; top: -16vw; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent); }
+.ambient::after { width: 56vw; height: 56vw; right: -16vw; top: 10vh; background: radial-gradient(closest-side, color-mix(in srgb, #1f6bd6 30%, transparent), transparent); }
+:root[data-theme="light"] .ambient::before, :root[data-theme="light"] .ambient::after { opacity: 0.5; }
+@media (prefers-reduced-motion: no-preference) {
+  .ambient::before { animation: drift-a 28s ease-in-out infinite alternate; }
+  .ambient::after { animation: drift-b 34s ease-in-out infinite alternate; }
+  .eyebrow::before { animation: ping 2.4s ease-out infinite; }
+}
+@keyframes drift-a { to { transform: translate3d(14vw, 12vh, 0) scale(1.15); } }
+@keyframes drift-b { to { transform: translate3d(-12vw, 16vh, 0) scale(0.9); } }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); } 75%, 100% { box-shadow: 0 0 0 9px transparent; } }
+
+/* ---- headline ---- */
+h1 em {
+  background: linear-gradient(100deg, var(--accent-text) 20%, var(--gold) 50%, var(--accent-text) 80%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 7s linear infinite;
+}
+@keyframes sheen { to { background-position: -220% 0; } }
+@media (forced-colors: active) { h1 em { color: inherit; background: none; } }
+
+/* ---- navigation ---- */
+.nav-links a { position: relative; }
+.nav-links a::after {
+  content: ""; position: absolute; left: 16px; right: 16px; bottom: 3px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--gold)); transform: scaleX(0); transform-origin: left; transition: transform 0.35s var(--ease);
+}
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-links a[aria-current="page"]::after { transform: scaleX(0); }
+.brand-ball { transition: transform 0.45s var(--ease); }
+.brand:hover .brand-ball { transform: rotate(-14deg) scale(1.12); }
+.theme-toggle { transition: transform 0.4s var(--ease), color 0.2s, border-color 0.2s; }
+.theme-toggle:hover { transform: rotate(180deg); }
+
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 40; pointer-events: none;
+  transform-origin: left; transform: scaleX(var(--p, 0)); background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+.ambient { inset: -60px; transform: translate3d(var(--ax, 0px), var(--ay, 0px), 0); transition: transform 0.9s var(--ease); }
+
+/* ---- controls ---- */
+.btn { transition: transform 0.2s var(--ease), filter 0.2s, box-shadow 0.3s var(--ease), border-color 0.2s, color 0.2s; }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -12px var(--accent); }
+.btn.ghost:hover { box-shadow: 0 10px 24px -14px var(--accent); }
+.btn:active { transform: scale(0.97); }
+.chip, .preset, .seg button, .more-toggle { transition: transform 0.2s var(--ease), background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.3s var(--ease); }
+.chip:hover, .preset:hover, .more-toggle:hover { transform: translateY(-1px); border-color: var(--accent); }
+.chip:active, .preset:active, .seg button:active { transform: scale(0.95); }
+.chip[aria-pressed="true"], .seg button[aria-pressed="true"] { box-shadow: 0 8px 18px -10px var(--accent); animation: pop 0.4s var(--ease); }
+@keyframes pop { 0% { transform: scale(0.86); } 55% { transform: scale(1.07); } 100% { transform: scale(1); } }
+select, input[type="search"] { transition: border-color 0.2s, box-shadow 0.25s var(--ease); }
+select:hover, input[type="search"]:hover { border-color: var(--faint); }
+select:focus-visible, input[type="search"]:focus-visible { box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 28%, transparent); }
+
+/* ---- tables ---- */
+table.data tbody tr { transition: background 0.15s; }
+table.data tbody tr:hover td { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+table.data tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* ---- entrance and scroll reveal (polish.js adds .js-motion, .reveal and .in; nothing is hidden without it) ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .hero > *, .dash-head > * { animation: rise 0.85s var(--ease) backwards; }
+  .hero > :nth-child(2), .dash-head > :nth-child(2) { animation-delay: 0.08s; }
+  .hero > :nth-child(3) { animation-delay: 0.16s; }
+  .hero > :nth-child(4) { animation-delay: 0.24s; }
+  .hero > :nth-child(n+5) { animation-delay: 0.32s; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(22px) scale(0.99); } }
+/* content is visible by default. Sections already on screen start hidden and fade in; sections below the fold
+   stay visible and play a short rise the first time they scroll into view. */
+.js-motion .reveal { opacity: 0; transform: translateY(26px) scale(0.985); }
+.js-motion .reveal.in { opacity: 1; transform: none; transition: opacity 0.8s var(--ease) var(--d, 0ms), transform 0.8s var(--ease) var(--d, 0ms); }
+.js-motion .rise { animation: rise 0.8s var(--ease) var(--d, 0ms) backwards; }
+
+/* ---- movement tied to the scroll position (CSS scroll-driven animations; browsers without them keep the fade-in from polish.js) ----
+   These only shift things a little and never change opacity, so nothing is ever hidden. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    :is(.kpi, .panel, .table-panel, .controls, .advanced, .fieldpanel, .finding-text) {
+      animation: settle linear backwards; animation-timeline: view(); animation-range: entry 0% entry 55%;
+    }
+    .finding .finding-text { animation-name: from-left; }
+    .finding .chart-card { animation: from-right linear backwards; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    .hero h1, .dash-head h1 { animation: rise 0.85s var(--ease) backwards, drift linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 80vh; }
+    .hero .lede, .hero .byline { animation: rise 0.85s var(--ease) backwards, drift-slow linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 80vh; }
+    .ambient { animation: bg-scroll linear both; animation-timeline: scroll(root); }
+    .nav { animation: nav-solid linear both; animation-timeline: scroll(root); animation-range: 0 160px; }
+  }
+}
+/* on narrow screens the sections slide up instead of sideways, so nothing ever pokes past the edge */
+@media (prefers-reduced-motion: no-preference) and (max-width: 900px) {
+  @supports (animation-timeline: view()) { .finding .finding-text, .finding .chart-card { animation-name: settle; } }
+}
+@keyframes settle { from { transform: translateY(44px) scale(0.965); } }
+@keyframes from-left { from { transform: translateX(-20px); } }
+@keyframes from-right { from { transform: translateX(20px); } }
+@keyframes drift { to { transform: translateY(54px); } }
+@keyframes drift-slow { to { transform: translateY(30px); } }
+@keyframes bg-scroll { to { translate: 0 -160px; } }
+@keyframes nav-solid { to { background: color-mix(in srgb, var(--bg) 94%, transparent); box-shadow: 0 12px 30px -20px rgba(2, 8, 24, 0.9); padding-block: 9px; } }
+
+/* stat cards tilt toward the pointer (polish.js sets --rx and --ry) */
+.kpi:hover { transform: perspective(800px) translateY(-3px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+
+@media print {
+  .scroll-progress { display: none; }
+  .js-motion .reveal { opacity: 1 !important; transform: none !important; }
+}

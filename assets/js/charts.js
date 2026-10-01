@@ -110,7 +110,7 @@
         indexAxis: horizontal ? "y" : "x",
         responsive: true,
         maintainAspectRatio: false,
-        animation: reducedMotion() ? false : { duration: 350 },
+        animation: reducedMotion() ? false : { duration: 800, easing: "easeOutQuart", delay: (c) => (!isLine && c.type === "data" && c.mode === "default" ? c.dataIndex * 22 : 0) },
         layout: { padding: { top: 6, right: 10, bottom: 2, left: 2 } },
         interaction: { mode: isLine ? "index" : "nearest", intersect: !isLine && false, axis: horizontal ? "y" : "x" },
         scales: horizontal ? { x: valueAxis, y: labelAxis } : { x: labelAxis, y: valueAxis },
