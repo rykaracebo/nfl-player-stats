@@ -8,6 +8,7 @@
    charts and table work exactly as before. Delete its <link> and <script> to remove it. */
 (function () {
   "use strict";
+  var QS = (document.currentScript && document.currentScript.src.split("?")[1]) || "";   // this file's version tag, reused so the data files it loads are never stale
   var CATS = [
     { id: "pass_yds", tag: "Most passing yards in a season", label: "passing yards" },
     { id: "rush_yds", tag: "Most rushing yards in a season", label: "rushing yards" },
@@ -21,11 +22,24 @@
 
   function loadNumbers() {
     if (numbers) return Promise.resolve();
-    return fetch("data/player_numbers.csv").then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+    return fetch("data/player_numbers.csv" + (QS ? "?" + QS : "")).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
       numbers = new Map();
-      // a 0 is how the source marks an unknown number, so it is left out
-      t.trim().split("\n").slice(1).forEach(function (line) { var f = line.split(","); if (f[1] && f[1].trim() && f[1].trim() !== "0") numbers.set(f[0], f[1].trim()); });
+      // player_id, team, first_season, last_season, jersey_number: the number a player wore with a team over a run of seasons
+      t.trim().split("\n").slice(1).forEach(function (line) {
+        var f = line.split(",");
+        if (f.length < 5 || !f[4].trim()) return;
+        if (!numbers.has(f[0])) numbers.set(f[0], []);
+        numbers.get(f[0]).push({ team: f[1], first: +f[2], last: +f[3], n: f[4].trim() });
+      });
     }).catch(function () { numbers = new Map(); });
+  }
+
+  // the number a player wore with a team in a season (never a number from some other year)
+  function numberFor(id, team, season) {
+    var runs = numbers && numbers.get(id);
+    if (!runs) return "";
+    for (var i = 0; i < runs.length; i++) if (runs[i].team === team && runs[i].first <= season && season <= runs[i].last) return runs[i].n;
+    return "";
   }
 
   // ---- the drawn jersey back ----
@@ -80,7 +94,7 @@
   var jerseys = null;
   function loadJerseys() {
     if (jerseys) return Promise.resolve();
-    return fetch("data/team_jerseys.csv").then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+    return fetch("data/team_jerseys.csv" + (QS ? "?" + QS : "")).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
       jerseys = {};
       var lines = t.trim().split("\n"), head = lines[0].split(",");
       lines.slice(1).forEach(function (line) { var f = line.split(","), o = {}; head.forEach(function (h, i) { o[h] = (f[i] || "").trim(); }); if (o.team) jerseys[o.team] = o; });
@@ -157,7 +171,7 @@
   }
 
   function card(D, p, team) {
-    var r = p.row, n = numbers.get(r.playerId), lk = look(team), value = D.S.format(p.m.fmt, r.value);
+    var r = p.row, n = numberFor(r.playerId, team, r.season), lk = look(team), value = D.S.format(p.m.fmt, r.value);
     var meta = esc(r.position) + (n ? " · #" + esc(n) : "");
     return '<button type="button" class="sp-card" data-id="' + esc(r.playerId) + '" style="--c:' + lk.vivid + '" aria-label="' + esc(r.name + ", " + r.position + (n ? ", number " + n : "") + ", " + NFLTeams.name(team) + ": " + value + " " + p.c.label + " in " + r.season + ", " + r.games + (r.games === 1 ? " game" : " games") + ". Opens this player.") + '">' +
       '<span class="sp-tag">' + esc(p.c.tag) + "</span>" +
@@ -185,7 +199,7 @@
       '<div class="ex-actions"><button type="button" class="ex-btn ex-change" aria-expanded="' + pickerOpen + '">Change team</button><button type="button" class="ex-btn ex-clear-team">All teams</button></div></div>';
     var body = picks.length
       ? '<div class="sp-grid">' + picks.map(function (p) { return card(D, p, st.team); }).join("") + "</div>" +
-        '<p class="ex-note">Each card is one player’s best total in a single season with this team, in the seasons, weeks and season type in view. It is not a career total. Position, unit and opponent filters are ignored. Click a card to open that player.</p>'
+        '<p class="ex-note">Each card is one player’s best total in a single season with this team, in the seasons, weeks and season type in view. It is not a career total. Position, unit and opponent filters are ignored. Each jersey number is the one listed for that season. Click a card to open that player.</p>'
       : '<p class="ex-empty">No games for the ' + esc(t.full_name) + " with these filters. Try widening the season range or the season type.</p>";
     return head + (pickerOpen ? logoGrid(st) : "") + body;
   }
@@ -226,7 +240,7 @@
   }
 
   function profileBody(D, st, f) {
-    var p = st.player, lk = look(p.team), n = numbers.get(p.id), M = D.S.MEASURE_BY_ID;
+    var p = st.player, M = D.S.MEASURE_BY_ID;
     var pc = Object.assign({}, f.cats); delete pc.team; delete pc.opponent_team;
     f = { seasonMin: f.seasonMin, seasonMax: f.seasonMax, weekMin: f.weekMin, weekMax: f.weekMax, cats: pc };
     var gamesAgg = D.S.aggregate(D.store, f, "all", [M.games]).get(0), games = gamesAgg ? gamesAgg.rows : 0;
@@ -236,6 +250,12 @@
       var top = D.S.topPlayerSeasons(D.store, f, M[mid], 1, 1);
       if (top.length) { position = top[0].position || position; if (top[0].value > 0) best = { row: top[0], m: M[mid], label: CATS.filter(function (c) { return c.id === mid; })[0].label }; }
     }
+    // the jersey shows the team and number from the season the profile is about: the best season shown, else the last season in view
+    var seasonKeys = Array.from(D.S.aggregate(D.store, f, "season", [M.games]).keys());
+    var shownSeason = best ? best.row.season : (seasonKeys.length ? Math.max.apply(null, seasonKeys) : p.last), shownTeam = p.team;
+    if (best && best.row.parts && best.row.parts.length) shownTeam = best.row.parts.slice().sort(function (a, b) { return b.share - a.share; })[0].team;
+    else { var wore = (p.teams || []).filter(function (x) { return x.first <= shownSeason && shownSeason <= x.last; }); if (wore.length) shownTeam = wore[wore.length - 1].team; }
+    var lk = look(shownTeam), n = numberFor(p.id, shownTeam, shownSeason);
     var compare = best ? compareBlock(D, p, f, M[mid], best, CATS.filter(function (c) { return c.id === mid; })[0].label) : "";
     var teams = (p.teams || []).map(function (x) {
       var t = NFLTeams.byCode[x.team];
@@ -244,12 +264,12 @@
     return '<div class="ex-profile" style="--c:' + lk.vivid + '">' +
       '<div class="ex-profile-avatar sp-avatar">' + jersey(lk.spec, n, p.name) + (lk.t ? logoImg(lk.t, "sp-logo") : "") + "</div>" +
       '<div class="ex-profile-text"><h3 id="ex-focus" tabindex="-1">' + esc(p.name) + "</h3>" +
-      '<p class="ex-sub">' + esc(position) + (n ? " · #" + esc(n) : "") + (lk.t ? " · last team " + esc(lk.t.full_name) : "") + "</p>" +
+      '<p class="ex-sub">' + esc(position) + (n ? " · #" + esc(n) : "") + (lk.t ? " · " + shownSeason + " with " + esc(lk.t.full_name) : "") + "</p>" +
       '<dl class="ex-facts"><div><dt>Seasons in view</dt><dd>' + seasons + "</dd></div><div><dt>Games in view</dt><dd>" + games + "</dd></div>" +
       (best ? "<div><dt>Best season in view</dt><dd>" + esc(D.S.format(best.m.fmt, best.row.value)) + " " + esc(best.label) + ", " + best.row.season + "</dd></div>" : "") + "</dl>" +
       compare +
       (teams ? '<p class="ex-teams-label">Teams in this data</p><ul class="ex-teams">' + teams + "</ul>" : "") +
-      '<p class="ex-note">Numbers are for the seasons, weeks and season type in view, not career totals. The jersey number is the last one listed.</p>' +
+      '<p class="ex-note">Numbers are for the seasons, weeks and season type in view, not career totals. The jersey shows the team and number from ' + shownSeason + (best ? ', the best season shown above.' : ', the last season in view.') + '</p>' +
       '<button type="button" class="ex-btn ex-clear-player">Back to all players</button></div></div>';
   }
 
