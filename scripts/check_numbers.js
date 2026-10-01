@@ -187,5 +187,64 @@ for (const pos of ["QB", "RB", "WR", "TE"]) {
   check("EPAOR team parts add up to the player's EPAOR for " + pos + " (" + multi + " with 2+ teams)", bad, 0);
 }
 
+// The dashboard's team spotlight: each team's best single-season total for five stats, recomputed straight from the raw season files
+// (not with stats.js) and compared with what stats.js topPlayerSeasons returns for a team filter.
+{
+  const spot = { pass_yds: "passing_yards", rush_yds: "rushing_yards", rec_yds: "receiving_yards", sacks: "def_sacks", ints_def: "def_interceptions" };
+  const sums = {};   // stat -> team -> "player|season" -> total, regular season only
+  for (const y of Object.keys(manifest.seasons)) {
+    const lines = fs.readFileSync(path.join(root, manifest.seasons[y].file), "utf8").trim().split("\n");
+    const head = lines[0].split(",");
+    const at = (name) => head.length - head.indexOf(name);   // counted from the end, so a comma in a name cannot shift the columns
+    for (const line of lines.slice(1)) {
+      const cells = line.split(","), get = (name) => cells[cells.length - at(name)];
+      if (get("season_type") !== "REG") continue;
+      const key = get("player_id") + "|" + get("season"), team = get("team");
+      for (const [id, col] of Object.entries(spot)) {
+        const v = parseFloat(get(col));
+        if (Number.isNaN(v)) continue;   // a season total nets out negative-yard games, as the dashboard does
+        const t = ((sums[id] = sums[id] || {})[team] = sums[id][team] || {});
+        t[key] = (t[key] || 0) + v;
+      }
+    }
+  }
+  for (const team of store.dicts.team.list) {
+    for (const id of Object.keys(spot)) {
+      const mine = Object.values((sums[id] || {})[team] || {}).filter((v) => v > 0), want = mine.length ? Math.max.apply(null, mine) : 0;
+      const top = S.topPlayerSeasons(store, { cats: { season_type: ["REG"], team: [team] } }, M[id], 1);
+      check("team spotlight " + team + " best " + id + " season", top.length ? top[0].value : 0, want);
+    }
+  }
+}
+
+// The player profile's "How this player compares" numbers: for each position group's main stat, the count of seasons with a value, the best
+// season and the 10th-best, recomputed from the raw files (a season is one player's total across all teams) and compared with stats.js.
+{
+  const groups = { QB: ["pass_yds", "passing_yards"], RB: ["rush_yds", "rushing_yards"], WR: ["rec_yds", "receiving_yards"], TE: ["rec_yds", "receiving_yards"], DL: ["sacks", "def_sacks"], LB: ["sacks", "def_sacks"], DB: ["ints_def", "def_interceptions"] };
+  const totals = {};
+  for (const y of Object.keys(manifest.seasons)) {
+    const lines = fs.readFileSync(path.join(root, manifest.seasons[y].file), "utf8").trim().split("\n");
+    const head = lines[0].split(",");
+    const at = (name) => head.length - head.indexOf(name);
+    for (const line of lines.slice(1)) {
+      const cells = line.split(","), get = (name) => cells[cells.length - at(name)];
+      if (get("season_type") !== "REG") continue;
+      const grp = get("position_group");
+      if (!groups[grp]) continue;
+      const v = parseFloat(get(groups[grp][1]));
+      if (Number.isNaN(v)) continue;   // a season total nets out negative-yard games, as the dashboard does
+      const t = (totals[grp] = totals[grp] || {}), key = get("player_id") + "|" + get("season");
+      t[key] = (t[key] || 0) + v;
+    }
+  }
+  for (const [grp, [id]] of Object.entries(groups)) {
+    const mine = Object.values(totals[grp] || {}).filter((v) => v > 0).sort((a, b) => b - a);
+    const cohort = S.topPlayerSeasons(store, { cats: { season_type: ["REG"], position_group: [grp] } }, M[id], 100000).filter((r) => r.value > 0);
+    check("comparison cohort size " + grp + " " + id, cohort.length, mine.length);
+    check("comparison best season " + grp + " " + id, cohort[0].value, mine[0]);
+    check("comparison 10th best " + grp + " " + id, cohort[9].value, mine[9]);
+  }
+}
+
 console.log(checks + " checks, " + failures + " mismatches");
 process.exit(failures ? 1 : 0);

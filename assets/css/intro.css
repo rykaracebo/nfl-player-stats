@@ -1,0 +1,91 @@
+/* The "roll call" opening on the report page (assets/js/intro.js): a football crosses the screen, the 32 team logos flash in
+   behind it, and a click on a logo opens the dashboard on that team. Decoration only. Delete the <link> to this file and the
+   <script> for intro.js to remove it. */
+
+.intro {
+  position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(14px, 3vh, 28px);
+  padding: 24px; overflow: hidden; color: var(--fg);
+  background: radial-gradient(90vw 70vh at 50% 40%, color-mix(in srgb, var(--bg) 82%, transparent), color-mix(in srgb, var(--bg) 94%, transparent));
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  animation: intro-in 0.45s ease both;
+  transition: opacity 0.55s ease, transform 0.55s var(--ease, ease);
+}
+.intro.out { opacity: 0; transform: scale(1.04); pointer-events: none; }
+@keyframes intro-in { from { opacity: 0; } }
+.intro-yard {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.9;
+  background: repeating-linear-gradient(90deg, var(--yard) 0 2px, transparent 2px 96px);
+  mask: radial-gradient(60vw 60vh at 50% 50%, #000, transparent 75%); -webkit-mask: radial-gradient(60vw 60vh at 50% 50%, #000, transparent 75%);
+}
+
+.intro-head { position: relative; text-align: center; animation: intro-rise 0.8s var(--ease, ease) 0.15s backwards; }
+.intro-kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-text); }
+.intro-head h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(34px, 6vw, 64px); line-height: 1.02; margin: 6px 0 4px; }
+.intro-head h2 em { color: var(--accent-text); }
+.intro-head p { margin: 0; color: var(--dim); font-size: 15px; }
+@keyframes intro-rise { from { opacity: 0; transform: translateY(14px); } }
+
+/* the 32 teams: eight columns, one per division (AFC left, NFC right), four teams each */
+.intro-grid {
+  position: relative; display: grid; grid-template-columns: repeat(8, auto); gap: clamp(6px, 1.2vw, 16px); grid-auto-flow: column; grid-template-rows: repeat(4, auto);
+  padding: 8px;
+}
+.intro-grid::before {   /* the line between the two conferences */
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-50%);
+  background: linear-gradient(transparent, color-mix(in srgb, var(--fg) 25%, transparent), transparent);
+}
+.intro-team {
+  --s: 1; position: relative; display: grid; place-items: center; padding: 0; border: 0; cursor: pointer; border-radius: 50%;
+  width: clamp(36px, 6.2vw, 68px); height: clamp(36px, 6.2vw, 68px); background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 70%, #fff), 0 0 18px -2px var(--c);
+  transform: scale(var(--s)); transition: transform 0.18s ease-out, box-shadow 0.2s;
+  animation: intro-flash 0.7s var(--ease, ease) var(--d, 0s) backwards;
+}
+.intro-team img { width: 78%; height: 78%; object-fit: contain; pointer-events: none; }
+.intro-team i { font: 700 clamp(9px, 1.4vw, 13px)/1 var(--mono); font-style: normal; color: var(--ink, #fff); background: var(--c); width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; }
+.intro-team:hover, .intro-team:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 38px 6px var(--c); z-index: 2; }
+.intro-team:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+@keyframes intro-flash {
+  0% { opacity: 0; transform: scale(0.2) rotate(-40deg); box-shadow: 0 0 0 0 var(--c); }
+  45% { opacity: 1; transform: scale(1.3) rotate(6deg); box-shadow: 0 0 0 3px #fff, 0 0 46px 12px var(--c); }
+  100% { opacity: 1; transform: scale(var(--s)); }
+}
+/* a shine passes over the finished board */
+.intro-grid::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: 24px;
+  background: linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, 0.22) 50%, transparent 62%); background-size: 260% 100%; background-position: 130% 0;
+  animation: intro-shine 1.1s ease 2.2s both;
+}
+@keyframes intro-shine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+.intro.picked .intro-team:not(.chosen) { opacity: 0; transform: scale(0.3); transition: opacity 0.35s, transform 0.35s; }
+.intro.picked .intro-team.chosen { --s: 1.9; transition: transform 0.5s var(--ease, ease); }
+
+.intro-foot { position: relative; display: flex; align-items: center; gap: 14px; animation: intro-rise 0.8s var(--ease, ease) 2.1s backwards; }
+.intro-hint { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+.intro-skip {
+  font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--fg); background: transparent; border: 1px solid var(--line);
+  border-radius: 999px; padding: 8px 18px; cursor: pointer; transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.intro-skip:hover { border-color: var(--accent); color: var(--accent-text); transform: translateY(-1px); }
+
+/* the football that opens the show */
+.intro-ball { position: absolute; left: 0; top: 0; width: 84px; height: 52px; pointer-events: none; animation: intro-kick 1.25s cubic-bezier(0.3, 0.1, 0.4, 1) 0.1s both; }
+@keyframes intro-kick {
+  0% { transform: translate(-12vw, 62vh) rotate(-30deg) scale(0.6); opacity: 0; }
+  12% { opacity: 1; }
+  50% { transform: translate(46vw, 8vh) rotate(210deg) scale(1.15); }
+  100% { transform: translate(112vw, 58vh) rotate(430deg) scale(0.7); opacity: 1; }
+}
+
+.replay-intro { margin-left: 10px; }
+
+@media (max-width: 520px) {
+  .intro { gap: 10px; padding: 14px; }
+  .intro-head h2 { font-size: 34px; }
+  .intro-head p { font-size: 13px; }
+  .intro-grid { grid-template-columns: repeat(4, auto); grid-template-rows: repeat(8, auto); gap: 6px; padding: 4px; }
+  .intro-grid::before { display: none; }
+  .intro-team { width: clamp(36px, 6.4vh, 50px); height: clamp(36px, 6.4vh, 50px); }
+  .intro-hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .intro { display: none; } }

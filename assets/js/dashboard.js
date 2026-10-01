@@ -358,6 +358,14 @@
   }
 
   // ------------------------------------------------------------------ player search (combobox)
+  // the team the search is limited to: the picked team (not a head-to-head), in the players view
+  const searchTeam = () => (state.view === "players" && state.team && !state.h2h ? state.team : "");
+  const playedFor = (p, team) => (p.teams || []).some((t) => t.team === team && t.last >= state.seasonMin && t.first <= state.seasonMax);
+  function paintSearchScope() {
+    const t = searchTeam(), label = document.querySelector('label[for="player-search"]'), input = $("player-search");
+    if (label) label.textContent = t ? "Search " + NFLTeams.name(t) + " players" : "Player search";
+    input.placeholder = t ? "Type a name on the " + NFLTeams.byCode[t].name : "Type a name, e.g. Mahomes";
+  }
   function setupPlayerSearch() {
     const input = $("player-search"), list = $("player-results");
     let timer = null, active = -1, items = [];
@@ -371,10 +379,11 @@
     const render = () => {
       const q = input.value.trim().toLowerCase();
       if (q.length < 2) { close(); return; }
-      const hits = players.filter((p) => p.name.toLowerCase().includes(q))
+      const scope = searchTeam();   // with a team picked, only that team's players in the seasons in view
+      const hits = players.filter((p) => p.name.toLowerCase().includes(q) && (!scope || playedFor(p, scope)))
         .sort((a, b) => (b.name.toLowerCase().startsWith(q) - a.name.toLowerCase().startsWith(q)) || b.games - a.games).slice(0, 8);
       list.innerHTML = ""; items = hits;
-      if (!hits.length) { const li = document.createElement("li"); li.className = "none"; li.setAttribute("role", "presentation"); li.textContent = "No players found"; list.appendChild(li); }
+      if (!hits.length) { const li = document.createElement("li"); li.className = "none"; li.setAttribute("role", "presentation"); li.textContent = scope ? "No " + NFLTeams.name(scope) + " players found" : "No players found"; list.appendChild(li); }
       hits.forEach((p, k) => {
         const li = document.createElement("li");
         li.id = "player-opt-" + k; li.setAttribute("role", "option"); li.setAttribute("aria-selected", "false");
@@ -386,7 +395,7 @@
         list.appendChild(li);
       });
       list.hidden = false; input.setAttribute("aria-expanded", "true"); setActive(-1);
-      announce(hits.length ? hits.length + (hits.length === 1 ? " player found" : " players found") + ". Use the arrow keys to choose." : "No players found.", true);
+      announce(hits.length ? hits.length + (hits.length === 1 ? " player found" : " players found") + ". Use the arrow keys to choose." : (scope ? "No " + NFLTeams.name(scope) + " players found." : "No players found."), true);
     };
     input.addEventListener("input", () => {
       if (!input.value.trim() && state.player) { state.player = null; update(); }
@@ -449,7 +458,7 @@
     if (state.h2h) out.push("head-to-head");
     if (state.opp) more.push("opponent");
     const same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
-    if (!same(state.chips.season_type, d.chips.season_type)) more.push("season type");
+    if (!same(state.chips.season_type, d.chips.season_type)) out.push("season type");
     if (!same(state.chips.unit, d.chips.unit)) more.push("unit");
     if (!same(state.chips.position_group, d.chips.position_group)) out.push("position group");
     if (state.player) out.push("player");
@@ -686,6 +695,8 @@
 
     paintState(rowsText);
     writeUrl();
+    paintSearchScope();
+    document.dispatchEvent(new CustomEvent("nfl:update"));   // lets the team spotlight redraw
 
     if (!rows) {
       $("summary").innerHTML = cardsHtml([[0, "int", state.view === "teams" ? "Team-games" : "Player-games"]]);
@@ -1026,6 +1037,17 @@
     $("loading").hidden = true;
     $("app").hidden = false;
     ready = true;
+    // a small read-only handle for the team spotlight (assets/js/spotlight.js); it changes nothing here
+    window.NFLDash = {
+      S, store, filters, state: () => state,
+      pickPlayer: (id) => { const p = players.find((x) => x.id === id); if (p) { selectPlayer(p); showResults(); } },
+      setTeam: (code) => {   // like picking a team on the field, without scrolling away
+        if (!code) { clearTeam(); return; }
+        state.team = code; state.h2h = null; syncTeamSelect(); if (fieldApi) fieldApi.setSelected(code);
+        avoidSingleTeamSplit(); update(); announce("Filtered to " + NFLTeams.name(code) + ".", true);
+      },
+      clearPlayer: () => { state.player = null; $("player-search").value = ""; update(); },
+    };
     update();
     renderDeep();
   }).catch((err) => {

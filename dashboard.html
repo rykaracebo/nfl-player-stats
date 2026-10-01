@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Stats Dashboard, 2009 to 2025</title>
 <meta name="description" content="Explore 300,000 NFL player-games by season, team, position and player. Switch between player and team views and between basic and advanced stats.">
-<link rel="stylesheet" href="assets/css/style.css?v=20260930r">
-<link rel="stylesheet" href="assets/css/polish.css?v=20260930r">
+<link rel="stylesheet" href="assets/css/style.css?v=20260930t">
+<link rel="stylesheet" href="assets/css/polish.css?v=20260930t">
+<link rel="stylesheet" href="assets/css/spotlight.css?v=20260930t">
+<link rel="stylesheet" href="assets/css/filters.css?v=20260930t">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}catch(e){}</script>
 </head>
@@ -54,34 +56,52 @@
     </details>
 
     <section class="card filters" aria-label="Filters">
-      <div class="filter-grid">
-        <div class="field">
+      <div class="fl-head">
+        <div>
+          <h2 class="fl-title">Narrow the numbers</h2>
+          <p class="fl-sub">These filters work the same whether you picked a team or a player.</p>
+        </div>
+        <div class="field fl-view">
           <span class="lbl" id="lbl-view">Look at</span>
           <div class="seg" role="group" aria-labelledby="lbl-view">
             <button type="button" id="view-players" aria-pressed="true">Players</button>
             <button type="button" id="view-teams" aria-pressed="false">Teams</button>
           </div>
         </div>
-        <div class="field">
-          <label for="f-season-min">Season from</label>
-          <div class="pair"><select id="f-season-min"></select><span>to</span><select id="f-season-max" aria-label="Season to"></select></div>
+      </div>
+      <div class="fl-groups">
+        <div class="fl-group" role="group" aria-labelledby="fg-when">
+          <h3 class="fl-gtitle" id="fg-when">When</h3>
+          <div class="field">
+            <label for="f-season-min">Seasons</label>
+            <div class="range" id="season-range"><select id="f-season-min"></select><div class="range-slot" id="season-slot"></div><select id="f-season-max" aria-label="Season to"></select></div>
+          </div>
+          <div class="field">
+            <span class="lbl" id="lbl-st">Season type</span>
+            <div class="chips" id="chips-season_type" role="group" aria-labelledby="lbl-st"></div>
+          </div>
         </div>
-        <div class="field wide2 search" id="player-field">
+        <div class="fl-group" role="group" aria-labelledby="fg-who">
+          <h3 class="fl-gtitle" id="fg-who">Who</h3>
+          <div class="field">
+            <span class="lbl" id="lbl-pos">Position group</span>
+            <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
+          </div>
+          <div class="fl-who-row">
+        <div class="field search" id="player-field">
           <label for="player-search">Player search</label>
           <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="player-results" aria-describedby="player-help">
           <ul class="results" id="player-results" hidden role="listbox" aria-label="Matching players"></ul>
           <span class="sr" id="player-help">Type at least two letters, then use the arrow keys to choose a player and Enter to select.</span>
         </div>
-        <div class="field wide3">
-          <span class="lbl" id="lbl-pos">Position group</span>
-          <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
-        </div>
-        <div class="field">
-          <label for="f-team">Team</label>
-          <select id="f-team"></select>
+            <div class="field">
+              <label for="f-team">Team</label>
+              <select id="f-team"></select>
+            </div>
+          </div>
         </div>
       </div>
-      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters (week, opponent, season type, unit) <span id="more-count"></span></button>
+      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters (week, opponent, unit) <span id="more-count"></span></button>
       <div class="filter-grid more-grid" id="more-filters" hidden>
         <div class="field">
           <label for="f-week-min">Week from</label>
@@ -90,10 +110,6 @@
         <div class="field">
           <label for="f-opp">Opponent</label>
           <select id="f-opp"></select>
-        </div>
-        <div class="field">
-          <span class="lbl" id="lbl-st">Season type</span>
-          <div class="chips" id="chips-season_type" role="group" aria-labelledby="lbl-st"></div>
         </div>
         <div class="field">
           <span class="lbl" id="lbl-unit">Unit</span>
@@ -196,11 +212,13 @@
 </main>
 
 <script src="assets/js/chart.umd.min.js"></script>
-<script src="assets/js/stats.js?v=20260930r"></script>
-<script src="assets/js/charts.js?v=20260930r"></script>
-<script src="assets/js/teams.js?v=20260930r"></script>
-<script src="assets/js/field.js?v=20260930r"></script>
-<script src="assets/js/dashboard.js?v=20260930r"></script>
-<script src="assets/js/polish.js?v=20260930r" defer></script>
+<script src="assets/js/stats.js?v=20260930t"></script>
+<script src="assets/js/charts.js?v=20260930t"></script>
+<script src="assets/js/teams.js?v=20260930t"></script>
+<script src="assets/js/field.js?v=20260930t"></script>
+<script src="assets/js/dashboard.js?v=20260930t"></script>
+<script src="assets/js/polish.js?v=20260930t" defer></script>
+<script src="assets/js/spotlight.js?v=20260930t" defer></script>
+<script src="assets/js/filters.js?v=20260930t" defer></script>
 </body>
 </html>

@@ -1,0 +1,53 @@
+/* The filters card on the dashboard: two labeled groups (When, Who), a season range slider that mirrors the year dropdowns, and a
+   "More filters" row for the rest (assets/js/filters.js). Every control keeps its id and behaves exactly as before; this file only lays
+   them out. */
+.filters { padding: 20px 22px 18px; }
+.fl-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
+.fl-title { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 3vw, 32px); line-height: 1.05; }
+.fl-sub { margin: 4px 0 0; color: var(--dim); font-size: 14px; }
+.fl-view .lbl { margin-bottom: 4px; }
+.fl-groups { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; align-items: stretch; }
+.fl-group {
+  display: flex; flex-direction: column; gap: 16px; padding: 16px 18px 18px; border-radius: 16px; border: 1px solid var(--line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface2) 55%, transparent), color-mix(in srgb, var(--surface2) 20%, transparent));
+}
+.fl-gtitle {
+  position: relative; margin: 0; padding-left: 12px; font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim);
+}
+.fl-gtitle::before { content: ""; position: absolute; left: 0; top: 0.1em; bottom: 0.1em; width: 3px; border-radius: 3px; background: linear-gradient(var(--accent), var(--gold)); }
+.fl-who-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 0.55fr); gap: 14px; align-items: start; }
+.filters .more-toggle { margin-top: 16px; }
+
+/* the season range: [from] ---o=======o--- [to] */
+.range { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; }
+.range select { width: auto; min-width: 92px; font-family: var(--mono); font-weight: 600; }
+.range-slot:empty { display: none; }
+.range:has(.range-slot:empty) { grid-template-columns: auto auto; justify-content: start; }
+.range-track { position: relative; height: 32px; }
+.range-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 4px; background: var(--line); }
+.range-fill { position: absolute; top: 50%; height: 4px; margin-top: -2px; border-radius: 4px; left: var(--l, 0%); right: var(--r, 0%); background: linear-gradient(90deg, var(--accent), var(--gold)); }
+.range-track input[type="range"] {
+  position: absolute; inset: 0; width: 100%; height: 32px; margin: 0; padding: 0; background: none; border: 0; pointer-events: none;
+  -webkit-appearance: none; appearance: none; min-height: 0;
+}
+.range-track input[type="range"]::-webkit-slider-runnable-track { background: transparent; height: 32px; border: 0; }
+.range-track input[type="range"]::-moz-range-track { background: transparent; height: 32px; border: 0; }
+.range-track input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; pointer-events: auto; width: 24px; height: 24px; margin-top: 4px; border-radius: 50%; cursor: grab;
+  background: #fff; border: 3px solid var(--accent); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4); transition: transform 0.15s;
+}
+.range-track input[type="range"]::-moz-range-thumb {
+  pointer-events: auto; width: 18px; height: 18px; border-radius: 50%; cursor: grab; background: #fff; border: 3px solid var(--accent); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+.range-track input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.18); cursor: grabbing; }
+
+@media (max-width: 900px) {
+  .fl-groups { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .filters { padding: 16px 14px; }
+  .fl-who-row { grid-template-columns: minmax(0, 1fr); }
+  .range { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
+  .range select { min-width: 84px; }
+  .range-track input[type="range"]::-webkit-slider-thumb { width: 28px; height: 28px; margin-top: 2px; }
+}

@@ -289,6 +289,7 @@ def write_dictionary():
     for name, src, typ, meaning, allowed in COLUMNS:
         lines.append(f"| `{name}` | {typ} | `{src}` | {meaning} | {allowed} |")
     lines += ["", "`data/teams.csv` has one row per team: `team` (code), `city`, `name`, `conference`, `division`, `full_name`, `color` and `color2` (team colors), `logo` (link to the team logo image) and `league_logo` (link to the league logo image); both are loaded by the site at view time and are not stored here."]
+    lines += ["", "`data/player_numbers.csv` has one row per player who appears in the season files and has a listed jersey number: `player_id` (the same id as the season files) and `jersey_number` (the last number the nflverse players table lists for that player; a player who changed numbers shows the latest). It is used only by the dashboard's team spotlight. Built by `scripts/build_player_numbers.py`."]
     with open("data/DATA_DICTIONARY.md", "w") as f:
         f.write("\n".join(lines) + "\n")
 
