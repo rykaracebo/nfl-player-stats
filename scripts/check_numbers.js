@@ -187,6 +187,20 @@ for (const pos of ["QB", "RB", "WR", "TE"]) {
   check("EPAOR team parts add up to the player's EPAOR for " + pos + " (" + multi + " with 2+ teams)", bad, 0);
 }
 
+// The season leader shown in the threshold tables on the report (the biggest single-season total each year), recomputed with stats.js and
+// compared with data/report.json, which scripts/build_report.py computed independently with pandas.
+{
+  const measureFor = { pass4000: M.pass_yds, rush1000: M.rush_yds, carries300: { type: "sum", num: ["carries"], fmt: "int" }, rec100: M.receptions, int6: M.ints_def };
+  for (const [key, bySeason] of Object.entries(report.leaders || {})) {
+    for (const [season, [name, value]] of Object.entries(bySeason)) {
+      const top = S.topPlayerSeasons(store, { seasonMin: +season, seasonMax: +season, cats: { season_type: ["REG"] } }, measureFor[key], 1)[0];
+      if (!top || !(value > 0)) continue;   // a season with nobody over the threshold has no leader row to compare
+      check("table leader " + key + " " + season + " total", top.value, value);
+      check("table leader " + key + " " + season + " name", top.name, name);
+    }
+  }
+}
+
 // The dashboard's team spotlight: each team's best single-season total for five stats, recomputed straight from the raw season files
 // (not with stats.js) and compared with what stats.js topPlayerSeasons returns for a team filter.
 {

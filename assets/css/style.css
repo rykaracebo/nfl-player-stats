@@ -393,3 +393,14 @@ html:has(.actionbar) { scroll-padding-top: 150px; }
   .theme-toggle { margin-left: 2px; }
 }
 @media (max-width: 400px) { .brand em { display: none; } }
+
+/* conditional formatting in the season tables on the report: red = lowest, green = highest (scripts/build_report.py sets --cs per cell) */
+table.data td.cs { background: var(--cs); }
+table.data td.cs.hi, table.data td.cs.lo { font-weight: 700; }
+.cs-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 10px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+.cs-legend i { width: 110px; height: 10px; border-radius: 6px; background: linear-gradient(90deg, rgba(215, 48, 39, 0.6), rgba(244, 174, 48, 0.6), rgba(26, 152, 80, 0.6)); }
+.cs-legend em { flex-basis: 100%; font-style: normal; color: var(--faint); }
+.tablewrap.has-cs { max-height: 480px; }
+.numbers-who { margin-top: 12px; }
+.numbers-who summary { cursor: pointer; font-size: 12.5px; color: var(--dim); font-family: var(--mono); }
+.numbers-who summary:hover { color: var(--accent-text); }

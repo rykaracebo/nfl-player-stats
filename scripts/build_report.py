@@ -10,7 +10,7 @@ import re
 
 import pandas as pd
 
-ASSET_V = "20260930u"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20260930w"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -138,6 +138,8 @@ def seg_chart(labels, items, fmt, height=320, kind="hbar", names=None):
 
 
 BLOCKS = {}
+LEADER = {}       # key -> season -> "Name (TEAM) 4,770", the season's biggest total
+LEADER_VAL = {}   # key -> season -> that total
 
 
 def player_blocks(key, col, threshold, unit, height=340):
@@ -155,6 +157,8 @@ def player_blocks(key, col, threshold, unit, height=340):
                            "parts": [(t.team, float(t.v), float(t.v) / tot if tot > 0 else 1 / len(g)) for t in g.itertuples()]})
         per_season[int(sn)] = blocks
         listing[int(sn)] = "; ".join(f"{b['name']} ({'/'.join(p[0] for p in b['parts'])}) {b['value']:,.0f}" for b in blocks)  # listed top block first, the way the bar is read
+    LEADER[key] = {sn: (f"{bl[0]['name']} ({'/'.join(p[0] for p in bl[0]['parts'])}) {bl[0]['value']:,.0f}" if bl else "None") for sn, bl in per_season.items()}
+    LEADER_VAL[key] = {sn: (bl[0]["value"] if bl else 0.0) for sn, bl in per_season.items()}
     BLOCKS[key] = {str(sn): [[b["name"], b["value"]] for b in bl] for sn, bl in per_season.items()}
     n_blocks = max(len(b) for b in per_season.values()); n_parts = max(len(bl["parts"]) for b in per_season.values() for bl in b)
     datasets = []
@@ -175,15 +179,16 @@ def player_blocks(key, col, threshold, unit, height=340):
     return spec, listing
 
 
-def add(theme, title, paras, spec, head, rows, cap=None):
+def add(theme, title, paras, spec, head, rows, cap=None, scales=None, extra=None):
     if spec.get("stacked") and spec["datasets"] and str(spec["datasets"][0]["label"]).startswith("Block"):
         paras = paras[:-1] + [paras[-1] + " Each block in the chart is one player, colored by his team; hover a block to see who."]
     cap = cap or spec.get("yTitle") or head[1]
-    sections.append({"theme": theme, "title": title, "paras": paras, "chart": spec, "head": head, "rows": rows, "cap": cap})
+    sections.append({"theme": theme, "title": title, "paras": paras, "chart": spec, "head": head, "rows": rows, "cap": cap, "scales": scales, "extra": extra})
 
 
 BLK = {key: player_blocks(key, col, thr, unit) for _, _, key, col, thr, unit in [("", "", "pass4000", "passing_yards", 4000, "passing yards"), ("", "", "rush1000", "rushing_yards", 1000, "rushing yards"), ("", "", "carries300", "carries", 300, "carries"), ("", "", "rec100", "receptions", 100, "receptions"), ("", "", "int6", "def_interceptions", 6, "interceptions")]}
 R["blocks"] = BLOCKS
+R["leaders"] = {k: {str(sn): [BLOCKS[k][str(sn)][0][0] if BLOCKS[k][str(sn)] else None, LEADER_VAL[k][sn]] for sn in LEADER_VAL[k]} for k in LEADER_VAL}
 
 min_rush, max_rush = rush_tg.min(), rush_tg.max()
 add("Passing peaked, then slid",
@@ -206,7 +211,9 @@ add("Passing peaked, then slid",
      "This counts each player's regular-season total for one season. Seasons were 16 games through 2020 and 17 from 2021, so "
      "counts from 2021 on have a little extra room to reach the threshold."],
     BLK["pass4000"][0],
-    ["Season", "Players with 4,000+ passing yards", "Who (team) and total, top block first"], [[int(s), int(c4000[s]), BLK["pass4000"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 4,000+ passing yards", "League leader (team) and total"], [[int(s), int(c4000[s]), LEADER["pass4000"][int(s)]] for s in SEASONS],
+    scales=[(1, [float(c4000[s]) for s in SEASONS]), (2, [LEADER_VAL["pass4000"][int(s)] for s in SEASONS])],
+    extra=(["Season", "Players with 4,000+ passing yards", "Who (team) and total, top block first"], [[int(s), int(c4000[s]), BLK["pass4000"][1][int(s)]] for s in SEASONS]))
 
 hi = ps.sort_values("rushing_yards", ascending=False)
 add("The running back roller coaster",
@@ -216,7 +223,9 @@ add("The running back roller coaster",
      f"There is no steady trend to explain it. The count is lowest in {', '.join(str(int(s)) for s in c1000[c1000 == c1000.min()].index)} "
      f"({int(c1000.min())}) and highest in {', '.join(str(int(s)) for s in c1000[c1000 == c1000.max()].index)} ({int(c1000.max())})."],
     BLK["rush1000"][0],
-    ["Season", "Players with 1,000+ rushing yards", "Who (team) and total, top block first"], [[int(s), int(c1000[s]), BLK["rush1000"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 1,000+ rushing yards", "League leader (team) and total"], [[int(s), int(c1000[s]), LEADER["rush1000"][int(s)]] for s in SEASONS],
+    scales=[(1, [float(c1000[s]) for s in SEASONS]), (2, [LEADER_VAL["rush1000"][int(s)] for s in SEASONS])],
+    extra=(["Season", "Players with 1,000+ rushing yards", "Who (team) and total, top block first"], [[int(s), int(c1000[s]), BLK["rush1000"][1][int(s)]] for s in SEASONS]))
 
 add("The running back roller coaster",
     f"300-carry seasons: {int(c300[2010])} in 2010, never more than {int(c300.loc[2013:2023].max())} a year from 2013 to 2023, then {int(c300[2024])} in 2024 and {int(c300[LAST])} in {LAST}",
@@ -225,7 +234,9 @@ add("The running back roller coaster",
      f"The count was {int(c300[2024])} in 2024 and {int(c300[LAST])} in {LAST}. The counts are small, so one or two "
      f"bell-cow backs (a running back who gets most of his team's carries) make a visible difference."],
     BLK["carries300"][0],
-    ["Season", "Players with 300+ carries", "Who (team) and total, top block first"], [[int(s), int(c300[s]), BLK["carries300"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 300+ carries", "League leader (team) and total"], [[int(s), int(c300[s]), LEADER["carries300"][int(s)]] for s in SEASONS],
+    scales=[(1, [float(c300[s]) for s in SEASONS]), (2, [LEADER_VAL["carries300"][int(s)] for s in SEASONS])],
+    extra=(["Season", "Players with 300+ carries", "Who (team) and total, top block first"], [[int(s), int(c300[s]), BLK["carries300"][1][int(s)]] for s in SEASONS]))
 
 add("Receivers: more 100-catch seasons",
     f"100-catch seasons got more common: never more than {int(c100rec.loc[:2017].max())} a year through 2017, at least {int(c100rec.loc[2020:].min())} a year from 2020, and {int(c100rec.max())} in 2023",
@@ -236,7 +247,9 @@ add("Receivers: more 100-catch seasons",
      "These are counts of individual players, so a few high-volume receivers can move the number from one season to the next. "
      "Seasons were 16 games through 2020 and 17 from 2021. The data do not say why."],
     BLK["rec100"][0],
-    ["Season", "Players with 100+ receptions", "Who (team) and total, top block first"], [[int(s), int(c100rec[s]), BLK["rec100"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 100+ receptions", "League leader (team) and total"], [[int(s), int(c100rec[s]), LEADER["rec100"][int(s)]] for s in SEASONS],
+    scales=[(1, [float(c100rec[s]) for s in SEASONS]), (2, [LEADER_VAL["rec100"][int(s)] for s in SEASONS])],
+    extra=(["Season", "Players with 100+ receptions", "Who (team) and total, top block first"], [[int(s), int(c100rec[s]), BLK["rec100"][1][int(s)]] for s in SEASONS]))
 
 add("Defenses: fewer interceptions, more sacks",
     f"Interceptions per team-game fell from {dec(int_tg[FIRST], 3)} in {FIRST} to {dec(int_tg[LAST], 3)} in {LAST}",
@@ -255,7 +268,9 @@ add("Defenses: fewer interceptions, more sacks",
      f"{ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['player_name']} in "
      f"{int(ps.sort_values(['def_interceptions', 'player_name'], ascending=[False, True]).iloc[0]['season'])}."],
     BLK["int6"][0],
-    ["Season", "Players with 6+ interceptions", "Who (team) and total, top block first"], [[int(s), int(c6int[s]), BLK["int6"][1][int(s)]] for s in SEASONS])
+    ["Season", "Players with 6+ interceptions", "League leader (team) and total"], [[int(s), int(c6int[s]), LEADER["int6"][int(s)]] for s in SEASONS],
+    scales=[(1, [float(c6int[s]) for s in SEASONS]), (2, [LEADER_VAL["int6"][int(s)] for s in SEASONS])],
+    extra=(["Season", "Players with 6+ interceptions", "Who (team) and total, top block first"], [[int(s), int(c6int[s]), BLK["int6"][1][int(s)]] for s in SEASONS]))
 
 add("Defenses: fewer interceptions, more sacks",
     f"Sacks per pass attempt rose from {pct(sack_rate[FIRST])} in {FIRST} to {pct(sack_rate[LAST])} in {LAST}",
@@ -307,7 +322,7 @@ add("Pass rushers",
      f"changed teams that season would show a bar split between them. Hover a bar to see who led."],
     seg_chart(SEASONS, [(float(r.sacks), LEADER_PARTS[int(r.season)]) for r in leaders.itertuples()], "half", 320, kind="bar", names=list(leaders["name"])),
     ["Season", "Leader", "Team", "Sacks"], [[int(r.season), r.name, "/".join(t for t, _, _ in LEADER_PARTS[int(r.season)]), nd(r.sacks)] for r in leaders.itertuples()],
-    cap="Sacks by each season's league leader")
+    cap="Sacks by each season's league leader", scales=[(3, [float(r.sacks) for r in leaders.itertuples()])])
 
 # ------------------------------------------------------------------ reference values for the advanced dashboard measures
 # Computed here with pandas so scripts/check_numbers.js can confirm the dashboard's own code gets the same answers.
@@ -477,13 +492,42 @@ def column_classes(n_cols, rows):
     return classes
 
 
-def table_html(head, rows, title=""):
+SCALE_STOPS = [(215, 48, 39), (244, 174, 48), (26, 152, 80)]   # red (lowest), amber, green (highest)
+
+
+def scale_color(t):
+    """A color between red (t=0), amber (0.5) and green (1), see-through so it works on the dark and the light theme."""
+    t = max(0.0, min(1.0, t))
+    seg, u = (0, t / 0.5) if t < 0.5 else (1, (t - 0.5) / 0.5)
+    a, b = SCALE_STOPS[seg], SCALE_STOPS[seg + 1]
+    r, g, bl = (round(a[i] + (b[i] - a[i]) * u) for i in range(3))
+    return f"rgba({r},{g},{bl},0.46)"
+
+
+def table_html(head, rows, title="", scales=None):
+    """scales=[(column, values)]: conditional formatting for those columns, the lowest value red, the highest green, shades between.
+    The number is still printed in every cell and the extremes carry a screen-reader label, so the color is never the only cue."""
     cls = column_classes(len(head), rows)
+    scale = {k: (vals, min(vals), max(vals)) for k, vals in (scales or [])}
     th = "".join(f'<th scope="col"{cls[k]}>{esc(h)}</th>' for k, h in enumerate(head))
-    body = "".join("<tr>" + "".join(f"<td{cls[k]}>{esc(c)}</td>" for k, c in enumerate(r)) + "</tr>" for r in rows)
+
+    def cell(k, c, i):
+        if k not in scale:
+            return f"<td{cls[k]}>{esc(c)}</td>"
+        vals, lo, hi = scale[k]
+        v = vals[i]
+        t = (v - lo) / (hi - lo) if hi > lo else 0.5
+        tone = " hi" if v == hi and hi > lo else " lo" if v == lo and hi > lo else ""
+        base = re.search(r'class="([^"]*)"', cls[k]); base = base.group(1) + " " if base else ""
+        mark = f'<span class="sr"> ({"highest" if tone == " hi" else "lowest"} value in this table)</span>' if tone else ""
+        return f'<td class="{base}cs{tone}" style="--cs:{scale_color(t)}">{esc(c)}{mark}</td>'
+
+    body = "".join("<tr>" + "".join(cell(k, c, i) for k, c in enumerate(r)) + "</tr>" for i, r in enumerate(rows))
     cap = f"<caption>{esc(title)}</caption>" if title else ""
-    return (f'<div class="tablewrap" tabindex="0" role="region" aria-label="{esc("The numbers behind: " + title)} (scrollable)">'
-            f'<table class="data">{cap}<thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div>')
+    return (f'<div class="tablewrap{" has-cs" if scales else ""}" tabindex="0" role="region" aria-label="{esc("The numbers behind: " + title)} (scrollable)">'
+            f'<table class="data">{cap}<thead><tr>{th}</tr></thead><tbody>{body}</tbody></table></div>'
+            + ('<p class="cs-legend"><span>Lowest</span><i aria-hidden="true"></i><span>Highest</span>'
+               '<em>Shading compares the seasons in this table, column by column. It marks highest and lowest, not good or bad.</em></p>' if scales else ""))
 
 
 sec_html = []
@@ -500,7 +544,7 @@ for i, s in enumerate(sections, 1):
     <figure class="card chart-card">
       <figcaption class="chart-caption">Chart for finding {i}: {esc(s['cap'])}. The numbers behind it are in the table under the chart.</figcaption>
       <div class="chart-box" style="height:{s['chart']['height']}px"><canvas data-chart='{esc(spec)}' role="img" aria-label="{esc(s['title'])}"></canvas></div>
-      <details class="numbers"><summary>View the numbers</summary>{table_html(s['head'], s['rows'], s['title'])}</details>
+      <details class="numbers"{' open' if s['scales'] else ''}><summary>View the numbers</summary>{table_html(s['head'], s['rows'], s['title'], s['scales'])}{('<details class="numbers-who"><summary>Everyone who reached it, by season</summary>' + table_html(s['extra'][0], s['extra'][1], s['title']) + '</details>') if s['extra'] else ''}</details>
     </figure>
   </section>""")
 

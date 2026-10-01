@@ -4861,6 +4861,358 @@
   "2024": 0.7113970588235294,
   "2025": 0.6985294117647058
  },
+ "leaders": {
+  "carries300": {
+   "2009": [
+    "Chris Johnson",
+    358.0
+   ],
+   "2010": [
+    "Michael Turner",
+    334.0
+   ],
+   "2011": [
+    "Maurice Jones-Drew",
+    343.0
+   ],
+   "2012": [
+    "Arian Foster",
+    351.0
+   ],
+   "2013": [
+    "LeSean McCoy",
+    314.0
+   ],
+   "2014": [
+    "DeMarco Murray",
+    392.0
+   ],
+   "2015": [
+    "Adrian Peterson",
+    327.0
+   ],
+   "2016": [
+    "Ezekiel Elliott",
+    322.0
+   ],
+   "2017": [
+    "Le'Veon Bell",
+    321.0
+   ],
+   "2018": [
+    "Ezekiel Elliott",
+    304.0
+   ],
+   "2019": [
+    "Derrick Henry",
+    303.0
+   ],
+   "2020": [
+    "Derrick Henry",
+    378.0
+   ],
+   "2021": [
+    "Jonathan Taylor",
+    332.0
+   ],
+   "2022": [
+    "Derrick Henry",
+    349.0
+   ],
+   "2023": [
+    null,
+    0.0
+   ],
+   "2024": [
+    "Saquon Barkley",
+    345.0
+   ],
+   "2025": [
+    "Jonathan Taylor",
+    323.0
+   ]
+  },
+  "int6": {
+   "2009": [
+    "Asante Samuel",
+    9.0
+   ],
+   "2010": [
+    "Ed Reed",
+    8.0
+   ],
+   "2011": [
+    "Charles Woodson",
+    7.0
+   ],
+   "2012": [
+    "Tim Jennings",
+    9.0
+   ],
+   "2013": [
+    "Richard Sherman",
+    8.0
+   ],
+   "2014": [
+    "Glover Quin",
+    7.0
+   ],
+   "2015": [
+    "Marcus Peters",
+    8.0
+   ],
+   "2016": [
+    "Casey Hayward",
+    7.0
+   ],
+   "2017": [
+    "Darius Slay",
+    8.0
+   ],
+   "2018": [
+    "Damontae Kazee",
+    7.0
+   ],
+   "2019": [
+    "Anthony Harris",
+    6.0
+   ],
+   "2020": [
+    "Xavien Howard",
+    10.0
+   ],
+   "2021": [
+    "Trevon Diggs",
+    11.0
+   ],
+   "2022": [
+    "C.J. Gardner-Johnson",
+    6.0
+   ],
+   "2023": [
+    "DaRon Bland",
+    9.0
+   ],
+   "2024": [
+    "Kerby Joseph",
+    9.0
+   ],
+   "2025": [
+    "Kevin Byard",
+    7.0
+   ]
+  },
+  "pass4000": {
+   "2009": [
+    "Matt Schaub",
+    4770.0
+   ],
+   "2010": [
+    "Philip Rivers",
+    4710.0
+   ],
+   "2011": [
+    "Drew Brees",
+    5535.0
+   ],
+   "2012": [
+    "Drew Brees",
+    5177.0
+   ],
+   "2013": [
+    "Peyton Manning",
+    5477.0
+   ],
+   "2014": [
+    "Ben Roethlisberger",
+    4952.0
+   ],
+   "2015": [
+    "Drew Brees",
+    4870.0
+   ],
+   "2016": [
+    "Drew Brees",
+    5208.0
+   ],
+   "2017": [
+    "Tom Brady",
+    4577.0
+   ],
+   "2018": [
+    "Ben Roethlisberger",
+    5129.0
+   ],
+   "2019": [
+    "Jameis Winston",
+    5109.0
+   ],
+   "2020": [
+    "Deshaun Watson",
+    4823.0
+   ],
+   "2021": [
+    "Tom Brady",
+    5316.0
+   ],
+   "2022": [
+    "Patrick Mahomes",
+    5250.0
+   ],
+   "2023": [
+    "Tua Tagovailoa",
+    4624.0
+   ],
+   "2024": [
+    "Joe Burrow",
+    4918.0
+   ],
+   "2025": [
+    "Matthew Stafford",
+    4707.0
+   ]
+  },
+  "rec100": {
+   "2009": [
+    "Wes Welker",
+    123.0
+   ],
+   "2010": [
+    "Roddy White",
+    115.0
+   ],
+   "2011": [
+    "Wes Welker",
+    122.0
+   ],
+   "2012": [
+    "Calvin Johnson",
+    122.0
+   ],
+   "2013": [
+    "Pierre Garcon",
+    113.0
+   ],
+   "2014": [
+    "Antonio Brown",
+    129.0
+   ],
+   "2015": [
+    "Antonio Brown",
+    136.0
+   ],
+   "2016": [
+    "Larry Fitzgerald",
+    107.0
+   ],
+   "2017": [
+    "Jarvis Landry",
+    112.0
+   ],
+   "2018": [
+    "Michael Thomas",
+    125.0
+   ],
+   "2019": [
+    "Michael Thomas",
+    149.0
+   ],
+   "2020": [
+    "Stefon Diggs",
+    127.0
+   ],
+   "2021": [
+    "Cooper Kupp",
+    145.0
+   ],
+   "2022": [
+    "Justin Jefferson",
+    128.0
+   ],
+   "2023": [
+    "CeeDee Lamb",
+    135.0
+   ],
+   "2024": [
+    "Ja'Marr Chase",
+    127.0
+   ],
+   "2025": [
+    "Puka Nacua",
+    129.0
+   ]
+  },
+  "rush1000": {
+   "2009": [
+    "Chris Johnson",
+    2006.0
+   ],
+   "2010": [
+    "Arian Foster",
+    1614.0
+   ],
+   "2011": [
+    "Maurice Jones-Drew",
+    1606.0
+   ],
+   "2012": [
+    "Adrian Peterson",
+    2097.0
+   ],
+   "2013": [
+    "LeSean McCoy",
+    1607.0
+   ],
+   "2014": [
+    "DeMarco Murray",
+    1845.0
+   ],
+   "2015": [
+    "Adrian Peterson",
+    1485.0
+   ],
+   "2016": [
+    "Ezekiel Elliott",
+    1631.0
+   ],
+   "2017": [
+    "Kareem Hunt",
+    1327.0
+   ],
+   "2018": [
+    "Ezekiel Elliott",
+    1434.0
+   ],
+   "2019": [
+    "Derrick Henry",
+    1540.0
+   ],
+   "2020": [
+    "Derrick Henry",
+    2027.0
+   ],
+   "2021": [
+    "Jonathan Taylor",
+    1811.0
+   ],
+   "2022": [
+    "Josh Jacobs",
+    1653.0
+   ],
+   "2023": [
+    "Christian McCaffrey",
+    1459.0
+   ],
+   "2024": [
+    "Saquon Barkley",
+    2005.0
+   ],
+   "2025": [
+    "James Cook",
+    1621.0
+   ]
+  }
+ },
  "pass4000": {
   "2009": 10.0,
   "2010": 5.0,

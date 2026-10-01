@@ -107,7 +107,7 @@ select:focus-visible, input[type="search"]:focus-visible { box-shadow: 0 0 0 4px
 
 /* ---- tables ---- */
 table.data tbody tr { transition: background 0.15s; }
-table.data tbody tr:hover td { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+table.data tbody tr:hover td:not(.cs) { background: color-mix(in srgb, var(--accent) 9%, transparent); }
 table.data tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
 /* ---- entrance and scroll reveal (polish.js adds .js-motion, .reveal and .in; nothing is hidden without it) ---- */
