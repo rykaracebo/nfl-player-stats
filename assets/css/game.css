@@ -1,0 +1,86 @@
+/* Field board modes (random plays, pick a play, play a game) and the football game itself (assets/js/game.js).
+   Delete this file, game.js, and the mode buttons in field.js to remove them. */
+.field-modes { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 4px 0 10px; }
+.field-modes .seg { flex-wrap: wrap; max-width: 100%; }
+@media (max-width: 640px) { .field-modes .seg button { padding-left: 14px; padding-right: 14px; } }
+.field-modehint { margin: 0; color: var(--dim); font-size: 13.5px; flex: 1 1 280px; }
+.field-pick { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.field-pick[hidden] { display: none; }
+.field-pick label { display: grid; gap: 4px; font: 600 11px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.field-pick select { font: 500 14px var(--sans); min-width: 190px; }
+
+.game { position: relative; padding: 4px 0 8px; color: var(--fg); }
+.g-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.g-top h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 3.4vw, 34px); margin: 0; }
+.g-lead { color: var(--dim); margin: 0 0 14px; max-width: 68ch; }
+.g-pick { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.g-pick label { display: grid; gap: 4px; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.g-pick select { font: 500 15px var(--sans); min-width: 220px; }
+.g-vs { font: 700 14px var(--mono); color: var(--dim); padding-bottom: 9px; }
+.g-scouts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.g-scout { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: color-mix(in srgb, var(--c) 8%, transparent); box-shadow: inset 0 3px 0 var(--c); }
+.g-scout-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.g-scout-head b { font-size: 16px; }
+.g-helm { display: inline-block; width: 44px; height: 44px; flex: none; }
+.g-row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; border-bottom: 1px dashed var(--line); }
+.g-row em { font: 600 11px var(--mono); font-style: normal; color: var(--accent-text); margin-left: 8px; }
+.g-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.g-board { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin-bottom: 8px; }
+.g-team { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 12px; border: 1px solid var(--line); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.g-team.has { box-shadow: 0 0 0 2px var(--c), 0 0 22px -4px var(--c); }
+.g-team b { font-size: 15px; }
+.g-team .g-helm { width: 38px; height: 38px; }
+.g-pts { margin-left: auto; font: 700 28px/1 var(--mono); }
+.g-mid { font: 600 12px var(--mono); color: var(--dim); text-align: center; }
+.g-field { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+.g-field canvas { display: block; }
+.g-banner { position: absolute; inset: 0; display: grid; place-items: center; font: 400 clamp(34px, 8vw, 84px)/1 'Bebas Neue', Impact, sans-serif; letter-spacing: 0.04em; color: #fff; text-shadow: 0 0 24px var(--c), 0 4px 14px rgba(0, 0, 0, 0.6); background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 35%, transparent), transparent); animation: g-pop 0.5s var(--ease, ease) both; pointer-events: none; }
+.g-banner[hidden] { display: none; }
+@keyframes g-pop { from { opacity: 0; transform: scale(0.7); } }
+.g-situation { margin: 10px 0 8px; font-size: 15px; min-height: 1.5em; }
+.g-calls { display: flex; flex-wrap: wrap; gap: 8px; }
+.g-call { display: grid; gap: 2px; text-align: left; padding: 9px 14px; min-width: 128px; }
+.g-call small { font: 500 11px var(--mono); opacity: 0.8; }
+.g-call[disabled] { opacity: 0.5; cursor: wait; }
+.g-log { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.g-log li { padding: 6px 10px; border-left: 3px solid var(--line); background: color-mix(in srgb, var(--fg) 4%, transparent); border-radius: 0 8px 8px 0; }
+.g-log li.good { border-left-color: #3fbf6a; }
+.g-log li.bad { border-left-color: #ef5350; }
+.g-log li:first-child { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+.g-dn { font: 600 11px var(--mono); color: var(--dim); }
+.g-why { color: var(--accent-text); font-style: italic; }
+.g-final { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-top: 14px; align-items: start; }
+.g-final table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.g-final caption { text-align: left; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); padding-bottom: 6px; }
+.g-final th, .g-final td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+.g-final th:first-child { text-align: left; font-weight: 500; color: var(--dim); }
+.g-final h3 { font-size: 14px; margin: 0 0 6px; }
+.g-final ul { margin: 0 0 12px; padding-left: 18px; font-size: 13px; color: var(--dim); }
+@media (max-width: 640px) {
+  .g-scouts, .g-final { grid-template-columns: 1fr; }
+  .g-board { grid-template-columns: 1fr 1fr; } .g-mid { grid-column: 1 / -1; order: -1; }
+  .g-call { min-width: calc(50% - 4px); }
+}
+@media (prefers-reduced-motion: reduce) { .g-banner { animation: none; } }
+
+/* ---- the camera-follow game: setup, scoreboard pops and big banners ---- */
+.g-pick { align-items: stretch; }
+.g-side { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 16px; border: 1px solid var(--line); background: color-mix(in srgb, var(--c) 10%, transparent); box-shadow: inset 0 3px 0 var(--c); flex: 1 1 280px; }
+.g-bighelm { width: 104px; height: 104px; flex: none; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--c) 70%, transparent)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45)); }
+.g-vs { align-self: center; font: 400 34px/1 'Bebas Neue', Impact, sans-serif; letter-spacing: 0.06em; color: var(--accent-text); padding: 0; }
+.g-pts.bump { animation: g-bump 0.6s var(--ease, ease); }
+@keyframes g-bump { 35% { transform: scale(1.7); color: #ffd23c; text-shadow: 0 0 18px #ffd23c; } }
+.g-banner.big { font-size: clamp(54px, 12vw, 132px); }
+.g-banner { z-index: 2; }
+.g-final-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.g-final { align-items: center; }
+.g-field canvas { max-width: 100%; }
+@media (max-width: 640px) { .g-bighelm { width: 76px; height: 76px; } .g-side { flex-basis: 100%; } .g-vs { width: 100%; text-align: center; } }
+@media (prefers-reduced-motion: reduce) { .g-pts.bump { animation: none; } }
+
+/* long team names must not widen the scoreboard on a phone */
+.g-board { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.g-team { min-width: 0; }
+.g-team b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 640px) { .g-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Stats Dashboard, 2009 to 2025</title>
 <meta name="description" content="Explore 300,000 NFL player-games by season, team, position and player. Switch between player and team views and between basic and advanced stats.">
-<link rel="stylesheet" href="assets/css/style.css?v=20261002i">
-<link rel="stylesheet" href="assets/css/polish.css?v=20261002i">
-<link rel="stylesheet" href="assets/css/spotlight.css?v=20261002i">
-<link rel="stylesheet" href="assets/css/filters.css?v=20261002i">
+<link rel="stylesheet" href="assets/css/style.css?v=20261002z">
+<link rel="stylesheet" href="assets/css/polish.css?v=20261002z">
+<link rel="stylesheet" href="assets/css/game.css?v=20261002z">
+<link rel="stylesheet" href="assets/css/spotlight.css?v=20261002z">
+<link rel="stylesheet" href="assets/css/filters.css?v=20261002z">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}catch(e){}</script>
 </head>
@@ -195,19 +196,20 @@
       The starting view is regular season only, all seasons, passing yards per team-game, which matches the <a href="index.html">report</a>. Tick Playoffs under "More filters" to include them.
       Counts and totals add up players' stats; rates divide the two sums shown in each measure's definition. Player-season rankings
       treat each player's season as one row, so nothing is a career total. Per-team-game rates count team-games among the rows in view.
-      Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> weekly player stats (CC-BY-4.0). This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams; they appear only to identify the league and teams and are loaded from links in the nflverse teams file.
+      Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> weekly player stats (CC-BY-4.0). This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams. They appear only to identify the league and teams. The round team logos are loaded from links in the nflverse teams file and are not stored in this repository. The helmet pictures on the field board are 3D renders stored in this repository (<code>assets/helmets</code>): they use the model &ldquo;Buffalo Bills Helmet&rdquo; by Exodusks (<a href="https://sketchfab.com/3d-models/buffalo-bills-helmet-fd471344bf9c4900b8cc0f59fedb8093">Sketchfab</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), recolored, with each team&rsquo;s mark added to identify it. A few marks (the Eagles&rsquo; wing, Vikings&rsquo; horn, Rams&rsquo; horns, Bengals&rsquo; stripes, Giants&rsquo; and Jets&rsquo; lettering) were traced from a public product photo.
     </p>
   </div>
 </main>
 
 <script src="assets/js/chart.umd.min.js"></script>
-<script src="assets/js/stats.js?v=20261002i"></script>
-<script src="assets/js/charts.js?v=20261002i"></script>
-<script src="assets/js/teams.js?v=20261002i"></script>
-<script src="assets/js/field.js?v=20261002i"></script>
-<script src="assets/js/dashboard.js?v=20261002i"></script>
-<script src="assets/js/polish.js?v=20261002i" defer></script>
-<script src="assets/js/spotlight.js?v=20261002i" defer></script>
-<script src="assets/js/filters.js?v=20261002i" defer></script>
+<script src="assets/js/stats.js?v=20261002z"></script>
+<script src="assets/js/charts.js?v=20261002z"></script>
+<script src="assets/js/teams.js?v=20261002z"></script>
+<script src="assets/js/field.js?v=20261002z"></script>
+<script src="assets/js/game.js?v=20261002z"></script>
+<script src="assets/js/dashboard.js?v=20261002z"></script>
+<script src="assets/js/polish.js?v=20261002z" defer></script>
+<script src="assets/js/spotlight.js?v=20261002z" defer></script>
+<script src="assets/js/filters.js?v=20261002z" defer></script>
 </body>
 </html>

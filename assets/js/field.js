@@ -34,7 +34,7 @@
     const sized = opts.measureSelect !== false; // the dashboard has its own Measure picker, so its field has no second one and equal-size dots
     let measureId = measures[0].id, conf = "All", flash = null, flashRaf = 0;
     let paused = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let hover = null, selected = opts.selected || null;
+    let hover = null, selected = opts.selected || null, mode = "random", playing = false;   // random: the ball goes to a random team on its own; pick: you choose the play
     let clock = paused ? 4.2 : 0, last = performance.now(), target = null, tipKey = null;
 
     // ---------------------------------------------------------------- markup
@@ -43,6 +43,8 @@
       "<div class='seg' role='group' aria-label='Conference'></div>" +
       (sized ? "<label class='sr' for='field-measure'>Dot size shows</label><select id='field-measure'></select>" : "") +
       "<button type='button' class='btn ghost small' id='field-pause'></button></div></div>" +
+      "<div class='field-modes'><div class='seg' id='field-mode' role='group' aria-label='What happens on the field'></div><p class='field-modehint'></p></div>" +
+      "<div class='field-pick' hidden><label>Throw to<select id='pick-team'></select></label><label>Routes<select id='pick-route'></select></label><button type='button' class='btn small' id='pick-run'>Run the play</button></div>" +
       "<div class='field-wrap'><canvas role='img'></canvas><div class='field-tip' role='tooltip' hidden></div></div>" +
       "<p class='field-caption'></p>" +
       "<details class='teamlist'><summary>All 32 teams as a list</summary><ul></ul></details>";
@@ -61,11 +63,45 @@
       b.addEventListener("click", () => { conf = c; seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x.textContent === c ? "true" : "false")); if (target && conf !== "All" && target.conference !== conf) target = null; redrawIfPaused(); });
       seg.appendChild(b);
     });
-    const sel = container.querySelector("select");
+    const sel = container.querySelector("#field-measure");
     if (sel) {
       measures.forEach((m) => { const o = document.createElement("option"); o.value = m.id; o.textContent = "Dot size: " + m.label; sel.appendChild(o); });
       sel.addEventListener("change", () => { measureId = sel.value; tipKey = null; redrawIfPaused(); });
     }
+    // ---- what happens on the field: random plays, pick a play, or play a whole game
+    const modeSeg = container.querySelector("#field-mode"), modeHint = container.querySelector(".field-modehint"), pickBox = container.querySelector(".field-pick");
+    const pickTeam = container.querySelector("#pick-team"), pickRoute = container.querySelector("#pick-route");
+    const HINTS = { classic: "The original field: the ball goes to a random team every few seconds, and each team runs the same route every play.", random: "The ball goes to a random team every few seconds, and every team runs a new route each play.", pick: "You choose who gets the ball and which routes everyone runs. Pick a team and press Run, or just click a helmet.", game: "" };
+    const pt0 = document.createElement("option"); pt0.value = ""; pt0.textContent = "A random team"; pickTeam.appendChild(pt0);
+    teams.slice().sort((x, y) => x.full_name.localeCompare(y.full_name)).forEach((t) => { const o = document.createElement("option"); o.value = t.team; o.textContent = t.full_name; pickTeam.appendChild(o); });
+    [["mixed", "Mixed: every team different"], ["deep", "Deep shots"], ["quick", "Quick passes"], ["cross", "Crossing routes"]].concat(ROUTE_NAMES.map((n) => [n, "Everyone runs a " + n])).forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; pickRoute.appendChild(o); });
+    function setMode(m) {
+      mode = m; hover = null; stuck = null; tip.hidden = true; tipKey = null;
+      modeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x.dataset.mode === m ? "true" : "false"));
+      pickBox.hidden = m !== "pick"; modeHint.textContent = HINTS[m] || "";
+      if (m === "random") { playing = false; clock = (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) ? 4.2 : 0; target = pickTarget(); assignRoutes("mixed"); tipKey = null; }
+      if (m === "classic") { playing = false; clock = 0; target = pickTarget(); classicRoutes(); tipKey = null; paused = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; setPauseLabel(); }
+      if (m === "pick") { playing = false; clock = 0; target = null; assignRoutes("mixed"); tipKey = null; paused = false; setPauseLabel(); }
+      redrawIfPaused(); draw();
+    }
+    function runPlay(code) {
+      const pool = teams.filter((t) => conf === "All" || t.conference === conf);
+      let t = (code && byTeam(code)) || (pickTeam.value && byTeam(pickTeam.value)) || null;
+      if (!t || (conf !== "All" && t.conference !== conf)) t = pool[Math.floor(Math.random() * pool.length)];   // a team hidden by the conference filter can't catch the ball
+      if (code) pickTeam.value = code;
+      assignRoutes(pickRoute.value || "mixed"); target = t; clock = 0; playing = true; paused = false; stuck = null; hover = null; tip.hidden = true; tipKey = null; setPauseLabel(); draw();
+    }
+    const byTeam = (code) => teams.find((t) => t.team === code);
+    [["random", "Random plays"], ["classic", "Classic"], ["pick", "Pick a play"]].concat(window.NFLGame && NFLTeams.helmets ? [["game", "Play a game"]] : []).forEach(([m, l]) => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.mode = m; b.textContent = l; b.setAttribute("aria-pressed", m === "random" ? "true" : "false");
+      b.addEventListener("click", () => {
+        if (m === "game") { const back = mode; paused = true; setPauseLabel(); NFLGame.open(container, { teams, summary, selected, ball: (g, x, y, len, ang, spin) => football(x, y, len, ang, 1, spin, g), onClose: () => { paused = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; setPauseLabel(); setMode(back === "game" ? "random" : back); } }); return; }
+        setMode(m);
+      });
+      modeSeg.appendChild(b);
+    });
+    modeHint.textContent = HINTS.random;
+    container.querySelector("#pick-run").addEventListener("click", () => runPlay(null));
     const pauseBtn = container.querySelector("#field-pause");
     const setPauseLabel = () => { pauseBtn.textContent = paused ? "Play" : "Pause"; pauseBtn.setAttribute("aria-label", paused ? "Play the field animation" : "Pause the field animation"); };
     setPauseLabel();
@@ -96,14 +132,24 @@
         const row = i % 2, lane = Math.floor(i / 2);
         const startX = ci === 0 ? 34 - row * 9 : 86 + row * 9;
         const startY = 5 + (lane + row * 0.5) * 6.1;
-        const route = ROUTES[ROUTE_NAMES[(i * 5 + ci * 3) % ROUTE_NAMES.length]];
-        const flip = (i + ci) % 2 ? 1 : -1;
         const dir = ci === 0 ? 1 : -1;
-        const pts = route.map(([u, v]) => [startX + dir * u, Math.max(3, Math.min(50.3, startY + v * flip))]);
-        const lens = [0]; for (let k = 1; k < pts.length; k++) lens.push(lens[k - 1] + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]));
-        slots.push({ t, pts, lens, total: lens[lens.length - 1], dir });
+        slots.push({ t, start: [startX, startY], dir, pts: [], lens: [], total: 0, i, ci });
       });
     });
+    // Route tree choices. "Mixed" gives every team a random route, so no two plays look alike; the other concepts run a themed set.
+    const CONCEPTS = { deep: ["go", "post", "corner", "fade", "wheel"], quick: ["slant", "hitch", "flat", "drag", "curl"], cross: ["drag", "dig", "slant", "out", "comeback"] };
+    function setRoute(s, name, flip) {
+      s.routeName = name;
+      s.pts = ROUTES[name].map(([u, v]) => [s.start[0] + s.dir * u, Math.max(3, Math.min(50.3, s.start[1] + v * flip))]);
+      s.lens = [0]; for (let k = 1; k < s.pts.length; k++) s.lens.push(s.lens[k - 1] + Math.hypot(s.pts[k][0] - s.pts[k - 1][0], s.pts[k][1] - s.pts[k - 1][1]));
+      s.total = s.lens[s.lens.length - 1];
+    }
+    function assignRoutes(concept) {
+      const pool = !concept || concept === "mixed" ? ROUTE_NAMES : CONCEPTS[concept] || [concept];
+      slots.forEach((s) => setRoute(s, pool[Math.floor(Math.random() * pool.length)], Math.random() < 0.5 ? 1 : -1));
+    }
+    function classicRoutes() { slots.forEach((s) => setRoute(s, ROUTE_NAMES[(s.i * 5 + s.ci * 3) % ROUTE_NAMES.length], (s.i + s.ci) % 2 ? 1 : -1)); }   // the original board: every team keeps the same route every play
+    assignRoutes("mixed");
     const slotOf = {}; slots.forEach((s) => (slotOf[s.t.team] = s));
     function along(s, p) { // point at fraction p of the route
       const d = p * s.total;
@@ -120,7 +166,7 @@
     }
 
     const images = {};
-    teams.forEach((t) => { const im = new Image(); im.referrerPolicy = "no-referrer"; im.onload = () => { im._ok = true; redrawIfPaused(); }; im.src = t.logo; images[t.team] = im; });
+    teams.forEach((t) => { const im = new Image(); im.referrerPolicy = "no-referrer"; im.onload = () => { im._ok = true; redrawIfPaused(); }; im.src = NFLTeams.helmets ? NFLTeams.helmetSheet(t.team) : t.logo; images[t.team] = im; });
     const values = (mid) => teams.map((t) => (summary.teams[t.team] ? summary.teams[t.team][mid] : NaN));
     const rankOf = (code, mid) => 1 + values(mid).filter((x) => x > summary.teams[code][mid]).length;
 
@@ -160,7 +206,7 @@
     new MutationObserver(() => { pal = null; redrawIfPaused(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
     const glow = { on: false, x: 0, y: 0, tx: 0, ty: 0, a: 0 };
-    const L = {}, M = {}, mouse = { x: 0, y: 0, on: false }; // eased hover lift and pointer-proximity swell per team
+    const L = {}, M = {}, SP = {}, mouse = { x: 0, y: 0, on: false }; // eased hover lift and pointer-proximity swell per team
     let speed = 1; // play speed, eased so hovering slows the play down smoothly instead of stopping it dead
     function drawField() {
       const P = pal || palette(), ink = P.ink;
@@ -194,7 +240,7 @@
       for (let y = 11; y < 110; y++) { if (y % 5 === 0) continue; [0.37, 0.63].forEach((f) => { ctx.beginPath(); ctx.moveTo(y * sx, H * f - H * 0.012); ctx.lineTo(y * sx, H * f + H * 0.012); ctx.stroke(); }); }
       // yard numbers in the site's mono face
       ctx.fillStyle = "rgba(" + ink + ",.34)"; ctx.font = "600 " + Math.round(H * 0.06) + "px 'Geist Mono', monospace"; if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
-      [10, 20, 30, 40, 50, 40, 30, 20, 10].forEach((n, i) => { const x = (20 + i * 10) * sx; inkText(String(n), x, H * 0.075, 0); inkText(String(n), x, H * 0.925, Math.PI); });
+      [10, 20, 30, 40, 50, 40, 30, 20, 10].forEach((n, i) => { const x = (20 + i * 10) * sx; inkText(String(n), x, H * 0.075, Math.PI); inkText(String(n), x, H * 0.925, 0); });   // like a real field: the far (top) numbers are upside down, the near (bottom) ones read upright
       if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
       ctx.strokeStyle = P.line; ctx.lineWidth = 2; ctx.strokeRect(1, 1, W - 2, H - 2);
     }
@@ -352,18 +398,19 @@
     if (document.fonts && document.fonts.load) document.fonts.load("20px 'Bebas Neue'").then(invalidateBall);
 
     // x, y: centre; len: length along the ball; angle: heading; spin: roll around the long axis (radians), 0 at rest
-    function football(x, y, len, angle, alpha, spin) {
+    function football(x, y, len, angle, alpha, spin, target) {
+      const g = target || ctx;   // the game borrows this ball and passes its own canvas context
       const F = BALL.FRAMES, pos = ((((((spin || 0) - 0.35) / TAU) % 1) + 1) % 1) * F, k0 = Math.floor(pos) % F, f = pos - Math.floor(pos);
       ballFrame(0); // the first frame is made right away; the rest are made in the background
       const ready = (k) => { for (let d = 0; d < F; d++) { const fr = ballSprite.frames[(k - d + F) % F]; if (fr) return fr; } return ballSprite.frames[0]; };
       const fr0 = ready(k0), fr1 = f > 0.01 ? ballSprite.frames[(k0 + 1) % F] : null;
       const w = len * (BALL.W / (BALL.A * 2)), h = w * (BALL.H / BALL.W);
-      ctx.save(); ctx.translate(x, y);
-      if (Math.cos(angle) < 0) { ctx.scale(-1, 1); angle = Math.PI - angle; } // heading left: mirror, so the light stays above
-      ctx.rotate(angle); const a0 = alpha == null ? 1 : alpha; ctx.globalAlpha = a0;
-      ctx.drawImage(fr0, -w / 2, -h / 2, w, h);
-      if (fr1 && fr1 !== fr0) { ctx.globalAlpha = a0 * f; ctx.drawImage(fr1, -w / 2, -h / 2, w, h); } // blend toward the next roll angle
-      ctx.restore();
+      g.save(); g.translate(x, y);
+      if (Math.cos(angle) < 0) { g.scale(-1, 1); angle = Math.PI - angle; } // heading left: mirror, so the light stays above
+      g.rotate(angle); const a0 = alpha == null ? 1 : alpha; g.globalAlpha = a0;
+      g.drawImage(fr0, -w / 2, -h / 2, w, h);
+      if (fr1 && fr1 !== fr0) { g.globalAlpha = a0 * f; g.drawImage(fr1, -w / 2, -h / 2, w, h); } // blend toward the next roll angle
+      g.restore();
     }
 
     // the ball never sits still at midfield: it rolls slowly on its long axis, floats up and down a little, and sways
@@ -407,16 +454,28 @@
         }
         ctx.globalAlpha = on ? 1 : 0.18;
         const lift = 6 * lf; pos[1] -= lift; // the chosen dot rises off the turf
+        const im = images[t.team], helm = NFLTeams.helmets && im && im._ok;
+        if (helm) { // 3D helmet picture instead of a round logo; the hover glow is a soft ring under it
+          const ph = (t.team.charCodeAt(0) * 7 + t.team.charCodeAt(t.team.length - 1) * 13) % 100 / 15.9;   // each team has its own rhythm
+          const idleF = calm ? 0 : Math.sin(clock * 1.25 + ph) * 0.95, bob = calm || !running ? 0 : -Math.abs(Math.sin(clock * 11 + ph)) * rad * 0.22, lean = calm || !running ? 0 : Math.sin(clock * 11 + ph) * 0.07;
+          let pop = 1; if (flash && flash.team === t.team) { const u = Math.min(1, (performance.now() - flash.start) / 520); pop = 1 + 0.32 * Math.sin(u * Math.PI) * (1 - u * 0.4); }
+          const hs = rad * 3.1 * (1 + 0.12 * lf) * pop, hy = pos[1] - hs * 0.04 + bob;
+          if (lf > 0.02) { ctx.save(); ctx.globalAlpha *= lf; ctx.beginPath(); ctx.ellipse(pos[0], pos[1] + hs * 0.34, hs * 0.56, hs * 0.16, 0, 0, TAU); ctx.fillStyle = "rgba(255,182,18,.55)"; ctx.fill(); ctx.restore(); }
+          ctx.save(); ctx.shadowColor = "rgba(0,0,0," + (0.45 + 0.1 * lf).toFixed(2) + ")"; ctx.shadowBlur = 8 + 8 * lf + 5 * mg; ctx.shadowOffsetY = 4 + 6 * lf + 2 * mg;
+          const fw = im.naturalWidth / 7, fi = Math.max(0, Math.min(6, Math.round((SP[t.team] === undefined ? 3 : SP[t.team]) + idleF * (1 - Math.min(1, Math.abs((SP[t.team] === undefined ? 3 : SP[t.team]) - 3))))));
+          ctx.translate(pos[0], hy); ctx.rotate(lean);
+          ctx.drawImage(im, fi * fw, 0, fw, im.naturalHeight, -hs / 2, -hs / 2, hs, hs); ctx.restore();
+        } else {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0," + (0.5 + 0.1 * lf).toFixed(2) + ")"; ctx.shadowBlur = 10 + 10 * lf + 6 * mg; ctx.shadowOffsetY = 5 + 7 * lf + 3 * mg;
         ctx.beginPath(); ctx.arc(pos[0], pos[1], rad + 1.5 + 2 * lf, 0, TAU); ctx.fillStyle = "rgb(255," + Math.round(255 - 73 * lf) + "," + Math.round(255 - 237 * lf) + ")"; ctx.fill(); ctx.restore();
         ctx.beginPath(); ctx.arc(pos[0], pos[1], rad, 0, TAU); ctx.fillStyle = col; ctx.fill();
-        const im = images[t.team];
         if (im && im._ok) {
           ctx.save(); ctx.beginPath(); ctx.arc(pos[0], pos[1], rad - 1.5, 0, TAU); ctx.clip();
           ctx.fillStyle = "rgba(255,255,255,.96)"; ctx.fillRect(pos[0] - rad, pos[1] - rad, rad * 2, rad * 2);
           const sz = (rad - 1.5) * 1.55; ctx.drawImage(im, pos[0] - sz / 2, pos[1] - sz / 2, sz, sz); ctx.restore();
         } else { ctx.fillStyle = "#fff"; ctx.font = "700 " + Math.round(rad * 0.75) + "px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(t.team, pos[0], pos[1] + 1); }
         { const gl = ctx.createRadialGradient(pos[0] - rad * 0.4, pos[1] - rad * 0.5, rad * 0.1, pos[0], pos[1], rad); gl.addColorStop(0, "rgba(255,255,255,.38)"); gl.addColorStop(0.45, "rgba(255,255,255,0)"); gl.addColorStop(1, "rgba(0,0,0,.28)"); ctx.beginPath(); ctx.arc(pos[0], pos[1], rad, 0, TAU); ctx.fillStyle = gl; ctx.fill(); } // domed highlight
+        }
         if (lf > 0.02) { ctx.save(); ctx.globalAlpha *= lf; ctx.font = "700 11px 'Geist Mono', monospace"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillStyle = "#ffb612"; ctx.fillText(t.team, pos[0], pos[1] + rad + 5); ctx.restore(); }
         if (flash && flash.team === t.team) { // a ring that spreads out from the dot you just clicked
           const u = Math.min(1, (performance.now() - flash.start) / 1100);
@@ -424,7 +483,7 @@
           ctx.beginPath(); ctx.arc(pos[0], pos[1], rad + 6 + u * 34, 0, TAU); ctx.stroke();
         }
         ctx.globalAlpha = 1;
-        dots.push({ t, x: pos[0], y: pos[1], r: rad, on });
+        dots.push({ t, x: pos[0], y: pos[1], r: NFLTeams.helmets ? rad * 1.45 : rad, on });
       });
 
       // the pass: arc from the 50-yard line to the target, then carried by the catcher, then back to the line
@@ -483,13 +542,14 @@
           const b = document.createElement("button"); b.type = "button"; b.className = "btn small go-btn"; b.textContent = opts.goButton || "Open team";
           b.addEventListener("click", (ev) => { ev.stopPropagation(); chooseTeam(t.team); });
           tip.appendChild(b);
-        } else { const go = document.createElement("div"); go.className = "go"; go.textContent = opts.goText || "Click to open this team"; tip.appendChild(go); }
+        } else { const go = document.createElement("div"); go.className = "go"; go.textContent = mode === "pick" ? "Click to throw to this team" : (opts.goText || "Click to open this team"); tip.appendChild(go); }
       }
       tip.classList.toggle("sticky", stuck === t.team);
       tip.hidden = false;
       const w = wrap.clientWidth, left = d.x + d.r + 14 + 235 > w ? d.x - d.r - 14 - 235 : d.x + d.r + 14;
       tip.style.left = Math.max(6, left) + "px"; tip.style.top = Math.max(6, Math.min(H - tip.offsetHeight - 6, d.y - 20)) + "px";
     }
+    const calm = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);   // no idle or running animation for visitors who ask for less motion
     const tiltOk = window.matchMedia && matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches;
     canvas.addEventListener("pointermove", (e) => {
       if (e.pointerType === "touch") return; // a finger dragging to scroll is not hovering
@@ -514,6 +574,7 @@
     }
     canvas.addEventListener("click", (e) => {
       const d = pick(e);
+      if (mode === "pick") { if (d) runPlay(d.t.team); return; }
       if (e.pointerType === "touch") {
         if (!d) { stuck = null; hover = null; tip.hidden = true; tip.classList.remove("sticky"); tipKey = null; last = performance.now(); redrawIfPaused(); return; }
         if (stuck !== d.t.team) { stuck = d.t.team; hover = d.t.team; tipKey = null; draw(); showTip(d); return; } // first tap: show the numbers
@@ -532,6 +593,11 @@
       const ease1 = (map, key, goal) => { const v = map[key] || 0, nv = v + (goal - v) * k; map[key] = Math.abs(goal - nv) < 0.003 ? goal : nv; if (map[key] !== goal) busy = true; };
       slots.forEach((sl) => { const c = sl.t.team; ease1(L, c, hover === c || selected === c ? 1 : 0); });
       dots.forEach((d) => { const c = d.t.team; ease1(M, c, mouse.on && tiltOk && d.on ? Math.pow(Math.max(0, 1 - Math.hypot(d.x - mouse.x, d.y - mouse.y) / 110), 2) : 0); });
+      dots.forEach((d) => { // helmets turn to look at the pointer when it is near
+        const c = d.t.team, dir = d.t.conference === "NFC" ? -1 : 1, near = mouse.on && tiltOk && d.on ? Math.max(0, 1 - Math.hypot(d.x - mouse.x, d.y - mouse.y) / 150) : 0;
+        const goal = 3 + dir * Math.max(-1, Math.min(1, (mouse.x - d.x) / 70)) * 3 * Math.min(1, near * 2.2), v = SP[c] === undefined ? 3 : SP[c], nv = v + (goal - v) * k * 0.9;
+        SP[c] = Math.abs(goal - nv) < 0.02 ? goal : nv; if (SP[c] !== goal) busy = true;
+      });
       glow.x += (glow.tx - glow.x) * k; glow.y += (glow.ty - glow.y) * k; const ga = glow.on ? 1 : 0; glow.a += (ga - glow.a) * k;
       if (Math.abs(ga - glow.a) < 0.01) glow.a = ga; else busy = true;
       if (glow.on && (Math.abs(glow.tx - glow.x) > 0.3 || Math.abs(glow.ty - glow.y) > 0.3)) busy = true;
@@ -540,13 +606,16 @@
     function frame(now) {
       const dt = Math.min(0.1, (now - last) / 1000); last = now;
       if (!document.hidden && onScreen) {
-        const goal = paused || hover ? 0 : 1;
+        const goal = paused || (hover && !(mode === "pick" && playing)) ? 0 : 1;
         speed += (goal - speed) * (1 - Math.exp(-dt * 7)); if (Math.abs(goal - speed) < 0.004) speed = goal;
         const busy = stepAnim(dt);
         if (speed > 0 || busy) {
           const before = Math.floor(clock / CYCLE);
-          clock += dt * speed;
-          if (Math.floor(clock / CYCLE) !== before || !target) { target = pickTarget(); tipKey = null; }
+          if (!(mode === "pick" && !playing)) clock += dt * speed;   // in "pick" mode the field waits for you between plays
+          if (Math.floor(clock / CYCLE) !== before) {
+            if (mode === "pick") { playing = false; clock = 0; tipKey = null; }
+            else { target = pickTarget(); if (mode !== "classic") assignRoutes("mixed"); tipKey = null; }   // a new random route for every team on every play (not in Classic)
+          } else if (!target && mode !== "pick") { target = pickTarget(); tipKey = null; }
           draw();
         }
       }

@@ -90,6 +90,34 @@
   }
 
   T.load = load; T.color = color; T.badge = badge; T.luminance = luminance; T.contrast = contrast; T.inkOn = inkOn;
+  // 3D helmet pictures (assets/helmets/turn/<CODE>.webp: 7 angles side by side). They turn toward the pointer. Set T.helmets = false to go back to round logos.
+  T.helmets = true;
+  T.helmetSheet = (code) => "assets/helmets/turn/" + code + ".webp?v=2";
+  T.helm = (code, cls) => "<span class='helm-spin " + (cls || "") + "' data-helm='" + code + "' style='background-image:url(" + T.helmetSheet(code) + ")' aria-hidden='true'></span>";
+  (function () {
+    const st = document.createElement("style");
+    st.textContent = ".helm-spin{display:block;width:100%;height:100%;background-size:700% 100%;background-repeat:no-repeat;background-position:50% 0;pointer-events:none;transform:rotate(var(--tilt,0deg)) translateY(var(--bob,0px))}";
+    document.head.appendChild(st);
+    if (!window.matchMedia || matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    let px = -1e4, py = -1e4, raf = 0;
+    function frame() {
+      raf = 0; let busy = false;
+      document.querySelectorAll(".helm-spin[data-helm]").forEach((el) => {
+        const s = el._hs || (el._hs = { f: 3, t: 3 }), r = el.getBoundingClientRect();
+        if (r.width < 2 || r.bottom < -200 || r.top > innerHeight + 200) return;
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = Math.max(150, r.width * 2.6), d = Math.hypot(px - cx, py - cy);
+        const tm = T.byCode && T.byCode[el.dataset.helm], dir = tm && tm.conference === "NFC" ? -1 : 1;   // turn to look at the pointer
+        s.t = d < R ? 3 + dir * Math.max(-1, Math.min(1, (px - cx) / (R * 0.55))) * 3 * Math.min(1, (R - d) / (R * 0.5)) : 3;
+        s.f += (s.t - s.f) * 0.2; if (Math.abs(s.t - s.f) < 0.02) s.f = s.t; else busy = true;
+        el.style.backgroundPositionX = (Math.round(s.f) / 6 * 100) + "%";
+        el.style.setProperty("--tilt", ((s.f - 3) * dir * 1.6).toFixed(2) + "deg");
+        el.style.setProperty("--bob", (-Math.max(0, 1 - d / R) * 3).toFixed(2) + "px");
+      });
+      if (busy) raf = requestAnimationFrame(frame);
+    }
+    document.addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(frame); }, { passive: true });
+    document.addEventListener("pointerleave", () => { px = py = -1e4; if (!raf) raf = requestAnimationFrame(frame); });
+  })();
   T.leagueLogo = () => (T.list[0] && T.list[0].league_logo) || null;
   T.name = (code) => (T.byCode[code] ? T.byCode[code].full_name : code);
   window.NFLTeams = T;

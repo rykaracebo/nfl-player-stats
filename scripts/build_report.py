@@ -10,7 +10,7 @@ import re
 
 import pandas as pd
 
-ASSET_V = "20261002i"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20261002z"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -585,6 +585,7 @@ page = f"""<!doctype html>
 <meta name="description" content="What {num(R['reg_rows'])} NFL player-games say about passing, rushing, receiving and defense from {FIRST} to {LAST}.">
 <link rel="stylesheet" href="assets/css/style.css?v={ASSET_V}">
 <link rel="stylesheet" href="assets/css/polish.css?v={ASSET_V}">
+<link rel="stylesheet" href="assets/css/game.css?v={ASSET_V}">
 <link rel="stylesheet" href="assets/css/intro.css?v={ASSET_V}">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}}catch(e){{}}</script>
@@ -716,11 +717,12 @@ page = f"""<!doctype html>
   </section>
 </main>
 
-<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a><br>This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams. They appear here only to identify the league and teams, are loaded from links in the nflverse teams file, and are not stored in this repository.</footer>
+<footer class="footer">Data: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY-4.0) &middot; Plain HTML, CSS and JavaScript &middot; <a href="dashboard.html">Dashboard</a><br>This is an unofficial, non-commercial student project. The NFL name and shield and the team names and logos belong to the NFL and its teams. They appear here only to identify the league and teams. The round team logos are loaded from links in the nflverse teams file and are not stored in this repository. The helmet pictures on the field board are 3D renders stored in this repository (<code>assets/helmets</code>): they use the model &ldquo;Buffalo Bills Helmet&rdquo; by Exodusks (<a href="https://sketchfab.com/3d-models/buffalo-bills-helmet-fd471344bf9c4900b8cc0f59fedb8093">Sketchfab</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), recolored, with each team&rsquo;s mark added to identify it. A few marks (the Eagles&rsquo; wing, Vikings&rsquo; horn, Rams&rsquo; horns, Bengals&rsquo; stripes, Giants&rsquo; and Jets&rsquo; lettering) were traced from a public product photo.</footer>
 <script src="assets/js/chart.umd.min.js"></script>
 <script src="assets/js/charts.js?v={ASSET_V}"></script>
 <script src="assets/js/teams.js?v={ASSET_V}"></script>
 <script src="assets/js/field.js?v={ASSET_V}"></script>
+<script src="assets/js/game.js?v={ASSET_V}"></script>
 <script src="assets/js/report.js?v={ASSET_V}"></script>
 <script src="assets/js/polish.js?v={ASSET_V}" defer></script>
 <script src="assets/js/intro.js?v={ASSET_V}" defer></script>

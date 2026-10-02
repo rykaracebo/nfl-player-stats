@@ -38,7 +38,10 @@ Full column definitions are in [`data/DATA_DICTIONARY.md`](data/DATA_DICTIONARY.
 | `assets/js/filters.js` | A draggable season range under the Seasons dropdowns. The dropdowns stay the real controls; the slider sets them and fires their normal change event, and stays in step when a preset, a link or Reset all changes them. |
 | `assets/css/spotlight.css` | Styles for the dashboard's team spotlight cards (see `assets/js/spotlight.js`). Delete its `<link>` tag to remove the feature. |
 | `assets/js/spotlight.js` | The dashboard's team spotlight: when a team is picked, five cards show that team's best single season for passing, rushing and receiving yards, sacks and interceptions in the seasons in view. Each card has a drawn avatar (helmet and jersey in the team colors with the player's number), the team logo, name, position and the stat. The stats come from the same `topPlayerSeasons` calculation the charts use, the number from `data/player_numbers.csv`. Avatars are drawn, never photos. Clicking a card opens that player. Reads the dashboard only through the small `window.NFLDash` handle. |
+| `assets/css/game.css` | Styles for the play board's mode switch, the Pick-a-play panel and the "Play a game" football game (see `assets/js/game.js`). Delete its `<link>` tag, `game.js` and the mode button in `field.js` to remove the game. |
+| `assets/helmets/turn/` | The 32 team helmet pictures drawn on the play board: one WebP per team code, seven turning angles side by side (3D renders; see the credits note below). |
 | `assets/css/intro.css` | Styles for the report page's opening "roll call" (see `assets/js/intro.js`). Delete its `<link>` tag to remove the opening. |
+| `assets/js/game.js` | The play board's "Play a game" mode: a short football simulation. You call plays (or watch or instantly simulate a game) and the helmets run each snap. Every result is a random draw shaped by the team averages in `data/team_summary.json` (passing and rushing yards, sacks, QB hits, interceptions, penalties per team-game, 2009 to 2025); key plays say which stat caused them. Simulated, not real results. |
 | `assets/js/intro.js` | The report page's opening "roll call": a football crosses the screen, the 32 team logos flash in (AFC left, NFC right), logos swell near the pointer, and a click opens the dashboard filtered to that team. Shows once per browser session; never for visitors who prefer reduced motion or for automated browsers; `?intro=1` shows it again and a Replay button sits next to the dashboard button. Decoration only. |
 | `assets/js/polish.js` | Motion for both pages: stat cards count up to the value the page computed (and always end on its exact text), sections fade in as they scroll into view, pointer glow, scroll progress. Does nothing when the visitor prefers reduced motion. Never changes a number, filter or chart data. |
 | `assets/js/charts.js` | Chart.js helpers and the theme toggle, shared by both pages.  |
@@ -104,10 +107,16 @@ dashboard loads its data with `fetch`, so opening `dashboard.html` straight from
   Bars use each team's primary color (lightened or darkened only when needed to stay at least 3:1 against the background), and every hover names the team. On the report, the season-count charts (4,000-yard passers, 1,000-yard rushers, 300-carry backs, 100-catch receivers, players with
   6+ interceptions) draw each season's bar as one block per player, colored by his team; the checker confirms who is in each block.
 - **This is an unofficial, non-commercial student project.** The NFL name and shield and the team names and logos belong to the
-  NFL and its teams. They appear only to identify the league and teams. Logos (including the league shield printed on the ball
+  NFL and its teams. They appear only to identify the league and teams. Round logos (including the league shield printed on the ball
   in the play board) are loaded by the visitor's browser from the links in the nflverse teams file (`team_logo_espn`,
   `team_league_logo`) and are not stored in this repository; if one cannot load, a color badge or a plain crest is shown instead.
   The rest of the ball's printing ("PLAYER STATS", "2009-2025") is this project's own.
+- **Helmets on the play board.** The 32 helmet pictures (`assets/helmets/turn/<CODE>.webp`, seven turning angles each) are 3D renders
+  stored in this repository. They use the model "Buffalo Bills Helmet" by Exodusks
+  (<https://sketchfab.com/3d-models/buffalo-bills-helmet-fd471344bf9c4900b8cc0f59fedb8093>, CC BY 4.0), recolored per team, with
+  each team's mark added. The Eagles' wing, Vikings' horn, Rams' horns, Bengals' stripes and the Giants' and Jets' lettering were
+  traced from a public product photo. The "Play a game" mode (`assets/js/game.js`) is a simulation: each play is a random draw
+  shaped by the team averages in `data/team_summary.json`, not a real game result.
 - Charts are drawn with [Chart.js](https://www.chartjs.org/) 4.4.1 (MIT license), served from `assets/js/chart.umd.min.js`.
 - Fonts, self-hosted in `assets/fonts/` (licence texts in `assets/fonts/LICENSES.txt`): Geist and Geist Mono (SIL Open Font License 1.1, Vercel), Instrument Serif (SIL Open Font
   License 1.1, Instrument) and Bebas Neue for the field lettering (SIL Open Font License 1.1, Dharma Type).
