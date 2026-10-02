@@ -10,7 +10,7 @@ import re
 
 import pandas as pd
 
-ASSET_V = "20261001o"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
+ASSET_V = "20261002e"  # bump when a script or stylesheet changes so browsers do not serve a cached copy
 FILES = sorted(glob.glob("data/seasons/player_games_*.csv"))
 d = pd.concat([pd.read_csv(f, low_memory=False) for f in FILES], ignore_index=True)
 NUMERIC = list(d.columns[11:])
@@ -492,16 +492,16 @@ def column_classes(n_cols, rows):
     return classes
 
 
-SCALE_STOPS = [(215, 48, 39), (244, 174, 48), (26, 152, 80)]   # red (lowest), amber, green (highest)
+SCALE_RED, SCALE_GREEN = (232, 72, 64), (46, 189, 115)   # lowest and highest; the middle of the range is left unfilled so it reads as plain
 
 
 def scale_color(t):
-    """A color between red (t=0), amber (0.5) and green (1), see-through so it works on the dark and the light theme."""
+    """A see-through tint: red at t=0, nothing at 0.5, green at t=1. The farther from the middle, the stronger the tint, so only
+    the low and high ends pull the eye and the muddy in-between colors of a three-color blend are gone. Works on both themes."""
     t = max(0.0, min(1.0, t))
-    seg, u = (0, t / 0.5) if t < 0.5 else (1, (t - 0.5) / 0.5)
-    a, b = SCALE_STOPS[seg], SCALE_STOPS[seg + 1]
-    r, g, bl = (round(a[i] + (b[i] - a[i]) * u) for i in range(3))
-    return f"rgba({r},{g},{bl},0.46)"
+    r, g, b = SCALE_RED if t < 0.5 else SCALE_GREEN
+    alpha = 0.04 + 0.50 * (abs(2 * t - 1) ** 0.85)
+    return f"rgba({r},{g},{b},{alpha:.2f})"
 
 
 def table_html(head, rows, title="", scales=None):

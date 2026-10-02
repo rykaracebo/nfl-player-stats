@@ -403,13 +403,23 @@ html:has(.actionbar) { scroll-padding-top: 150px; }
 }
 @media (max-width: 400px) { .brand em { display: none; } }
 
-/* conditional formatting in the season tables on the report: red = lowest, green = highest (scripts/build_report.py sets --cs per cell) */
-table.data td.cs { background: var(--cs); }
-table.data td.cs.hi, table.data td.cs.lo { font-weight: 700; }
+/* conditional formatting in the season tables on the report: red = lowest, green = highest (scripts/build_report.py sets --cs per cell).
+   Each shaded cell is a soft rounded tile; the middle of the range stays unfilled, the ends carry a marker as well as a color. */
+.tablewrap.has-cs { max-height: 440px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.has-cs table.data th, .has-cs table.data td { padding: 5px 10px; border-bottom: 1px solid color-mix(in srgb, var(--line) 45%, transparent); }
+.has-cs table.data th { background: var(--surface2); border-bottom: 1px solid var(--line); z-index: 3; } /* above the shaded tiles, which are positioned, so rows scrolling under the header are hidden by it */
+.has-cs table.data td:first-child { color: var(--dim); }
+table.data td.cs { position: relative; isolation: isolate; background: none; }
+table.data td.cs::before { content: ""; position: absolute; inset: 2px 3px; border-radius: 7px; background: var(--cs); z-index: -1; }
+table.data td.cs.hi, table.data td.cs.lo { font-weight: 700; padding-left: 24px; }
+table.data td.cs.hi::before { box-shadow: inset 0 0 0 1px rgba(46, 189, 115, 0.75); }
+table.data td.cs.lo::before { box-shadow: inset 0 0 0 1px rgba(232, 72, 64, 0.75); }
+table.data td.cs.hi::after, table.data td.cs.lo::after { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; line-height: 1; }
+table.data td.cs.hi::after { content: "\25B2"; content: "\25B2" / ""; color: rgb(46, 189, 115); }
+table.data td.cs.lo::after { content: "\25BC"; content: "\25BC" / ""; color: rgb(232, 72, 64); }
 .cs-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 10px 0 0; font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
-.cs-legend i { width: 110px; height: 10px; border-radius: 6px; background: linear-gradient(90deg, rgba(215, 48, 39, 0.6), rgba(244, 174, 48, 0.6), rgba(26, 152, 80, 0.6)); }
+.cs-legend i { width: 120px; height: 8px; border-radius: 6px; background: linear-gradient(90deg, rgba(232, 72, 64, 0.62), rgba(140, 150, 175, 0.12) 50%, rgba(46, 189, 115, 0.62)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 80%, transparent); }
 .cs-legend em { flex-basis: 100%; font-style: normal; color: var(--faint); }
-.tablewrap.has-cs { max-height: 480px; }
 .numbers-who { margin-top: 12px; }
 .numbers-who summary { cursor: pointer; font-size: 12.5px; color: var(--dim); font-family: var(--mono); }
 .numbers-who summary:hover { color: var(--accent-text); }

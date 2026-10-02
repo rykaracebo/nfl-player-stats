@@ -35,7 +35,7 @@
     let measureId = measures[0].id, conf = "All", flash = null, flashRaf = 0;
     let paused = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     let hover = null, selected = opts.selected || null;
-    let clock = paused ? 4.2 : 0, last = performance.now(), cycle = 0, target = null, tipKey = null;
+    let clock = paused ? 4.2 : 0, last = performance.now(), target = null, tipKey = null;
 
     // ---------------------------------------------------------------- markup
     container.innerHTML =
@@ -43,7 +43,7 @@
       "<div class='seg' role='group' aria-label='Conference'></div>" +
       (sized ? "<label class='sr' for='field-measure'>Dot size shows</label><select id='field-measure'></select>" : "") +
       "<button type='button' class='btn ghost small' id='field-pause'></button></div></div>" +
-      "<div class='field-wrap'><canvas role='img'></canvas><div class='field-tip' hidden></div></div>" +
+      "<div class='field-wrap'><canvas role='img'></canvas><div class='field-tip' role='tooltip' hidden></div></div>" +
       "<p class='field-caption'></p>" +
       "<details class='teamlist'><summary>All 32 teams as a list</summary><ul></ul></details>";
     container.querySelector("h2").textContent = opts.title || "The league on the field";
@@ -52,6 +52,7 @@
     const caption = container.querySelector(".field-caption"), wrap = container.querySelector(".field-wrap");
     const ctx = canvas.getContext("2d");
     canvas.setAttribute("aria-label", "A football field where the 32 NFL teams run routes and the ball is thrown to a random team. AFC teams run right, NFC teams run left. Use the team list below the field for keyboard access.");
+    caption.id = "field-caption-" + Math.random().toString(36).slice(2, 8); canvas.setAttribute("aria-describedby", caption.id); // the caption is the written description of what the board shows
 
     const seg = container.querySelector(".seg");
     ["All", "AFC", "NFC"].forEach((c) => {
@@ -182,7 +183,7 @@
       [[5, "AFC", -Math.PI / 2], [115, "NFC", Math.PI / 2]].forEach(([yd, label, rot]) => inkText(label, yd * sx, H / 2, rot));
       if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
       // midfield logo, dimmed into the surface
-      if (leagueImg) { const lh = H * 0.36, lw = lh * (leagueImg.naturalWidth / leagueImg.naturalHeight); ctx.save(); ctx.globalAlpha = P.light ? 0.5 : 0.4; ctx.drawImage(leagueImg, 60 * sx - lw / 2, H / 2 - lh / 2, lw, lh); ctx.restore(); }
+      if (leagueImg && leagueImg.naturalWidth) { const lh = H * 0.36, lw = lh * (leagueImg.naturalWidth / leagueImg.naturalHeight); ctx.save(); ctx.globalAlpha = P.light ? 0.5 : 0.4; ctx.drawImage(leagueImg, 60 * sx - lw / 2, H / 2 - lh / 2, lw, lh); ctx.restore(); }
       // hairline yard lines
       for (let y = 10; y <= 110; y += 5) {
         const goal = y === 10 || y === 110;
@@ -202,7 +203,8 @@
     // geometry. The leather, seams, laces and printing are painted on an unwrapped texture that is wrapped around it and lit from
     // above left, so turning the texture around the long axis gives a true spiral. Frames for 48 roll angles are rendered in the background, and
     // the roll blends between neighbouring frames so even a slow turn looks continuous. The crest is the league logo from the link in the nflverse teams file (not a manufacturer's branding).
-    let ballSprite = null, ballGeo = null;
+    let ballSprite = null, ballGeo = null, ballTimer = 0;
+    const invalidateBall = () => { clearTimeout(ballTimer); ballTimer = setTimeout(() => { ballSprite = null; redrawIfPaused(); }, 80); }; // fonts and the logo can finish together: rebuild once
     const BALL = { W: 380, H: 220, SS: 2, A: 170, B: 93, PITCH: 0.3, FRAMES: 48, TW: 640, TH: 372, Z0: 600, SHAPE: 0.7 };
     let leagueImg = null, leagueReadable = false;
     if (NFLTeams.leagueLogo && NFLTeams.leagueLogo()) {
@@ -210,7 +212,7 @@
       // first try a CORS-enabled load so the logo can be read onto the ball; if that fails, load it plainly for the midfield paint only
       const load = (cors, fail) => {
         const im = new Image(); im.referrerPolicy = "no-referrer"; if (cors) im.crossOrigin = "anonymous";
-        im.onload = () => { leagueImg = im; leagueReadable = cors; ballSprite = null; redrawIfPaused(); };
+        im.onload = () => { leagueImg = im; leagueReadable = cors; invalidateBall(); };
         im.onerror = fail || null; im.src = url;
       };
       load(true, () => load(false));
@@ -265,7 +267,7 @@
       };
       text("“PLAYER STATS”", cu - TH * 0.27, cw - 9, 17, 0.1); text("2009–2025", cu - TH * 0.27, cw + 9, 20, 0.06);
       text("Regular season", cu + TH * 0.27, cw - 9, 19, 0, "italic 21px 'Instrument Serif', Georgia, serif"); text("PER TEAM-GAME", cu + TH * 0.27, cw + 9, 10.5, 0.14);
-      if (leagueImg && leagueReadable) {
+      if (leagueImg && leagueImg.naturalWidth && leagueReadable) {
         const lh = 86, lw = lh * (leagueImg.naturalWidth / leagueImg.naturalHeight);
         g.save(); g.globalAlpha = 0.96; g.shadowColor = "rgba(0,0,0,.3)"; g.shadowBlur = 2; g.shadowOffsetY = 1; g.drawImage(leagueImg, cu - lw / 2, cw - lh / 2, lw, lh); g.restore();
       }
@@ -296,7 +298,7 @@
       const R = (x) => { const f = (x / A * 0.5 + 0.5) * 1024, i = Math.max(0, Math.min(1023, f | 0)); return rt[i] + (rt[i + 1] - rt[i]) * (f - i); };
       const s = new Float32Array(N), th = new Float32Array(N), sh = new Float32Array(N), spc = new Float32Array(N), ok = new Uint8Array(N);
       const norm = (v) => { const l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; };
-      const L = norm([-0.4, -0.62, -0.68]), Fl = norm([0.55, 0.45, -0.7]), Hh = norm([L[0], L[1], L[2] - 1]);
+      const lightDir = norm([-0.4, -0.62, -0.68]), Fl = norm([0.55, 0.45, -0.7]), Hh = norm([lightDir[0], lightDir[1], lightDir[2] - 1]);
       for (let j = 0; j < GH; j++) {
         const y = (j + 0.5 - GH / 2) / SS;
         if (Math.abs(y) >= B) continue;
@@ -315,7 +317,7 @@
           const x = x0 - hi * sp, z = z0 + hi * cp, rho = Math.hypot(y, z) || 1e-6, u = x / A, q = Math.max(0.02, 1 - u * u);
           const drdx = B * SH * Math.pow(q, SH - 1) * (-2 * u / A);
           const n = norm([-drdx, y / rho, z / rho]), nX = n[0] * cp + n[2] * sp, nY = n[1], nZ = -n[0] * sp + n[2] * cp;
-          const d = Math.max(0, nX * L[0] + nY * L[1] + nZ * L[2]), f = Math.max(0, nX * Fl[0] + nY * Fl[1] + nZ * Fl[2]);
+          const d = Math.max(0, nX * lightDir[0] + nY * lightDir[1] + nZ * lightDir[2]), f = Math.max(0, nX * Fl[0] + nY * Fl[1] + nZ * Fl[2]);
           const hh = Math.max(0, nX * Hh[0] + nY * Hh[1] + nZ * Hh[2]);
           const p = j * GW + i;
           sh[p] = (0.3 + 1.0 * d + 0.12 * f) * (0.78 + 0.22 * (1 - Math.pow(Math.abs(u), 4)));
@@ -347,7 +349,7 @@
       if (k === 0) { const sprite = ballSprite; let next = 1; const fill = () => { if (ballSprite !== sprite || next >= BALL.FRAMES) return; if (!document.hidden) ballFrame(next++); setTimeout(fill, 24); }; setTimeout(fill, 120); }
       return fr;
     }
-    if (document.fonts && document.fonts.load) document.fonts.load("20px 'Bebas Neue'").then(() => { ballSprite = null; redrawIfPaused(); if (!paused) draw(); });
+    if (document.fonts && document.fonts.load) document.fonts.load("20px 'Bebas Neue'").then(invalidateBall);
 
     // x, y: centre; len: length along the ball; angle: heading; spin: roll around the long axis (radians), 0 at rest
     function football(x, y, len, angle, alpha, spin) {
@@ -464,7 +466,7 @@
       if (e.target === canvas && e.offsetX !== undefined) { x = e.offsetX; y = e.offsetY; } // local coords, correct while the board is tilted
       else { const rect = canvas.getBoundingClientRect(); x = e.clientX - rect.left; y = e.clientY - rect.top; }
       let best = null, bd = 1e9;
-      dots.forEach((d) => { if (!d.on) return; const dd = Math.hypot(d.x - x, d.y - y); if (dd <= d.r + 8 && dd < bd) { bd = dd; best = d; } });
+      dots.forEach((d) => { if (!d.on) return; const dd = Math.hypot(d.x - x, d.y - y); if (dd <= d.r + (e.pointerType === "touch" ? 14 : 8) && dd < bd) { bd = dd; best = d; } });
       return best;
     }
     let stuck = null; // touch: the team whose tooltip a first tap left open
@@ -544,7 +546,7 @@
         if (speed > 0 || busy) {
           const before = Math.floor(clock / CYCLE);
           clock += dt * speed;
-          if (Math.floor(clock / CYCLE) !== before || !target) { cycle++; target = pickTarget(); tipKey = null; }
+          if (Math.floor(clock / CYCLE) !== before || !target) { target = pickTarget(); tipKey = null; }
           draw();
         }
       }
