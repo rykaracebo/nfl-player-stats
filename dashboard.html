@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Stats Dashboard, 2009 to 2025</title>
 <meta name="description" content="Explore 300,000 NFL player-games by season, team, position and player. Switch between player and team views and between basic and advanced stats.">
-<link rel="stylesheet" href="assets/css/style.css?v=20261002e">
-<link rel="stylesheet" href="assets/css/polish.css?v=20261002e">
-<link rel="stylesheet" href="assets/css/spotlight.css?v=20261002e">
-<link rel="stylesheet" href="assets/css/filters.css?v=20261002e">
+<link rel="stylesheet" href="assets/css/style.css?v=20261002h">
+<link rel="stylesheet" href="assets/css/polish.css?v=20261002h">
+<link rel="stylesheet" href="assets/css/spotlight.css?v=20261002h">
+<link rel="stylesheet" href="assets/css/filters.css?v=20261002h">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 32'%3E%3Cellipse cx='26' cy='16' rx='25' ry='15' fill='%238a3f12'/%3E%3Cpath d='M16 16H36M20 11.5V20.5M26 11.5V20.5M32 11.5V20.5' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;else if(matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='light';}catch(e){}</script>
 </head>
@@ -55,54 +55,52 @@
       </div>
     </details>
 
-    <section class="card filters" aria-label="Filters">
+    <section class="card filters askbar" aria-label="What to look at">
       <div class="fl-head">
         <div>
-          <h2 class="fl-title">Narrow the numbers</h2>
-          <p class="fl-sub">These filters work the same whether you picked a team or a player.</p>
+          <h2 class="fl-title">What do you want to see?</h2>
+          <p class="fl-sub">Pick a stat and who it is about. Season type, position, weeks, opponent and splits are under &ldquo;More options&rdquo;.</p>
         </div>
+      </div>
+      <div class="ask-grid">
         <div class="field fl-view">
           <span class="lbl" id="lbl-view">Look at</span>
           <div class="seg" role="group" aria-labelledby="lbl-view">
-            <button type="button" id="view-players" aria-pressed="true">Players</button>
-            <button type="button" id="view-teams" aria-pressed="false">Teams</button>
+            <button type="button" id="view-players" aria-pressed="true">Player stats</button>
+            <button type="button" id="view-teams" aria-pressed="false">Team stats</button>
           </div>
         </div>
-      </div>
-      <div class="fl-groups">
-        <div class="fl-group" role="group" aria-labelledby="fg-when">
-          <h3 class="fl-gtitle" id="fg-when">When</h3>
-          <div class="field">
-            <label for="f-season-min">Seasons</label>
-            <div class="range" id="season-range"><select id="f-season-min"></select><div class="range-slot" id="season-slot"></div><select id="f-season-max" aria-label="Season to"></select></div>
-          </div>
-          <div class="field">
-            <span class="lbl" id="lbl-st">Season type</span>
-            <div class="chips" id="chips-season_type" role="group" aria-labelledby="lbl-st"></div>
-          </div>
+        <div class="field ask-measure">
+          <label for="m-select">Stat</label>
+          <select id="m-select"></select>
+          <p class="hint" id="m-desc"></p>
         </div>
-        <div class="fl-group" role="group" aria-labelledby="fg-who">
-          <h3 class="fl-gtitle" id="fg-who">Who</h3>
-          <div class="field">
-            <span class="lbl" id="lbl-pos">Position group</span>
-            <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
-          </div>
-          <div class="fl-who-row">
+        <div class="field ask-seasons">
+          <label for="f-season-min">Seasons</label>
+          <div class="range" id="season-range"><select id="f-season-min"></select><div class="range-slot" id="season-slot"></div><select id="f-season-max" aria-label="Season to"></select></div>
+        </div>
         <div class="field search" id="player-field">
-          <label for="player-search">Player search</label>
+          <label for="player-search">Find a player</label>
           <input id="player-search" type="search" placeholder="Type a name, e.g. Mahomes" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="player-results" aria-describedby="player-help">
           <ul class="results" id="player-results" hidden role="listbox" aria-label="Matching players"></ul>
           <span class="sr" id="player-help">Type at least two letters, then use the arrow keys to choose a player and Enter to select.</span>
         </div>
-            <div class="field">
-              <label for="f-team">Team</label>
-              <select id="f-team"></select>
-            </div>
-          </div>
+        <div class="field">
+          <label for="f-team">Team</label>
+          <select id="f-team"></select>
         </div>
       </div>
-      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More filters (week, opponent, unit) <span id="more-count"></span></button>
+      <p class="sentence" id="view-sentence"></p>
+      <button class="more-toggle" id="more-toggle" type="button" aria-expanded="false" aria-controls="more-filters">More options (season type, position, weeks, opponent, split) <span id="more-count"></span></button>
       <div class="filter-grid more-grid" id="more-filters" hidden>
+        <div class="field">
+          <span class="lbl" id="lbl-st">Season type</span>
+          <div class="chips" id="chips-season_type" role="group" aria-labelledby="lbl-st"></div>
+        </div>
+        <div class="field wide2">
+          <span class="lbl" id="lbl-pos">Position group</span>
+          <div class="chips" id="chips-position_group" role="group" aria-labelledby="lbl-pos"></div>
+        </div>
         <div class="field">
           <label for="f-week-min">Week from</label>
           <div class="pair"><select id="f-week-min"></select><span>to</span><select id="f-week-max" aria-label="Week to"></select></div>
@@ -115,8 +113,21 @@
           <span class="lbl" id="lbl-unit">Unit</span>
           <div class="chips" id="chips-unit" role="group" aria-labelledby="lbl-unit"></div>
         </div>
+        <div class="field">
+          <label for="b-select">Split the charts by</label>
+          <select id="b-select"></select>
+          <p class="hint" id="b-desc">Splits the trend, category and week charts and the table.</p>
+        </div>
+        <div class="field minrow" id="min-row" hidden>
+          <label for="min-select">Minimum sample</label>
+          <select id="min-select"></select>
+          <p class="hint" id="min-line"></p>
+        </div>
+        <details class="glossary-box">
+          <summary>Glossary of every stat</summary>
+          <dl class="glossary" id="glossary"></dl>
+        </details>
       </div>
-      <p class="sentence" id="view-sentence"></p>
     </section>
 
     <div class="actionbar" id="actionbar">
@@ -127,28 +138,6 @@
 
     <div class="banner card" id="player-banner" hidden></div>
     <p class="notice card" id="player-notice" role="status" hidden></p>
-
-    <section class="card controls" aria-label="What to show">
-      <div class="field">
-        <label for="m-select">Measure</label>
-        <select id="m-select"></select>
-        <p class="hint" id="m-desc"></p>
-        <div class="minrow" id="min-row" hidden>
-          <label for="min-select">Minimum</label>
-          <select id="min-select"></select>
-          <p class="hint" id="min-line"></p>
-        </div>
-      </div>
-      <div class="field">
-        <label for="b-select">Break down by</label>
-        <select id="b-select"></select>
-        <p class="hint" id="b-desc">Splits the trend, category and week charts and the table.</p>
-      </div>
-      <details class="glossary-box">
-        <summary>Glossary of every measure</summary>
-        <dl class="glossary" id="glossary"></dl>
-      </details>
-    </section>
 
     <section class="summary" id="summary" aria-label="Summary numbers"></section>
 
@@ -165,7 +154,7 @@
       <div class="table-head">
         <h2 id="table-title">The numbers behind this view</h2>
         <div class="table-tools">
-          <label class="sr" for="table-view">Table view</label>
+          <label class="tv-label" for="table-view">Show table as</label>
           <select id="table-view"></select>
           <button class="btn ghost small" id="btn-csv" type="button">Download CSV</button>
         </div>
@@ -212,13 +201,13 @@
 </main>
 
 <script src="assets/js/chart.umd.min.js"></script>
-<script src="assets/js/stats.js?v=20261002e"></script>
-<script src="assets/js/charts.js?v=20261002e"></script>
-<script src="assets/js/teams.js?v=20261002e"></script>
-<script src="assets/js/field.js?v=20261002e"></script>
-<script src="assets/js/dashboard.js?v=20261002e"></script>
-<script src="assets/js/polish.js?v=20261002e" defer></script>
-<script src="assets/js/spotlight.js?v=20261002e" defer></script>
-<script src="assets/js/filters.js?v=20261002e" defer></script>
+<script src="assets/js/stats.js?v=20261002h"></script>
+<script src="assets/js/charts.js?v=20261002h"></script>
+<script src="assets/js/teams.js?v=20261002h"></script>
+<script src="assets/js/field.js?v=20261002h"></script>
+<script src="assets/js/dashboard.js?v=20261002h"></script>
+<script src="assets/js/polish.js?v=20261002h" defer></script>
+<script src="assets/js/spotlight.js?v=20261002h" defer></script>
+<script src="assets/js/filters.js?v=20261002h" defer></script>
 </body>
 </html>

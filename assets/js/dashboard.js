@@ -18,6 +18,7 @@
   const PLAYER_TABLE_VIEWS = [["breakdown", "By the breakdown above"], ["season", "By season"], ["players", "Top player-seasons"], ["gamelog", "Player game log"]];
   const TEAM_TABLE_VIEWS = [["breakdown", "By the breakdown above"], ["season", "By season"], ["teamseasons", "Every team-season"]];
   const MENU_ORDER = ["Totals", "Per player-game", "Per team-game", "Rates", "Advanced"];
+  const POPULAR_MEASURES = ["pass_yds_tg", "rush_yds_tg", "pass_yds", "rush_yds", "rec_yds", "tds", "sacks", "ints_def", "receptions", "fantasy"];
   const LINE_DASHES = [[], [7, 4], [2, 3], [10, 3, 2, 3], [1, 5]]; // solid, dashed, dotted, dash-dot, sparse dots: grouped lines differ by more than color
   const MAX_CATS = 5; // lines and bars shown per breakdown in the trend and week charts
   // Summary cards next to the selected measure: [label, columns to add up (null = player-games), format]
@@ -115,6 +116,12 @@
     S.MEASURES.forEach((m) => { if (state.view === "teams" && m.group === "Per player-game") return; (groups[m.menuGroup] = groups[m.menuGroup] || []).push(m); });
     const ms = $("m-select");
     ms.innerHTML = "";
+    const popular = POPULAR_MEASURES.filter((id) => S.MEASURE_BY_ID[id] && !(state.view === "teams" && S.MEASURE_BY_ID[id].group === "Per player-game"));
+    if (popular.length) { // a short list on top; every stat is still listed below in its group
+      const og = document.createElement("optgroup"); og.label = "Popular";
+      popular.forEach((id) => { const o = document.createElement("option"); o.value = id; o.textContent = S.MEASURE_BY_ID[id].label; og.appendChild(o); });
+      ms.appendChild(og);
+    }
     MENU_ORDER.filter((g) => groups[g]).forEach((g) => {
       const og = document.createElement("optgroup"); og.label = g;
       groups[g].forEach((m) => { const o = document.createElement("option"); o.value = m.id; o.textContent = m.label; og.appendChild(o); });
@@ -126,7 +133,7 @@
     const m = measure(), row = $("min-row");
     row.hidden = m.type !== "ratio";
     if (m.type !== "ratio") return;
-    const unit = m.minUnit || "in the denominator";
+    const unit = m.minUnit || "plays";
     fillSelect($("min-select"), [["qualified", "Qualified (" + m.min + " " + unit + ")"]].concat([10, 25, 50, 100].map((n) => [String(n), n + " " + unit])), state.minimum);
     if ($("min-select").value !== state.minimum) { state.minimum = "qualified"; $("min-select").value = "qualified"; }
   }
@@ -458,15 +465,16 @@
     if (state.h2h) out.push("head-to-head");
     if (state.opp) more.push("opponent");
     const same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
-    if (!same(state.chips.season_type, d.chips.season_type)) out.push("season type");
+    if (!same(state.chips.season_type, d.chips.season_type)) more.push("season type");
     if (!same(state.chips.unit, d.chips.unit)) more.push("unit");
-    if (!same(state.chips.position_group, d.chips.position_group)) out.push("position group");
+    if (!same(state.chips.position_group, d.chips.position_group)) more.push("position group");
+    const split = state.breakdownId !== d.breakdownId; // a split is not a filter, but it is easy to miss when the options are folded away
     if (state.player) out.push("player");
-    return { all: out.concat(more), more };
+    return { all: out.concat(more), more: split ? more.concat("split") : more };
   }
   function describe() {
     const parts = [];
-    parts.push(state.player ? state.player.name + " (" + state.player.position_group + ")" : state.view === "teams" ? "Teams" : "Players");
+    parts.push(state.player ? state.player.name + " (" + state.player.position_group + ")" : state.view === "teams" ? "Team stats" : "Player stats");
     parts.push(state.seasonMin === state.seasonMax ? String(state.seasonMin) : state.seasonMin + " to " + state.seasonMax);
     if (state.weekMin !== 1 || state.weekMax !== 22) parts.push("weeks " + state.weekMin + " to " + state.weekMax);
     const st = state.chips.season_type;

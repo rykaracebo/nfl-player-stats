@@ -51,3 +51,17 @@
   .range select { min-width: 84px; }
   .range-track input[type="range"]::-webkit-slider-thumb { width: 28px; height: 28px; margin-top: 2px; }
 }
+
+/* the simplified top of the dashboard: five main controls in one row of cards, everything else folded under "More options" */
+.askbar .fl-head { margin-bottom: 14px; }
+.ask-grid { display: grid; grid-template-columns: auto minmax(0, 1.5fr) minmax(0, 1.4fr); gap: 16px 22px; align-items: start; }
+.ask-grid .ask-seasons { grid-column: span 1; }
+.ask-grid .search, .ask-grid > .field:last-child { min-width: 0; }
+.askbar .sentence { margin-top: 14px; }
+.askbar .more-toggle { margin-top: 12px; }
+.askbar .more-grid .minrow { margin-top: 0; }
+.askbar .more-grid .glossary-box { grid-column: 1 / -1; }
+.tv-label { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-right: 8px; }
+@media (max-width: 900px) { .ask-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .ask-grid .ask-measure { grid-column: 1 / -1; } }
+@media (max-width: 600px) { .ask-grid { grid-template-columns: minmax(0, 1fr); } }
+
