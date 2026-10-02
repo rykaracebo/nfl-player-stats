@@ -281,7 +281,16 @@ input[type="search"] {
 .field-head p { margin: 0; color: var(--dim); font-size: 14px; max-width: 560px; }
 .field-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .field-tools select { width: auto; }
-.field-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #10361d; }
+.fieldcard { perspective: 1200px; }
+.field-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 2px 4px rgba(2,8,24,.35), 0 28px 50px -26px rgba(2,8,24,.9);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, border-color .3s; will-change: transform; }
+.field-wrap:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--line)); box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 4px 8px rgba(2,8,24,.4), 0 40px 60px -28px rgba(2,8,24,.95); }
+.field-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity .35s;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.07), transparent 60%), linear-gradient(180deg, rgba(255,255,255,.06), transparent 22%); }
+.field-wrap:hover::after { opacity: 1; }
+:root[data-theme="light"] .field-wrap { box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(10,26,51,.1), 0 26px 44px -28px rgba(10,26,51,.45); }
+@media (prefers-reduced-motion: reduce) { .field-wrap { transform: none; transition: none; } }
 .field-wrap canvas { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; cursor: default; touch-action: manipulation; }
 .field-tip {
   position: absolute; z-index: 5; pointer-events: none; min-width: 190px; padding: 10px 12px; border-radius: 12px; font-size: 13px;
